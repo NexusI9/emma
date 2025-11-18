@@ -37,9 +37,11 @@ int main() {
   Octagon *oct = canvas_create_octagon(&canvas);
 
   octagon_set_outer_offset(oct, 3, 1.0f);
-  octagon_set_outer_offset(oct, 6, 0.4f);
+  octagon_set_outer_offset(oct, 1, 0.6f);
+  octagon_set_outer_offset(oct, 2, 0.2f);
+
   octagon_update_vertices(oct);
-  
+
   CanvasDrawData draw_data = {.gui = gui, .canvas = &canvas};
   renderer_add_draw_callback(renderer, canvas_draw_callback, (void *)&draw_data,
                              RendererDrawMode_All);

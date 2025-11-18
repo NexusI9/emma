@@ -1,17 +1,85 @@
 #include "octagon.hpp"
 
 #include "nkengine/include/gui.hpp"
+#include <cstring>
 #include <imgui/imgui.h>
 
-void Widget::OctagonShape::draw() {
+static const char *octalysis_labels[] = {
+    "Epic Meaning", "Empowerment", "Social Influence", "Unpredictability",
+    "Avoidance",    "Scarcity",    "Ownership",        "Accomplishment",
+};
 
-  // ImDrawList *dl = ImGui::GetForegroundDrawList();
-  //  dl->AddConvexPolyFilled((ImVec2 *)node->inner_vertices,
-  //  OCTAGON_VERTEX_COUNT,
-  //                          im_color(node->inner_color));
+ImU32 Widget::OctagonShape::vertex_color(const int vertex) {
 
-  // 1. Get the draw list for the current window
-  ImDrawList *draw_list = ImGui::GetForegroundDrawList();
+  static const ImU32 colors[] = {
+      IM_COL32(69, 251, 255, 255),  IM_COL32(112, 0, 255, 255),
+      IM_COL32(193, 0, 173, 255),   IM_COL32(249, 0, 72, 255),
+      IM_COL32(249, 139, 72, 255),  IM_COL32(255, 225, 21, 255),
+      IM_COL32(216, 255, 154, 255), IM_COL32(131, 255, 63, 255),
+  };
+
+  return colors[vertex];
+}
+
+// Calculate interpolated color based on segment index (0 to 7)
+// This creates the color gradient around the perimeter
+ImU32 Widget::OctagonShape::vertex_color_rgb(const int vertex) {
+
+  float t =
+      (float)vertex / OCTAGON_VERTEX_COUNT; // t goes from 0.0 to approx 0.875
+
+  // Simple gradient: Red -> Green -> Blue -> Red
+  if (t < 0.33f) {
+    // Red to Green (0.0 to 0.33)
+    float t_local = t * 3.0f;
+    return IM_COL32(255 * (1.0f - t_local), 255 * t_local, 0, 255);
+  } else if (t < 0.66f) {
+    // Green to Blue (0.33 to 0.66)
+    float t_local = (t - 0.33f) * 3.0f;
+    return IM_COL32(0, 255 * (1.0f - t_local), 255 * t_local, 255);
+  } else {
+    // Blue back to Red (0.66 to 1.0 - wraps around)
+    float t_local = (t - 0.66f) * 3.0f;
+    return IM_COL32(255 * t_local, 0, 255 * (1.0f - t_local), 255);
+  }
+}
+
+void Widget::OctagonShape::draw_labels(ImDrawList *draw_list) {
+
+  static const float label_margin = 20.0f;
+
+  for (int i = 0; i < OCTAGON_VERTEX_COUNT; i++) {
+    // Calculate position
+    ImVec2 pos = ImVec2(node->outer_vertices[i][0], node->outer_vertices[i][1]);
+    ImVec2 label_pos = pos;
+
+    vec2 sub;
+    glm_vec2_sub(node->outer_vertices[i], node->position, sub);
+
+    // handle X position adjustments
+    if (sub[0] < 0.0f)
+      label_pos[0] -= strlen(octalysis_labels[i]) * 16.0f - label_margin;
+
+    else if (sub[0] == 0.0f)
+      label_pos[0] -= strlen(octalysis_labels[i]) * 5.0f;
+
+    else
+      label_pos[0] += label_margin;
+
+    // handle Y position adjustments
+    if (sub[1] < 0.0f)
+      label_pos[1] -= 60.0f - label_margin;
+
+    else if (sub[1] == 0.0f)
+      label_pos[1] -= 10.0f;
+
+    draw_list->AddText(label_pos, ImColor(255, 255, 255, 255),
+                       octalysis_labels[i]);
+    draw_list->AddCircleFilled(pos, 3.0f, IM_COL32(255, 255, 255, 255));
+  }
+}
+
+void Widget::OctagonShape::draw_outer_gradient(ImDrawList *draw_list) {
 
   static const int num_segments = OCTAGON_VERTEX_COUNT;
   static const int num_vertices =
@@ -23,7 +91,8 @@ void Widget::OctagonShape::draw() {
   // You can use ImGui::GetColorU32() to convert common formats
   const ImU32 COLOR_CENTER = IM_COL32(255, 255, 255, 255); // White (Center)
 
-  // We'll calculate the outer colors using a function for smooth interpolation
+  // We'll calculate the outer colors using a function for smooth
+  // interpolation
 
   // Allocate space in the draw list buffers
   draw_list->PrimReserve(num_indices, num_vertices);
@@ -47,25 +116,7 @@ void Widget::OctagonShape::draw() {
     ImVec2 vtx_pos =
         ImVec2(node->outer_vertices[i][0], node->outer_vertices[i][1]);
 
-    // Calculate interpolated color based on segment index (0 to 7)
-    // This creates the color gradient around the perimeter
-    float t = (float)i / num_segments; // t goes from 0.0 to approx 0.875
-    ImU32 vtx_color;
-
-    // Simple gradient: Red -> Green -> Blue -> Red
-    if (t < 0.33f) {
-      // Red to Green (0.0 to 0.33)
-      float t_local = t * 3.0f;
-      vtx_color = IM_COL32(255 * (1.0f - t_local), 255 * t_local, 0, 255);
-    } else if (t < 0.66f) {
-      // Green to Blue (0.33 to 0.66)
-      float t_local = (t - 0.33f) * 3.0f;
-      vtx_color = IM_COL32(0, 255 * (1.0f - t_local), 255 * t_local, 255);
-    } else {
-      // Blue back to Red (0.66 to 1.0 - wraps around)
-      float t_local = (t - 0.66f) * 3.0f;
-      vtx_color = IM_COL32(255 * t_local, 0, 255 * (1.0f - t_local), 255);
-    }
+    ImU32 vtx_color = vertex_color(i);
 
     // Populate the vertex structure
     ImDrawVert *vtx = draw_list->_VtxWritePtr;
@@ -100,8 +151,15 @@ void Widget::OctagonShape::draw() {
 
   // Update the index base for the next primitive in the draw list
   draw_list->_VtxCurrentIdx += num_vertices;
+}
 
+void Widget::OctagonShape::draw() {
+
+  ImDrawList *draw_list = ImGui::GetForegroundDrawList();
+
+  draw_outer_gradient(draw_list);
   draw_list->AddConvexPolyFilled((ImVec2 *)node->inner_vertices,
                                  OCTAGON_VERTEX_COUNT,
                                  im_color(node->inner_color));
+  draw_labels(draw_list);
 }
