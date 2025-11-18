@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+	<meta charset="utf-8">
+	<title>Emscripten-Generated Code</title>
+	<style type="text/css">
+		body {
+			background: #222222;
+		}
+
+		canvas {
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			border: none;
+			margin: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+			display: block;
+		}
+
+
+		button {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<button id="call-button">Call</button>
+	<canvas id="canvas"></canvas>
+	<script async type="text/javascript" src="scripts/wgpu_init.js"></script>
+	<script async type="text/javascript" src="scripts/Emma.js"></script>
+</body>
+
+</html>

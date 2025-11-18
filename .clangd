@@ -1,0 +1,10 @@
+CompileFlags:
+  Add: [-I/usr/local/Cellar/emscripten/4.0.1/libexec/cache/sysroot/include/,  -I/Users/elkhantour/Documents/C/emma/vendor/, -I/Users/elkhantour/Documents/C/emma/src/, -I/Users/elkhantour/Documents/C/emma/vendor/nkengine/src/, -I/Users/elkhantour/Documents/C/emma/vendor/nkengine/vendor/]
+
+---
+# Fragment specific to C++ source files
+If:
+    PathExclude: [.*\.c, .*\.h]
+CompileFlags:
+    Add:
+        - "-std=c++17"
