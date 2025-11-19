@@ -1,13 +1,7 @@
 #include "octagon.hpp"
 
 #include "nkengine/include/gui.hpp"
-#include <cstring>
 #include <imgui/imgui.h>
-
-static const char *octalysis_labels[] = {
-    "Epic Meaning", "Empowerment", "Social Influence", "Unpredictability",
-    "Avoidance",    "Scarcity",    "Ownership",        "Accomplishment",
-};
 
 ImU32 Widget::OctagonShape::vertex_color(const int vertex) {
 
@@ -46,36 +40,15 @@ ImU32 Widget::OctagonShape::vertex_color_rgb(const int vertex) {
 
 void Widget::OctagonShape::draw_labels(ImDrawList *draw_list) {
 
-  static const float label_margin = 20.0f;
-
   for (int i = 0; i < OCTAGON_VERTEX_COUNT; i++) {
     // Calculate position
-    ImVec2 pos = ImVec2(node->outer_vertices[i][0], node->outer_vertices[i][1]);
-    ImVec2 label_pos = pos;
+    ImVec2 vert_pos =
+        ImVec2(node->outer_vertices[i][0], node->outer_vertices[i][1]);
+    ImVec2 label_pos =
+        ImVec2(node->label_coordinates[i][0], node->label_coordinates[i][1]);
 
-    vec2 sub;
-    glm_vec2_sub(node->outer_vertices[i], node->position, sub);
-
-    // handle X position adjustments
-    if (sub[0] < 0.0f)
-      label_pos[0] -= strlen(octalysis_labels[i]) * 16.0f - label_margin;
-
-    else if (sub[0] == 0.0f)
-      label_pos[0] -= strlen(octalysis_labels[i]) * 5.0f;
-
-    else
-      label_pos[0] += label_margin;
-
-    // handle Y position adjustments
-    if (sub[1] < 0.0f)
-      label_pos[1] -= 60.0f - label_margin;
-
-    else if (sub[1] == 0.0f)
-      label_pos[1] -= 10.0f;
-
-    draw_list->AddText(label_pos, ImColor(255, 255, 255, 255),
-                       octalysis_labels[i]);
-    draw_list->AddCircleFilled(pos, 3.0f, IM_COL32(255, 255, 255, 255));
+    draw_list->AddText(label_pos, ImColor(255, 255, 255, 255), node->labels[i]);
+    draw_list->AddCircleFilled(vert_pos, 3.0f, IM_COL32(255, 255, 255, 255));
   }
 }
 

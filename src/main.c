@@ -40,7 +40,14 @@ int main() {
   octagon_set_outer_offset(oct, 1, 0.6f);
   octagon_set_outer_offset(oct, 2, 0.2f);
 
+  static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
+      "Epic Meaning", "Empowerment", "Social Influence", "Unpredictability",
+      "Avoidance",    "Scarcity",    "Ownership",        "Accomplishment",
+  };
+
   octagon_update_vertices(oct);
+  octagon_set_labels(oct, octalysis_labels);
+  octagon_update_labels_coordinates(oct);
 
   CanvasDrawData draw_data = {.gui = gui, .canvas = &canvas};
   renderer_add_draw_callback(renderer, canvas_draw_callback, (void *)&draw_data,
