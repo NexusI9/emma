@@ -6,33 +6,36 @@
 #include "runtime/canvas/core.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
+#include "runtime/widgets/canvas.hpp"
 #include <emscripten/emscripten.h>
 
 int main() {
 
-  context_init(&(ContextDescriptor){
-      .html_target = "canvas",
-  });
+  ContextDescriptor ctx = {.html_target = "canvas"};
+  context_init(&ctx);
 
   Renderer *renderer = rem_new_renderer();
-  renderer_create(renderer, &(RendererCreateDescriptor){
-                                .background = {1.0, 0.1, 0.1, 1.0f},
-                                .dpi = RENDERER_DPI_AUTO,
-                                .width = RENDERER_WIDTH_AUTO,
-                                .height = RENDERER_HEIGHT_AUTO,
-                            });
+  RendererCreateDescriptor rd = {
+      .background = {1.0, 0.1, 0.1, 1.0f},
+      .dpi = RENDERER_DPI_AUTO,
+      .width = RENDERER_WIDTH_AUTO,
+      .height = RENDERER_HEIGHT_AUTO,
+  };
+  renderer_create(renderer, &rd);
 
   Gui *gui = rem_new_gui();
-  gui_init(gui, &(GuiDescriptor){
-                    .dpi = context_dpi(),
-                    .theme = &g_theme,
-                    .renderer = renderer,
-                    .active_scene = NULL,
-                });
+  GuiDescriptor g = {
+      .dpi = context_dpi(),
+      .theme = &g_theme,
+      .renderer = renderer,
+      .active_scene = NULL,
+  };
+  gui_init(gui, &g);
 
   allocator_init();
 
   Canvas canvas;
+
   Frame *frame = canvas_create_frame(&canvas);
   Octagon *oct = canvas_create_octagon(&canvas);
 
@@ -49,8 +52,8 @@ int main() {
   octagon_set_labels(oct, octalysis_labels);
   octagon_update_labels_coordinates(oct);
 
-  CanvasDrawData draw_data = {.gui = gui, .canvas = &canvas};
-  renderer_add_draw_callback(renderer, canvas_draw_callback, (void *)&draw_data,
+  Widget::CanvasShape canvas_shape = Widget::CanvasShape(gui, &canvas);
+  renderer_add_draw_callback(renderer, canvas_draw_callback, &canvas_shape,
                              RendererDrawMode_All);
 
   renderer_draw(renderer);

@@ -20,12 +20,8 @@ typedef struct {
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) selected_frames;
 } Canvas;
 
-typedef struct {
-  Gui *gui;
-  Canvas *canvas;
-} CanvasDrawData;
-
 EXTERN_C_BEGIN
+
 
 Frame *canvas_create_frame(Canvas *);
 Octagon *canvas_create_octagon(Canvas *);

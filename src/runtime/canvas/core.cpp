@@ -1,14 +1,6 @@
 #include "core.h"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_wgpu.h"
-#include "nkengine/include/gui.hpp"
-#include "runtime/allocator.h"
-#include "runtime/node/frame.h"
-#include "runtime/node/octagon.h"
-#include "runtime/widgets/frame.hpp"
-#include "runtime/widgets/grid_background.hpp"
-#include "runtime/widgets/octagon.hpp"
+#include "runtime/widgets/canvas.hpp"
 
 Frame *canvas_create_frame(Canvas *canvas) {
 
@@ -67,32 +59,8 @@ Octagon *canvas_create_octagon(Canvas *canvas) {
   return oct;
 }
 
+// TODO move it to shape
 void canvas_draw_callback(Renderer *renderer, void *data) {
-
-  CanvasDrawData *draw_data = (CanvasDrawData *)data;
-  Gui *gui = draw_data->gui;
-  Canvas *canvas = draw_data->canvas;
-
-  gui_draw_begin(gui);
-  gui_draw_update_io(gui);
-  {
-    ImGui_ImplWGPU_NewFrame();
-    ImGui::NewFrame();
-    {
-      draw_grid_background();
-
-      for (size_t i = 0; i < canvas->frames.length; i++) {
-        const alloc_id id = canvas->frames.entries[i];
-        Widget::FrameShape(allocator_frame_entry(id)).draw();
-      }
-
-      for (size_t i = 0; i < canvas->octagons.length; i++) {
-        const alloc_id id = canvas->octagons.entries[i];
-        Widget::OctagonShape(allocator_octagon_entry(id)).draw();
-      }
-    }
-    ImGui::Render();
-    ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), gui->pass_encoder);
-  }
-  gui_draw_end(gui);
+  Widget::CanvasShape *canvas_shape = (Widget::CanvasShape *)data;
+  canvas_shape->draw();
 }

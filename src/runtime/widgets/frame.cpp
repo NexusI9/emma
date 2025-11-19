@@ -2,6 +2,7 @@
 
 #include "imgui/imgui.h"
 #include "nkengine/include/gui.hpp"
+#include "runtime/node/frame.h"
 
 void Widget::FrameShape::draw() {
 
@@ -15,4 +16,22 @@ void Widget::FrameShape::draw() {
 
   // Draw the core frame
   dl->AddRectFilled(p0, p1, im_color(node->background), 2.0f);
+}
+
+void Widget::FrameShape::set_position(void *data, ImVec2 value) {
+  FrameShape *shape = (FrameShape *)data;
+
+  
+}
+
+void Widget::FrameShape::get_position(void *data, ImVec2 value) {
+  FrameShape *shape = (FrameShape *)data;
+}
+
+void Widget::FrameShape::set_size(void *data, ImVec2 value) {
+  FrameShape *shape = (FrameShape *)data;
+}
+
+void Widget::FrameShape::get_size(void *data, ImVec2 value) {
+  FrameShape *shape = (FrameShape *)data;
 }
