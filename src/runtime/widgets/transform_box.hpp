@@ -2,7 +2,6 @@
 #define _WIDGET_TRANSFORM_BOX_H_
 
 #include "nkengine/include/gui.h"
-#include "runtime/canvas/core.h"
 #include "runtime/node/handle.h"
 #include "runtime/widgets/handle.hpp"
 #include <cglm/cglm.h>

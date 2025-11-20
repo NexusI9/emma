@@ -1,5 +1,5 @@
-#ifndef _CANVAS_CORE_H_
-#define _CANVAS_CORE_H_
+#ifndef _CANVAS_H_
+#define _CANVAS_H_
 
 #include "nkengine/include/gui.h"
 #include "nkengine/include/renderer.h"

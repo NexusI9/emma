@@ -1,4 +1,4 @@
-#include "core.h"
+#include "canvas.h"
 
 #include "runtime/widgets/canvas.hpp"
 

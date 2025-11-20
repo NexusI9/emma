@@ -3,7 +3,7 @@
 #include "nkengine/include/renderer.h"
 #include "nkengine/include/resource_manager.h"
 #include "runtime/allocator.h"
-#include "runtime/canvas/core.h"
+#include "runtime/node/canvas.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "runtime/widgets/canvas.hpp"

@@ -1,7 +1,7 @@
 #ifndef _WIDGET_CANVAS_HPP_
 #define _WIDGET_CANVAS_HPP_
 
-#include "runtime/canvas/core.h"
+#include "runtime/node/canvas.h"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/transform_box.hpp"
 
