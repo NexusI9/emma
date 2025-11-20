@@ -30,22 +30,25 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
 
   for (uint8_t i = 0; i < BOUNDBOX_FRAME_RECT_COUNT; i++)
     // add to selection
-    if (ImGui::IsMouseHoveringRect(im_vec2(shape->boundbox[i].p0),
-                                   im_vec2(shape->boundbox[i].p1)) &&
-        ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
 
-      // transform_box.remove_target(shape);
+      if (ImGui::IsMouseHoveringRect(im_vec2(shape->boundbox[i].p0),
+                                     im_vec2(shape->boundbox[i].p1))) {
 
-      TransformBoxObjectDescriptor object = {
-          .handle = shape,
-          .get_position = frame_shape_get_position,
-          .set_position = frame_shape_set_position,
-          .get_size = frame_shape_get_size,
-          .set_size = frame_shape_set_size,
-      };
+        TransformBoxObjectDescriptor object = {
+            .handle = shape,
+            .get_position = frame_shape_get_position,
+            .set_position = frame_shape_set_position,
+            .get_size = frame_shape_get_size,
+            .set_size = frame_shape_set_size,
+        };
 
-      transform_box.toggle_object(&object);
-      transform_box.update_bound_from_selection();
+        transform_box.toggle_object(&object);
+        transform_box.update_bound_from_selection();
+
+      } else {
+        transform_box.empty_objects();
+      }
     }
 }
 
@@ -84,9 +87,8 @@ void Widget::CanvasShape::draw() {
         OctagonShape(allocator_octagon_entry(id)).draw();
       }
 
-      if (transform_box.objects_count()) {
+      if (transform_box.objects_count())
         transform_box.draw();
-      }
 
       ImGui::End();
       ImGui::PopStyleVar(2);

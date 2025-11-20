@@ -230,9 +230,8 @@ void Widget::TransformBox::draw() {
   if (active_handle >= 0 && ImGui::IsMouseDown(0))
     transform_core((HandleType)active_handle);
 
-  if (active_handle >= 0 && ImGui::IsMouseReleased(0)) {
+  if (active_handle >= 0 && ImGui::IsMouseReleased(0))
     active_handle = -1;
-  }
 }
 
 void Widget::TransformBox::handle_transform(const HandleType type,
