@@ -21,6 +21,14 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas) {
   transform_box = TransformBox(gui);
 
   transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
+
+  HTMLEventWheel event = {
+      .callback = canvas_shape_wheel_callback,
+      .destructor = NULL,
+      .data = this,
+      .size = 0,
+  };
+  html_event_add_wheel(&event);
 }
 
 void Widget::CanvasShape::draw_frame(FrameShape *shape) {
@@ -45,7 +53,7 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
             .set_size = frame_shape_set_size,
         };
 
-        if (input_key(INPUT_KEY_ALT) == false)
+        if (input_key(INPUT_KEY_CAP) == false)
           transform_box.empty_objects();
 
         transform_box.session_set_hit();
@@ -116,4 +124,31 @@ void Widget::CanvasShape::sync_shapes() {
     boundbox_frame_update(frame_shapes[i].boundbox, frame->position,
                           frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
   }
+}
+
+void Widget::CanvasShape::sync_boundboxes() {
+
+  for (size_t i = 0; i < node->frames.length; i++) {
+    const alloc_id id = node->frames.entries[i];
+    Frame *frame = allocator_frame_entry(id);
+    boundbox_frame_update(frame_shapes[i].boundbox, frame->position,
+                          frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
+  }
+  
+}
+
+/**
+   On wheel change we need to update each objects boundbox.
+   Another solution could be integrate a system of "require_change" triggered by
+   the viewport, but we'll use the html event based solution for now as it comes
+   builtin with the engine.
+ */
+bool Widget::canvas_shape_wheel_callback(int type,
+                                         const EmscriptenWheelEvent *event,
+                                         void *data) {
+
+  CanvasShape *canvas = (CanvasShape *)data;
+  canvas->sync_boundboxes();
+
+  return EM_FALSE;
 }

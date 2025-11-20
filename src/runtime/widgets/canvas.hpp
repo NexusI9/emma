@@ -7,6 +7,8 @@
 
 namespace Widget {
 
+bool canvas_shape_wheel_callback(int, const EmscriptenWheelEvent *, void *);
+
 class CanvasShape {
 
 public:
@@ -15,6 +17,7 @@ public:
 
   void draw();
   void sync_shapes();
+  void sync_boundboxes();
 
 private:
   Gui *gui;

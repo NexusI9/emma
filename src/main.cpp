@@ -35,7 +35,8 @@ int main() {
   gui_init(gui, &g);
 
   allocator_init();
-  viewport_set_sensitivity(20.0f);
+  viewport_set_pan_sensitivity(20.0f);
+  viewport_set_zoom_sensitivity(0.001f);
   unit_set_step(20.0f);
 
   Canvas canvas;

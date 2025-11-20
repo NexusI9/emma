@@ -1,6 +1,8 @@
 #include "transform_box.hpp"
+#include "runtime/manager/viewport.h"
 #include "runtime/node/handle.h"
 #include "runtime/widgets/handle.hpp"
+#include "runtime/widgets/utils.hpp"
 #include "utils/id.h"
 #include <climits>
 #include <stdint.h>
@@ -171,7 +173,7 @@ Widget::TransformBoxStatus Widget::TransformBox::session_end() {
 void Widget::TransformBox::cache_initial_attributes() {
 
   // cache initial attributes
-  drag_start = ImGui::GetIO().MousePos;
+  drag_start = vp_im2_scene(ImGui::GetIO().MousePos);
   drag_p0 = p0;
   drag_p1 = p1;
 
@@ -184,7 +186,7 @@ void Widget::TransformBox::cache_initial_attributes() {
 
 void Widget::TransformBox::transform_core(const HandleType handle) {
 
-  ImVec2 mouse = ImGui::GetIO().MousePos;
+  ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
   clamp_mouse(handle, mouse);
 
   ImVec2 offset = ImVec2(mouse.x - drag_start.x, mouse.y - drag_start.y);
@@ -235,11 +237,13 @@ void Widget::TransformBox::transform_core(const HandleType handle) {
 void Widget::TransformBox::draw() {
 
   ImDrawList *draw = ImGui::GetWindowDrawList();
-  draw->AddRect(p0, p1, IM_COL32(255, 255, 255, 255), 0.0f, 0, 2.0f);
+  draw->AddRect(vp_im2(p0), vp_im2(p1), IM_COL32(255, 255, 255, 255), 0.0f, 0,
+                2.0f);
 
   // Area Behaviour (Translate)
   if (active_handle == -1 &&
-      ImGui::IsMouseHoveringRect(padded_area_0, padded_area_1) &&
+      ImGui::IsMouseHoveringRect(vp_im2(padded_area_0),
+                                 vp_im2(padded_area_1)) &&
       ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
     active_handle = HandleType_MM;
     cache_initial_attributes();

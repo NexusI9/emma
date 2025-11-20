@@ -94,7 +94,7 @@ private:
 
   // flags
   int active_handle = -1;
-  TransformBoxSessionStatus session_status;
+  TransformBoxSessionStatus session_status = TransformBoxSessionStatus_Off;
 
   // utils
   void handle_transform(const HandleType, const ImVec2, const ImVec2,
