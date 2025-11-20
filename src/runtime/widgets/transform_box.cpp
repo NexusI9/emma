@@ -18,8 +18,35 @@ Widget::TransformBox::TransformBox(Gui *gui) {
   }
 }
 
+Widget::TransformBoxStatus
+Widget::TransformBox::toggle_object(const TransformBoxObjectDescriptor *desc) {
+
+  if (!find_object(desc->handle, NULL))
+    add_object(desc);
+  else
+    remove_object(desc->handle);
+
+  return TransformBoxStatus_Success;
+}
+
+Widget::TransformBoxObject *
+Widget::TransformBox::find_object(const void *handle, size_t *index) {
+
+  for (size_t i = 0; i < objects.count; i++)
+    if (objects.entries[i].handle == handle) {
+      if (index)
+        *index = i;
+      return &objects.entries[i];
+    }
+
+  if (index)
+    *index = SIZE_MAX;
+
+  return NULL;
+}
+
 StaticListStatus
-Widget::TransformBox::add_target(const TransformBoxObjectDescriptor *desc) {
+Widget::TransformBox::add_object(const TransformBoxObjectDescriptor *desc) {
 
   if (objects.count == transform_box_objects_capacity)
     return StaticListStatus_MaxCapacity;
@@ -37,20 +64,22 @@ Widget::TransformBox::add_target(const TransformBoxObjectDescriptor *desc) {
                      "Transform Box Target List");
 }
 
-StaticListStatus Widget::TransformBox::remove_target(const void *target) {
+StaticListStatus Widget::TransformBox::remove_object(const void *target) {
 
   size_t index = SIZE_MAX;
-  for (size_t i = 0; i < objects.count; i++)
-    if (objects.entries[i].handle == target) {
-      index = i;
-      break;
-    }
+  find_object(target, &index);
 
   if (index == SIZE_MAX)
     return StaticListStatus_UnfoundEntry;
 
   return stli_remove_at_index(objects.entries, &objects.count,
                               sizeof(TransformBoxObject), index);
+}
+
+StaticListStatus Widget::TransformBox::empty_objects() {
+
+  return stli_empty(objects.entries, &objects.count, sizeof(TransformBoxObject),
+                    "Transform Box Target List");
 }
 
 void Widget::TransformBox::draw() {

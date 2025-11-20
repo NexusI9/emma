@@ -69,7 +69,7 @@ void Widget::CanvasShape::draw() {
               .set_size = frame_shape_set_size,
           };
 
-          transform_box.add_target(&object);
+          transform_box.toggle_object(&object);
           transform_box.update_bound_from_selection();
         }
       }

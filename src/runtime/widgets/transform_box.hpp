@@ -53,8 +53,11 @@ public:
   TransformBox(){};
   TransformBox(Gui *gui);
 
-  StaticListStatus add_target(const TransformBoxObjectDescriptor *);
-  StaticListStatus remove_target(const void *);
+  TransformBoxObject *find_object(const void *, size_t *);
+  TransformBoxStatus toggle_object(const TransformBoxObjectDescriptor *);
+  StaticListStatus add_object(const TransformBoxObjectDescriptor *);
+  StaticListStatus remove_object(const void *);
+  StaticListStatus empty_objects();
 
   TransformBoxStatus update_bound_from_selection();
   TransformBoxStatus update_bound(ImVec2, ImVec2);
