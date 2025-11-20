@@ -86,11 +86,117 @@ StaticListStatus Widget::TransformBox::empty_objects() {
                     "Transform Box Target List");
 }
 
+/**
+   Prevents the end from overlapping the start and vice-versa.
+   Keeps the bounding box from inverting when dragging handles.
+*/
+void Widget::TransformBox::clamp_mouse(const HandleType handle, ImVec2 &dest) {
+
+  static const float margin = 10.0f;
+
+  switch (handle) {
+
+  case HandleType_TL:
+    dest.x = fminf(dest.x, p1.x - margin);
+    dest.y = fminf(dest.y, p1.y - margin);
+    break;
+
+  case HandleType_TM:
+    dest.y = fminf(dest.y, p1.y - margin);
+    break;
+
+  case HandleType_TR:
+    dest.x = fmaxf(dest.x, p0.x + margin);
+    dest.y = fminf(dest.y, p0.y - margin);
+    break;
+
+  case HandleType_ML:
+    dest.x = fminf(dest.x, p1.x - margin);
+    break;
+
+  case HandleType_MR:
+    dest.x = fmaxf(dest.x, p0.x + margin);
+    break;
+
+  case HandleType_BL:
+    dest.x = fminf(dest.x, p1.x - margin);
+    dest.y = fmaxf(dest.y, p0.y + margin);
+    break;
+
+  case HandleType_BM:
+    dest.y = fmaxf(dest.y, p0.y + margin);
+    break;
+
+  case HandleType_BR:
+    dest.x = fmaxf(dest.x, p0.x + margin);
+    dest.y = fmaxf(dest.y, p0.y + margin);
+    break;
+
+  default:
+    break;
+  }
+}
+
+void Widget::TransformBox::transform_core(const HandleType handle) {
+
+  ImVec2 mouse = ImGui::GetIO().MousePos;
+  clamp_mouse(handle, mouse);
+
+  ImVec2 offset = ImVec2(mouse.x - drag_start.x, mouse.y - drag_start.y);
+
+  for (uint16_t obj = 0; obj < objects.count; obj++) {
+    TransformBoxObject *object = &objects.entries[obj];
+    ImVec2 new_pos = object->init_position;
+    ImVec2 new_size = object->init_size;
+    handle_transform(handle, object->init_position, object->init_size, offset,
+                     new_pos, new_size);
+
+    // compensate stretch if use top or right side handles
+    switch (handle) {
+    case HandleType_TL:
+      new_size.x -= offset.x;
+      new_size.y -= offset.y;
+      break;
+
+    case HandleType_ML:
+    case HandleType_BL:
+      new_size.x -= offset.x;
+      break;
+
+    case HandleType_TM:
+      new_size.y -= offset.y;
+      break;
+
+    case HandleType_MM:
+      new_size = object->init_size;
+      break;
+
+    default:
+      break;
+    }
+
+    object->set_position(object->handle, new_pos);
+    object->set_size(object->handle, new_size);
+  }
+
+  // update frame bound
+  ImVec2 new_pos = p0;
+  ImVec2 new_size = p1;
+  handle_transform(handle, drag_p0, drag_p1, offset, new_pos, new_size);
+  update_bound(new_pos, new_size);
+}
+
 void Widget::TransformBox::draw() {
 
   ImDrawList *draw = ImGui::GetWindowDrawList();
   draw->AddRect(p0, p1, IM_COL32(255, 255, 255, 255), 0.0f, 0, 2.0f);
 
+  // Area Behaviour (Translate)
+  // if (active_handle == -1 && ImGui::IsMouseHoveringRect(p0, p1) &&
+  //    ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+  //  active_handle = HandleType_MM;
+
+  // Handle Behaviour (Scale)
   for (uint8_t i = 0; i < transform_box_handles_count; i++) {
     HandleShape handle = HandleShape(&handles[i]);
     handle.draw();
@@ -111,52 +217,13 @@ void Widget::TransformBox::draw() {
         object->get_size(object->handle, object->init_size);
       }
     }
+  }
 
-    if (active_handle == i && ImGui::IsMouseDown(0)) {
+  if (active_handle >= 0 && ImGui::IsMouseDown(0))
+    transform_core((HandleType)active_handle);
 
-      ImVec2 offset = ImVec2(
-          fmaxf(ImGui::GetIO().MousePos.x, p0.x + 1.0f) - drag_start.x,
-          fmaxf(ImGui::GetIO().MousePos.y, p0.y + 1.0f) - drag_start.y);
-
-      for (uint16_t obj = 0; obj < objects.count; obj++) {
-        TransformBoxObject *object = &objects.entries[obj];
-        ImVec2 new_pos = object->init_position;
-        ImVec2 new_size = object->init_size;
-        handle_transform((HandleType)i, object->init_position,
-                         object->init_size, offset, new_pos, new_size);
-
-        // compensate stretch if use top or right side handles
-        switch (i) {
-        case HandleType_TL:
-          new_size.x -= offset.x;
-          new_size.y -= offset.y;
-          break;
-
-        case HandleType_ML:
-        case HandleType_BL:
-          new_size.x -= offset.x;
-          break;
-
-        case HandleType_TM:
-          new_size.y -= offset.y;
-          break;
-        }
-
-        object->set_position(object->handle, new_pos);
-        object->set_size(object->handle, new_size);
-      }
-
-      // update frame bound
-      ImVec2 new_pos = p0;
-      ImVec2 new_size = p1;
-      handle_transform((HandleType)i, drag_p0, drag_p1, offset, new_pos,
-                       new_size);
-      update_bound(new_pos, new_size);
-    }
-
-    if (active_handle == i && ImGui::IsMouseReleased(0)) {
-      active_handle = -1;
-    }
+  if (active_handle >= 0 && ImGui::IsMouseReleased(0)) {
+    active_handle = -1;
   }
 }
 

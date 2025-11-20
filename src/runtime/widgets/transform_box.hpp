@@ -61,7 +61,7 @@ public:
 
   TransformBoxStatus update_bound_from_selection();
   TransformBoxStatus update_bound(ImVec2, ImVec2);
-  
+
   uint16_t objects_count() { return objects.count; }
 
   void draw();
@@ -80,6 +80,8 @@ private:
 
   void handle_transform(const HandleType, const ImVec2, const ImVec2,
                         const ImVec2, ImVec2 &, ImVec2 &);
+  void transform_core(const HandleType);
+  void clamp_mouse(const HandleType, ImVec2 &);
 };
 
 } // namespace Widget
