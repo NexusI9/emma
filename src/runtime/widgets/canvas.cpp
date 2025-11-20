@@ -3,6 +3,7 @@
 #include "imgui/imgui_impl_wgpu.h"
 #include "nkengine/include/gui.hpp"
 #include "runtime/allocator.h"
+#include "runtime/manager/viewport.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "runtime/widgets/canvas.hpp"
@@ -100,6 +101,8 @@ void Widget::CanvasShape::draw() {
     ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), gui->pass_encoder);
   }
   gui_draw_end(gui);
+
+  viewport_update(&g_viewport_manager);
 }
 
 /**

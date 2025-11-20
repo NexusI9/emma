@@ -3,6 +3,8 @@
 #include "nkengine/include/renderer.h"
 #include "nkengine/include/resource_manager.h"
 #include "runtime/allocator.h"
+#include "runtime/manager/unit.h"
+#include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
@@ -33,6 +35,8 @@ int main() {
   gui_init(gui, &g);
 
   allocator_init();
+  viewport_set_sensitivity(20.0f);
+  unit_set_step(20.0f);
 
   Canvas canvas;
 
@@ -47,13 +51,12 @@ int main() {
   octagon_set_outer_offset(oct, 3, 1.0f);
   octagon_set_outer_offset(oct, 1, 0.6f);
   octagon_set_outer_offset(oct, 2, 0.2f);
+  octagon_update_vertices(oct);
 
   static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
       "Epic Meaning", "Empowerment", "Social Influence", "Unpredictability",
       "Avoidance",    "Scarcity",    "Ownership",        "Accomplishment",
   };
-
-  octagon_update_vertices(oct);
   octagon_set_labels(oct, octalysis_labels);
   octagon_update_labels_coordinates(oct);
 
@@ -62,6 +65,7 @@ int main() {
 
   renderer_add_draw_callback(renderer, canvas_draw_callback, &canvas_shape,
                              RendererDrawMode_All);
+
 
   renderer_draw(renderer);
 
