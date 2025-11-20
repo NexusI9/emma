@@ -21,6 +21,9 @@ static constexpr uint16_t transform_box_objects_capacity = 16;
 typedef enum {
   TransformBoxStatus_Success,
   TransformBoxStatus_MaxCapacity,
+  TransformBoxStatus_ObjectAdded,
+  TransformBoxStatus_ObjectRemoved,
+  TransformBoxStatus_SessionAlreadyStarted,
   TransformBoxStatus_OutOfBound,
   TransformBoxStatus_UndefError,
 } TransformBoxStatus;
@@ -48,6 +51,12 @@ typedef struct {
   size_t count;
 } TransformBoxObjectList;
 
+typedef enum {
+  TransformBoxSessionStatus_Off,
+  TransformBoxSessionStatus_BlankClick,
+  TransformBoxSessionStatus_Hit,
+} TransformBoxSessionStatus;
+
 class TransformBox {
 
 public:
@@ -63,6 +72,10 @@ public:
   TransformBoxStatus update_bound_from_selection();
   TransformBoxStatus update_bound(ImVec2, ImVec2);
 
+  TransformBoxStatus session_set_blank_click();
+  TransformBoxStatus session_set_hit();
+  TransformBoxStatus session_end();
+
   uint16_t objects_count() { return objects.count; }
 
   void draw();
@@ -73,14 +86,18 @@ private:
   static constexpr float transform_box_handle_size = 10.0f;
 
   Gui *gui;
-
-  ImVec2 p0, p1, padded_area_0, padded_area_1;
+  TransformBoxObjectList objects = {0};
   Handle handles[transform_box_handles_count];
-  int active_handle = -1;
+
+  // caches
+  ImVec2 p0, p1, padded_area_0, padded_area_1;
   ImVec2 drag_start, drag_p0, drag_p1 = ImVec2(0, 0);
 
-  TransformBoxObjectList objects = {0};
+  // flags
+  int active_handle = -1;
+  TransformBoxSessionStatus session_status;
 
+  // utils
   void handle_transform(const HandleType, const ImVec2, const ImVec2,
                         const ImVec2, ImVec2 &, ImVec2 &);
   void transform_core(const HandleType);

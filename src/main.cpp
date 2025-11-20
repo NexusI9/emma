@@ -36,9 +36,14 @@ int main() {
 
   Canvas canvas;
 
+  // === Frame Generation ===
   Frame *frame = canvas_create_frame(&canvas);
-  Octagon *oct = canvas_create_octagon(&canvas);
+  Frame *frame_2 = canvas_create_frame(&canvas);
 
+  frame_set_position(frame_2, (vec2){800, 600});
+
+  // === Octagon Generation ===
+  Octagon *oct = canvas_create_octagon(&canvas);
   octagon_set_outer_offset(oct, 3, 1.0f);
   octagon_set_outer_offset(oct, 1, 0.6f);
   octagon_set_outer_offset(oct, 2, 0.2f);
@@ -52,9 +57,8 @@ int main() {
   octagon_set_labels(oct, octalysis_labels);
   octagon_update_labels_coordinates(oct);
 
-  
   Widget::CanvasShape canvas_shape = Widget::CanvasShape(gui, &canvas);
-  canvas_shape.update_frame_shapes();
+  canvas_shape.sync_shapes();
 
   renderer_add_draw_callback(renderer, canvas_draw_callback, &canvas_shape,
                              RendererDrawMode_All);

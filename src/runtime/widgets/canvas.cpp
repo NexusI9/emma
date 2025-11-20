@@ -19,7 +19,6 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas) {
   this->node = canvas;
   transform_box = TransformBox(gui);
 
-  // DEBUG
   transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
 }
 
@@ -28,10 +27,12 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
   Frame *frame = shape->get_node();
   shape->draw();
 
-  for (uint8_t i = 0; i < BOUNDBOX_FRAME_RECT_COUNT; i++)
-    // add to selection
-    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+  // add to selection
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
 
+    transform_box.session_set_blank_click();
+
+    for (uint8_t i = 0; i < BOUNDBOX_FRAME_RECT_COUNT; i++)
       if (ImGui::IsMouseHoveringRect(im_vec2(shape->boundbox[i].p0),
                                      im_vec2(shape->boundbox[i].p1))) {
 
@@ -43,13 +44,14 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
             .set_size = frame_shape_set_size,
         };
 
+        if (input_key(INPUT_KEY_ALT) == false)
+          transform_box.empty_objects();
+
+        transform_box.session_set_hit();
         transform_box.toggle_object(&object);
         transform_box.update_bound_from_selection();
-
-      } else {
-        transform_box.empty_objects();
       }
-    }
+  }
 }
 
 void Widget::CanvasShape::draw() {
@@ -87,7 +89,8 @@ void Widget::CanvasShape::draw() {
         OctagonShape(allocator_octagon_entry(id)).draw();
       }
 
-      if (transform_box.objects_count())
+      transform_box.session_end();
+      if (transform_box.objects_count() > 0)
         transform_box.draw();
 
       ImGui::End();
@@ -102,7 +105,7 @@ void Widget::CanvasShape::draw() {
 /**
    Sync up the canvas data and generate shapes out of those.
  */
-void Widget::CanvasShape::update_frame_shapes() {
+void Widget::CanvasShape::sync_shapes() {
   for (size_t i = 0; i < node->frames.length; i++) {
     const alloc_id id = node->frames.entries[i];
     Frame *frame = allocator_frame_entry(id);

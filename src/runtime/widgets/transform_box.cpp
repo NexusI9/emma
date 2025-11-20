@@ -8,6 +8,7 @@
 Widget::TransformBox::TransformBox(Gui *gui) {
 
   this->gui = gui;
+
   for (uint8_t i = 0; i < transform_box_handles_count; i++) {
     HandleDescriptor desc = {
         .position = {0.0f},
@@ -22,12 +23,13 @@ Widget::TransformBoxStatus
 Widget::TransformBox::toggle_object(const TransformBoxObjectDescriptor *desc) {
 
   size_t index;
-  if (!find_object(desc->handle, &index))
+  if (!find_object(desc->handle, &index)) {
     add_object(desc);
-  else
-    remove_object(desc->handle, &index);
+    return TransformBoxStatus_ObjectAdded;
+  }
 
-  return TransformBoxStatus_Success;
+  remove_object(desc->handle, &index);
+  return TransformBoxStatus_ObjectRemoved;
 }
 
 Widget::TransformBoxObject *
@@ -135,6 +137,35 @@ void Widget::TransformBox::clamp_mouse(const HandleType handle, ImVec2 &dest) {
   default:
     break;
   }
+}
+
+/**
+   Only update the  session status if the state is OFF, meaning we do change the
+   state if this one has be marked as successful (hit).
+ */
+Widget::TransformBoxStatus Widget::TransformBox::session_set_blank_click() {
+
+  if (session_status == TransformBoxSessionStatus_Off)
+    session_status = TransformBoxSessionStatus_BlankClick;
+
+  return TransformBoxStatus_Success;
+}
+
+Widget::TransformBoxStatus Widget::TransformBox::session_set_hit() {
+
+  session_status = TransformBoxSessionStatus_Hit;
+
+  return TransformBoxStatus_Success;
+}
+
+Widget::TransformBoxStatus Widget::TransformBox::session_end() {
+
+  if (session_status == TransformBoxSessionStatus_BlankClick)
+    empty_objects();
+
+  session_status = TransformBoxSessionStatus_Off;
+
+  return TransformBoxStatus_Success;
 }
 
 void Widget::TransformBox::cache_initial_attributes() {

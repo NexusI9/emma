@@ -14,7 +14,7 @@ public:
   CanvasShape(Gui *, Canvas *);
 
   void draw();
-  void update_frame_shapes();
+  void sync_shapes();
 
 private:
   Gui *gui;
