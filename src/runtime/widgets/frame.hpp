@@ -4,17 +4,20 @@
 #include "runtime/node/frame.h"
 #include "runtime/widgets/core.hpp"
 
+void frame_shape_set_position(void *, ImVec2);
+void frame_shape_get_position(void *, ImVec2 &);
+void frame_shape_set_size(void *, ImVec2);
+void frame_shape_get_size(void *, ImVec2 &);
+
 namespace Widget {
 
-class FrameShape : public TransformWidget {
+class FrameShape {
 
 public:
-  FrameShape(Frame *node) : node(node), TransformWidget() {}
+  FrameShape() {}
+  FrameShape(Frame *node) : node(node) {}
   void draw();
-  void set_position(void *, ImVec2) override;
-  void get_position(void *, ImVec2) override;
-  void set_size(void *, ImVec2) override;
-  void get_size(void *, ImVec2) override;
+  Frame *get_node() { return node; }
 
 private:
   Frame *node;

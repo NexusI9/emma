@@ -128,7 +128,7 @@ void Widget::OctagonShape::draw_outer_gradient(ImDrawList *draw_list) {
 
 void Widget::OctagonShape::draw() {
 
-  ImDrawList *draw_list = ImGui::GetForegroundDrawList();
+  ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
   draw_outer_gradient(draw_list);
   draw_list->AddConvexPolyFilled((ImVec2 *)node->inner_vertices,

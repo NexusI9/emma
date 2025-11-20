@@ -52,7 +52,10 @@ int main() {
   octagon_set_labels(oct, octalysis_labels);
   octagon_update_labels_coordinates(oct);
 
+  
   Widget::CanvasShape canvas_shape = Widget::CanvasShape(gui, &canvas);
+  canvas_shape.update_frame_shapes();
+
   renderer_add_draw_callback(renderer, canvas_draw_callback, &canvas_shape,
                              RendererDrawMode_All);
 

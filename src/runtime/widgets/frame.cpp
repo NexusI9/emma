@@ -6,7 +6,7 @@
 
 void Widget::FrameShape::draw() {
 
-  ImDrawList *dl = ImGui::GetForegroundDrawList();
+  ImDrawList *dl = ImGui::GetWindowDrawList();
 
   // Frame rectangle
 
@@ -18,20 +18,32 @@ void Widget::FrameShape::draw() {
   dl->AddRectFilled(p0, p1, im_color(node->background), 2.0f);
 }
 
-void Widget::FrameShape::set_position(void *data, ImVec2 value) {
-  FrameShape *shape = (FrameShape *)data;
+void frame_shape_set_position(void *data, ImVec2 value) {
+  Widget::FrameShape *shape = (Widget::FrameShape *)data;
+  Frame *frame = shape->get_node();
 
-  
+  frame->position[0] = value.x;
+  frame->position[1] = value.y;
 }
 
-void Widget::FrameShape::get_position(void *data, ImVec2 value) {
-  FrameShape *shape = (FrameShape *)data;
+void frame_shape_get_position(void *data, ImVec2 &value) {
+  Widget::FrameShape *shape = (Widget::FrameShape *)data;
+  Frame *frame = shape->get_node();
+
+  value = im_vec2(frame->position);
 }
 
-void Widget::FrameShape::set_size(void *data, ImVec2 value) {
-  FrameShape *shape = (FrameShape *)data;
+void frame_shape_set_size(void *data, ImVec2 value) {
+  Widget::FrameShape *shape = (Widget::FrameShape *)data;
+  Frame *frame = shape->get_node();
+
+  frame->size[0] = value.x;
+  frame->size[1] = value.y;
 }
 
-void Widget::FrameShape::get_size(void *data, ImVec2 value) {
-  FrameShape *shape = (FrameShape *)data;
+void frame_shape_get_size(void *data, ImVec2 &value) {
+  Widget::FrameShape *shape = (Widget::FrameShape *)data;
+  Frame *frame = shape->get_node();
+
+  value = im_vec2(frame->size);
 }

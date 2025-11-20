@@ -31,9 +31,7 @@ serve:
 # Clean build artifacts
 # ======================
 clean:
-	rm -rf $(BUILD_DIR)/CMakeFiles \
-	rm -f $(BUILD_DIR)/*.wasm \
-	rm -f $(BUILD_DIR)/*.js \
-	rm -f $(BUILD_DIR)/*.o
+	rm -rf $(BUILD_DIR)
+
 
 

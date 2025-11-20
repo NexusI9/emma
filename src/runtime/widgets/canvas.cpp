@@ -18,7 +18,9 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas) {
   this->gui = gui;
   this->node = canvas;
   transform_box = TransformBox(gui);
-  
+
+  // DEBUG
+  transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
 }
 
 void Widget::CanvasShape::draw() {
@@ -31,18 +33,72 @@ void Widget::CanvasShape::draw() {
     {
       draw_grid_background();
 
+      ImGuiViewport *vp = ImGui::GetMainViewport();
+
+      // Push fullscreen position + size
+      ImGui::SetNextWindowPos(vp->Pos);
+      ImGui::SetNextWindowSize(vp->Size);
+
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+      ImGui::Begin("Canvas", NULL,
+                   ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+                       ImGuiWindowFlags_NoScrollWithMouse |
+                       ImGuiWindowFlags_NoCollapse |
+                       ImGuiWindowFlags_NoBackground |
+                       ImGuiWindowFlags_NoBringToFrontOnFocus);
+
       for (size_t i = 0; i < node->frames.length; i++) {
-        const alloc_id id = node->frames.entries[i];
-        FrameShape(allocator_frame_entry(id)).draw();
+
+        FrameShape *shape = &frame_shapes[i];
+        Frame *frame = shape->get_node();
+        shape->draw();
+
+        // add to selection
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+
+          // transform_box.remove_target(shape);
+
+          TransformBoxObjectDescriptor object = {
+              .handle = shape,
+              .get_position = frame_shape_get_position,
+              .set_position = frame_shape_set_position,
+              .get_size = frame_shape_get_size,
+              .set_size = frame_shape_set_size,
+          };
+
+          transform_box.add_target(&object);
+          transform_box.update_bound_from_selection();
+        }
       }
 
       for (size_t i = 0; i < node->octagons.length; i++) {
         const alloc_id id = node->octagons.entries[i];
         OctagonShape(allocator_octagon_entry(id)).draw();
       }
+
+      if (transform_box.objects_count()) {
+        transform_box.draw();
+      }
+
+      ImGui::End();
+      ImGui::PopStyleVar(2);
     }
     ImGui::Render();
     ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), gui->pass_encoder);
   }
   gui_draw_end(gui);
+}
+
+/**
+   Sync up the canvas data and generate shapes out of those.
+ */
+void Widget::CanvasShape::update_frame_shapes() {
+  for (size_t i = 0; i < node->frames.length; i++) {
+    const alloc_id id = node->frames.entries[i];
+    Frame *frame = allocator_frame_entry(id);
+    frame_shapes[i] = FrameShape(frame);
+  }
 }

@@ -3,6 +3,7 @@
 
 #include <cglm/cglm.h>
 
+#include "nkengine/include/utils.h"
 #include "utils/id.h"
 
 typedef enum {
@@ -14,13 +15,13 @@ typedef enum {
 
    TL                    TM                  TR
        o-----------------o-----------------o
-       |                 |                 | 
+       |                 |                 |
        |                 |                 |
        |                 MM                |
    ML  o-----------------o-----------------o  MR
-       |                 |                 | 
        |                 |                 |
-       |                 |                 |   
+       |                 |                 |
+       |                 |                 |
        o-----------------o-----------------o
    BL                    BM                  BR
 
@@ -37,13 +38,25 @@ typedef enum {
   HandleType_BL, // Bottom Left
   HandleType_BM, // Bottom Middle
   HandleType_BR, // Bottom Left
-
 } HandleType;
 
 typedef struct {
   alloc_id id;
   vec2 position;
-  vec2 scale;
+  float scale;
+  color color;
 } Handle;
+
+typedef struct {
+  const vec2 position;
+  const float scale;
+  const color color;
+} HandleDescriptor;
+
+EXTERN_C_BEGIN
+
+void handle_create(Handle *, const HandleDescriptor *);
+
+EXTERN_C_END
 
 #endif
