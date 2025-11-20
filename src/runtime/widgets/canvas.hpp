@@ -12,7 +12,7 @@ class CanvasShape {
 public:
   CanvasShape(){};
   CanvasShape(Gui *, Canvas *);
-  
+
   void draw();
   void update_frame_shapes();
 
@@ -21,6 +21,8 @@ private:
   Canvas *node;
   TransformBox transform_box;
   FrameShape frame_shapes[CANVAS_MAX_FRAMES];
+
+  void draw_frame(FrameShape *);
 };
 
 } // namespace Widget

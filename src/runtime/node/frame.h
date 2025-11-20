@@ -15,6 +15,7 @@ typedef struct {
   const char *label;
   vec2 position;
   vec2 size;
+  vec2 end_point; // pos + size, usefull to get full area for mouse interaction
   color background;
 } Frame;
 
@@ -29,20 +30,19 @@ EXTERN_C_BEGIN
 
 FrameStatus frame_create(Frame *, const FrameDescriptor *);
 
-static inline FrameStatus frame_set_size(Frame *node,
-                                                  const vec2 value) {
+static inline FrameStatus frame_set_size(Frame *node, const vec2 value) {
   glm_vec2_copy((float *)value, node->size);
+  glm_vec2_add(node->position, node->size, node->end_point);
   return FrameStatus_Success;
 }
 
-static inline FrameStatus frame_set_position(Frame *node,
-                                                      const vec2 value) {
+static inline FrameStatus frame_set_position(Frame *node, const vec2 value) {
   glm_vec2_copy((float *)value, node->position);
+  glm_vec2_add(node->position, node->size, node->end_point);
   return FrameStatus_Success;
 }
 
-static inline FrameStatus frame_set_background(Frame *node,
-                                                        const color value) {
+static inline FrameStatus frame_set_background(Frame *node, const color value) {
   glm_vec4_copy((float *)value, node->background);
   return FrameStatus_Success;
 }

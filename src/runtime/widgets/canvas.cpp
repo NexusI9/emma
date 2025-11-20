@@ -23,6 +23,32 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas) {
   transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
 }
 
+void Widget::CanvasShape::draw_frame(FrameShape *shape) {
+
+  Frame *frame = shape->get_node();
+  shape->draw();
+
+  for (uint8_t i = 0; i < BOUNDBOX_FRAME_RECT_COUNT; i++)
+    // add to selection
+    if (ImGui::IsMouseHoveringRect(im_vec2(shape->boundbox[i].p0),
+                                   im_vec2(shape->boundbox[i].p1)) &&
+        ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+
+      // transform_box.remove_target(shape);
+
+      TransformBoxObjectDescriptor object = {
+          .handle = shape,
+          .get_position = frame_shape_get_position,
+          .set_position = frame_shape_set_position,
+          .get_size = frame_shape_get_size,
+          .set_size = frame_shape_set_size,
+      };
+
+      transform_box.toggle_object(&object);
+      transform_box.update_bound_from_selection();
+    }
+}
+
 void Widget::CanvasShape::draw() {
 
   gui_draw_begin(gui);
@@ -50,29 +76,8 @@ void Widget::CanvasShape::draw() {
                        ImGuiWindowFlags_NoBackground |
                        ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-      for (size_t i = 0; i < node->frames.length; i++) {
-
-        FrameShape *shape = &frame_shapes[i];
-        Frame *frame = shape->get_node();
-        shape->draw();
-
-        // add to selection
-        if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-
-          // transform_box.remove_target(shape);
-
-          TransformBoxObjectDescriptor object = {
-              .handle = shape,
-              .get_position = frame_shape_get_position,
-              .set_position = frame_shape_set_position,
-              .get_size = frame_shape_get_size,
-              .set_size = frame_shape_set_size,
-          };
-
-          transform_box.toggle_object(&object);
-          transform_box.update_bound_from_selection();
-        }
-      }
+      for (size_t i = 0; i < node->frames.length; i++)
+        draw_frame(&frame_shapes[i]);
 
       for (size_t i = 0; i < node->octagons.length; i++) {
         const alloc_id id = node->octagons.entries[i];
@@ -100,5 +105,7 @@ void Widget::CanvasShape::update_frame_shapes() {
     const alloc_id id = node->frames.entries[i];
     Frame *frame = allocator_frame_entry(id);
     frame_shapes[i] = FrameShape(frame);
+    boundbox_frame_update(frame_shapes[i].boundbox, frame->position,
+                          frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
   }
 }

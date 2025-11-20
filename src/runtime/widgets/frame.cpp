@@ -2,6 +2,7 @@
 
 #include "imgui/imgui.h"
 #include "nkengine/include/gui.hpp"
+#include "runtime/geometry/boundbox_frame.h"
 #include "runtime/node/frame.h"
 
 void Widget::FrameShape::draw() {
@@ -22,8 +23,9 @@ void frame_shape_set_position(void *data, ImVec2 value) {
   Widget::FrameShape *shape = (Widget::FrameShape *)data;
   Frame *frame = shape->get_node();
 
-  frame->position[0] = value.x;
-  frame->position[1] = value.y;
+  frame_set_position(frame, (vec2){value.x, value.y});
+  boundbox_frame_update(shape->boundbox, frame->position, frame->end_point,
+                        Widget::FRAME_SHAPE_BOUNDBOX_THICKNESS);
 }
 
 void frame_shape_get_position(void *data, ImVec2 &value) {
@@ -37,8 +39,9 @@ void frame_shape_set_size(void *data, ImVec2 value) {
   Widget::FrameShape *shape = (Widget::FrameShape *)data;
   Frame *frame = shape->get_node();
 
-  frame->size[0] = value.x;
-  frame->size[1] = value.y;
+  frame_set_size(frame, (vec2){value.x, value.y});
+  boundbox_frame_update(shape->boundbox, frame->position, frame->end_point,
+                        Widget::FRAME_SHAPE_BOUNDBOX_THICKNESS);
 }
 
 void frame_shape_get_size(void *data, ImVec2 &value) {

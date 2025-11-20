@@ -21,10 +21,11 @@ Widget::TransformBox::TransformBox(Gui *gui) {
 Widget::TransformBoxStatus
 Widget::TransformBox::toggle_object(const TransformBoxObjectDescriptor *desc) {
 
-  if (!find_object(desc->handle, NULL))
+  size_t index;
+  if (!find_object(desc->handle, &index))
     add_object(desc);
   else
-    remove_object(desc->handle);
+    remove_object(desc->handle, &index);
 
   return TransformBoxStatus_Success;
 }
@@ -64,16 +65,19 @@ Widget::TransformBox::add_object(const TransformBoxObjectDescriptor *desc) {
                      "Transform Box Target List");
 }
 
-StaticListStatus Widget::TransformBox::remove_object(const void *target) {
+StaticListStatus Widget::TransformBox::remove_object(const void *target,
+                                                     size_t *index) {
 
-  size_t index = SIZE_MAX;
-  find_object(target, &index);
+  size_t found_index = index ? (*index) : SIZE_MAX;
 
-  if (index == SIZE_MAX)
+  if (index == NULL)
+    find_object(target, &found_index);
+
+  if (found_index == SIZE_MAX)
     return StaticListStatus_UnfoundEntry;
 
   return stli_remove_at_index(objects.entries, &objects.count,
-                              sizeof(TransformBoxObject), index);
+                              sizeof(TransformBoxObject), found_index);
 }
 
 StaticListStatus Widget::TransformBox::empty_objects() {
@@ -110,8 +114,9 @@ void Widget::TransformBox::draw() {
 
     if (active_handle == i && ImGui::IsMouseDown(0)) {
 
-      ImVec2 offset = ImVec2(ImGui::GetIO().MousePos.x - drag_start.x,
-                             ImGui::GetIO().MousePos.y - drag_start.y);
+      ImVec2 offset = ImVec2(
+          fmaxf(ImGui::GetIO().MousePos.x, p0.x + 1.0f) - drag_start.x,
+          fmaxf(ImGui::GetIO().MousePos.y, p0.y + 1.0f) - drag_start.y);
 
       for (uint16_t obj = 0; obj < objects.count; obj++) {
         TransformBoxObject *object = &objects.entries[obj];
@@ -257,11 +262,11 @@ Widget::TransformBoxStatus Widget::TransformBox::update_bound_from_selection() {
     object->get_position(object->handle, pos);
     object->get_size(object->handle, size);
 
-    p0.x = glm_min(p0.x, pos.x);
-    p0.y = glm_min(p0.y, pos.y);
+    p0.x = fminf(p0.x, pos.x);
+    p0.y = fminf(p0.y, pos.y);
 
-    p1.x = glm_max(p1.x, pos.x + size.x);
-    p1.y = glm_max(p1.y, pos.y + size.y);
+    p1.x = fmaxf(p1.x, pos.x + size.x);
+    p1.y = fmaxf(p1.y, pos.y + size.y);
   }
 
   update_bound(p0, p1);
