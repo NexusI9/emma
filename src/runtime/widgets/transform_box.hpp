@@ -4,6 +4,7 @@
 #include "nkengine/include/gui.h"
 #include "runtime/canvas/core.h"
 #include "runtime/node/handle.h"
+#include "runtime/widgets/handle.hpp"
 #include <cglm/cglm.h>
 #include <imgui/imgui.h>
 
@@ -67,11 +68,13 @@ public:
   void draw();
 
 private:
-  ImVec2 p0, p1;
-  Gui *gui;
+  static constexpr float area_padding = 20.0f;
   static constexpr uint8_t transform_box_handles_count = 9;
   static constexpr float transform_box_handle_size = 10.0f;
 
+  Gui *gui;
+
+  ImVec2 p0, p1, padded_area_0, padded_area_1;
   Handle handles[transform_box_handles_count];
   int active_handle = -1;
   ImVec2 drag_start, drag_p0, drag_p1 = ImVec2(0, 0);
@@ -81,6 +84,7 @@ private:
   void handle_transform(const HandleType, const ImVec2, const ImVec2,
                         const ImVec2, ImVec2 &, ImVec2 &);
   void transform_core(const HandleType);
+  void cache_initial_attributes();
   void clamp_mouse(const HandleType, ImVec2 &);
 };
 

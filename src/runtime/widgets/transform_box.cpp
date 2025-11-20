@@ -107,7 +107,7 @@ void Widget::TransformBox::clamp_mouse(const HandleType handle, ImVec2 &dest) {
 
   case HandleType_TR:
     dest.x = fmaxf(dest.x, p0.x + margin);
-    dest.y = fminf(dest.y, p0.y - margin);
+    dest.y = fminf(dest.y, p1.y - margin);
     break;
 
   case HandleType_ML:
@@ -134,6 +134,20 @@ void Widget::TransformBox::clamp_mouse(const HandleType handle, ImVec2 &dest) {
 
   default:
     break;
+  }
+}
+
+void Widget::TransformBox::cache_initial_attributes() {
+
+  // cache initial attributes
+  drag_start = ImGui::GetIO().MousePos;
+  drag_p0 = p0;
+  drag_p1 = p1;
+
+  for (uint16_t obj = 0; obj < objects.count; obj++) {
+    TransformBoxObject *object = &objects.entries[obj];
+    object->get_position(object->handle, object->init_position);
+    object->get_size(object->handle, object->init_size);
   }
 }
 
@@ -164,6 +178,7 @@ void Widget::TransformBox::transform_core(const HandleType handle) {
       break;
 
     case HandleType_TM:
+    case HandleType_TR:
       new_size.y -= offset.y;
       break;
 
@@ -192,9 +207,12 @@ void Widget::TransformBox::draw() {
   draw->AddRect(p0, p1, IM_COL32(255, 255, 255, 255), 0.0f, 0, 2.0f);
 
   // Area Behaviour (Translate)
-  // if (active_handle == -1 && ImGui::IsMouseHoveringRect(p0, p1) &&
-  //    ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-  //  active_handle = HandleType_MM;
+  if (active_handle == -1 &&
+      ImGui::IsMouseHoveringRect(padded_area_0, padded_area_1) &&
+      ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+    active_handle = HandleType_MM;
+    cache_initial_attributes();
+  }
 
   // Handle Behaviour (Scale)
   for (uint8_t i = 0; i < transform_box_handles_count; i++) {
@@ -205,17 +223,7 @@ void Widget::TransformBox::draw() {
         ImGui::IsMouseHoveringRect(handle.get_p0(), handle.get_p1()) &&
         ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
       active_handle = i;
-
-      // cache initial attributes
-      drag_start = ImGui::GetIO().MousePos;
-      drag_p0 = p0;
-      drag_p1 = p1;
-
-      for (uint16_t obj = 0; obj < objects.count; obj++) {
-        TransformBoxObject *object = &objects.entries[obj];
-        object->get_position(object->handle, object->init_position);
-        object->get_size(object->handle, object->init_size);
-      }
+      cache_initial_attributes();
     }
   }
 
@@ -293,6 +301,9 @@ Widget::TransformBoxStatus Widget::TransformBox::update_bound(ImVec2 start,
 
   p0 = start;
   p1 = end;
+
+  padded_area_0 = ImVec2(p0.x + area_padding, p0.y + area_padding);
+  padded_area_1 = ImVec2(p1.x - area_padding, p1.y - area_padding);
 
   const float x[] = {
       start.x,
