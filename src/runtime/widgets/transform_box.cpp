@@ -1,7 +1,7 @@
 #include "transform_box.hpp"
 #include "runtime/manager/viewport.h"
-#include "runtime/node/handle.h"
-#include "runtime/widgets/handle.hpp"
+#include "runtime/node/transform_handle.h"
+#include "runtime/widgets/transform_handle.hpp"
 #include "runtime/widgets/utils.hpp"
 #include "utils/id.h"
 #include <climits>
@@ -12,12 +12,12 @@ Widget::TransformBox::TransformBox(Gui *gui) {
   this->gui = gui;
 
   for (uint8_t i = 0; i < transform_box_handles_count; i++) {
-    HandleDescriptor desc = {
+    TransformHandleDescriptor desc = {
         .position = {0.0f},
         .scale = transform_box_handle_size,
         .color = {1.0f, 1.0f, 1.0f, 1.0f},
     };
-    handle_create(&handles[i], &desc);
+    transform_handle_create(&handles[i], &desc);
   }
 }
 
@@ -94,44 +94,44 @@ StaticListStatus Widget::TransformBox::empty_objects() {
    Prevents the end from overlapping the start and vice-versa.
    Keeps the bounding box from inverting when dragging handles.
 */
-void Widget::TransformBox::clamp_mouse(const HandleType handle, ImVec2 &dest) {
+void Widget::TransformBox::clamp_mouse(const TransformHandleType handle, ImVec2 &dest) {
 
   static const float margin = 10.0f;
 
   switch (handle) {
 
-  case HandleType_TL:
+  case TransformHandleType_TL:
     dest.x = fminf(dest.x, p1.x - margin);
     dest.y = fminf(dest.y, p1.y - margin);
     break;
 
-  case HandleType_TM:
+  case TransformHandleType_TM:
     dest.y = fminf(dest.y, p1.y - margin);
     break;
 
-  case HandleType_TR:
+  case TransformHandleType_TR:
     dest.x = fmaxf(dest.x, p0.x + margin);
     dest.y = fminf(dest.y, p1.y - margin);
     break;
 
-  case HandleType_ML:
+  case TransformHandleType_ML:
     dest.x = fminf(dest.x, p1.x - margin);
     break;
 
-  case HandleType_MR:
+  case TransformHandleType_MR:
     dest.x = fmaxf(dest.x, p0.x + margin);
     break;
 
-  case HandleType_BL:
+  case TransformHandleType_BL:
     dest.x = fminf(dest.x, p1.x - margin);
     dest.y = fmaxf(dest.y, p0.y + margin);
     break;
 
-  case HandleType_BM:
+  case TransformHandleType_BM:
     dest.y = fmaxf(dest.y, p0.y + margin);
     break;
 
-  case HandleType_BR:
+  case TransformHandleType_BR:
     dest.x = fmaxf(dest.x, p0.x + margin);
     dest.y = fmaxf(dest.y, p0.y + margin);
     break;
@@ -184,7 +184,7 @@ void Widget::TransformBox::cache_initial_attributes() {
   }
 }
 
-void Widget::TransformBox::transform_core(const HandleType handle) {
+void Widget::TransformBox::transform_core(const TransformHandleType handle) {
 
   ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
   clamp_mouse(handle, mouse);
@@ -200,22 +200,22 @@ void Widget::TransformBox::transform_core(const HandleType handle) {
 
     // compensate stretch if use top or right side handles
     switch (handle) {
-    case HandleType_TL:
+    case TransformHandleType_TL:
       new_size.x -= offset.x;
       new_size.y -= offset.y;
       break;
 
-    case HandleType_ML:
-    case HandleType_BL:
+    case TransformHandleType_ML:
+    case TransformHandleType_BL:
       new_size.x -= offset.x;
       break;
 
-    case HandleType_TM:
-    case HandleType_TR:
+    case TransformHandleType_TM:
+    case TransformHandleType_TR:
       new_size.y -= offset.y;
       break;
 
-    case HandleType_MM:
+    case TransformHandleType_MM:
       new_size = object->init_size;
       break;
 
@@ -245,13 +245,13 @@ void Widget::TransformBox::draw() {
       ImGui::IsMouseHoveringRect(vp_im2(padded_area_0),
                                  vp_im2(padded_area_1)) &&
       ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-    active_handle = HandleType_MM;
+    active_handle = TransformHandleType_MM;
     cache_initial_attributes();
   }
 
   // Handle Behaviour (Scale)
   for (uint8_t i = 0; i < transform_box_handles_count; i++) {
-    HandleShape handle = HandleShape(&handles[i]);
+    TransformHandleShape handle = TransformHandleShape(&handles[i]);
     handle.draw();
 
     if (active_handle == -1 &&
@@ -263,13 +263,13 @@ void Widget::TransformBox::draw() {
   }
 
   if (active_handle >= 0 && ImGui::IsMouseDown(0))
-    transform_core((HandleType)active_handle);
+    transform_core((TransformHandleType)active_handle);
 
   if (active_handle >= 0 && ImGui::IsMouseReleased(0))
     active_handle = -1;
 }
 
-void Widget::TransformBox::handle_transform(const HandleType type,
+void Widget::TransformBox::handle_transform(const TransformHandleType type,
                                             const ImVec2 init_pos,
                                             const ImVec2 init_size,
                                             const ImVec2 offset,
@@ -277,50 +277,50 @@ void Widget::TransformBox::handle_transform(const HandleType type,
 
   switch (type) {
 
-  case HandleType_TL: // Top Left
+  case TransformHandleType_TL: // Top Left
     new_pos = ImVec2(init_pos.x + offset.x, init_pos.y + offset.y);
     new_size = init_size;
     break;
 
-  case HandleType_TM: // Top Middle
+  case TransformHandleType_TM: // Top Middle
     new_pos = ImVec2(init_pos.x, init_pos.y + offset.y);
     new_size = init_size;
     break;
 
-  case HandleType_TR: // Top Right
+  case TransformHandleType_TR: // Top Right
     new_pos = ImVec2(init_pos.x, init_pos.y + offset.y);
     new_size = ImVec2(init_size.x + offset.x, init_size.y);
     break;
 
-  case HandleType_ML: // Middle Left
+  case TransformHandleType_ML: // Middle Left
     new_pos = ImVec2(init_pos.x + offset.x, init_pos.y);
     new_size = init_size;
 
     break;
 
-  case HandleType_MM: // Middle Middle
+  case TransformHandleType_MM: // Middle Middle
     new_pos = ImVec2(init_pos.x + offset.x, init_pos.y + offset.y);
     new_size = ImVec2(init_size.x + offset.x, init_size.y + offset.y);
 
     break;
 
-  case HandleType_MR: // Middle Right
+  case TransformHandleType_MR: // Middle Right
     new_pos = init_pos;
     new_size = ImVec2(init_size.x + offset.x, init_size.y);
 
     break;
 
-  case HandleType_BL: // Bottom Left
+  case TransformHandleType_BL: // Bottom Left
     new_pos = ImVec2(init_pos.x + offset.x, init_pos.y);
     new_size = ImVec2(init_size.x, init_size.y + offset.y);
     break;
 
-  case HandleType_BM: // Bottom Middle
+  case TransformHandleType_BM: // Bottom Middle
     new_pos = init_pos;
     new_size = ImVec2(init_size.x, init_size.y + offset.y);
     break;
 
-  case HandleType_BR: // Bottom Right
+  case TransformHandleType_BR: // Bottom Right
     new_pos = init_pos,
     new_size = ImVec2(init_size.x + offset.x, init_size.y + offset.y);
     break;

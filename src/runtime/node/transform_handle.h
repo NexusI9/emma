@@ -1,5 +1,5 @@
-#ifndef _HANDLE_H_
-#define _HANDLE_H_
+#ifndef _TRANSFORM_HANDLE_H_
+#define _TRANSFORM_HANDLE_H_
 
 #include <cglm/cglm.h>
 
@@ -7,9 +7,9 @@
 #include "utils/id.h"
 
 typedef enum {
-  HandleStatus_Success,
-  HandleStatus_UndefError,
-} HandleStatus;
+  TransformHandleStatus_Success,
+  TransformHandleStatus_UndefError,
+} TransformHandleStatus;
 
 /*
 
@@ -27,35 +27,33 @@ typedef enum {
 
  */
 typedef enum {
-  HandleType_TL, // Top Left
-  HandleType_TM, // Top Middle
-  HandleType_TR, // Top Right
-
-  HandleType_ML, // Middle Left
-  HandleType_MM, // Middle Middle
-  HandleType_MR, // Middle Right
-
-  HandleType_BL, // Bottom Left
-  HandleType_BM, // Bottom Middle
-  HandleType_BR, // Bottom Left
-} HandleType;
+  TransformHandleType_TL, // Top Left
+  TransformHandleType_TM, // Top Middle
+  TransformHandleType_TR, // Top Right
+  TransformHandleType_ML, // Middle Left
+  TransformHandleType_MM, // Middle Middle
+  TransformHandleType_MR, // Middle Right
+  TransformHandleType_BL, // Bottom Left
+  TransformHandleType_BM, // Bottom Middle
+  TransformHandleType_BR, // Bottom Left
+} TransformHandleType;
 
 typedef struct {
   alloc_id id;
   vec2 position;
   float scale;
   color color;
-} Handle;
+} TransformHandle;
 
 typedef struct {
   const vec2 position;
   const float scale;
   const color color;
-} HandleDescriptor;
+} TransformHandleDescriptor;
 
 EXTERN_C_BEGIN
 
-void handle_create(Handle *, const HandleDescriptor *);
+void transform_handle_create(TransformHandle *, const TransformHandleDescriptor *);
 
 EXTERN_C_END
 

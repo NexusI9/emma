@@ -4,16 +4,16 @@
 #include "nkengine/include/list.h"
 #include "runtime/node/connector.h"
 #include "runtime/node/frame.h"
-#include "runtime/node/handle.h"
 #include "runtime/node/octagon.h"
+#include "runtime/node/transform_handle.h"
 #include "utils/id.h"
 
 // clang-format off
 #define ALLOCATOR_LIST(_) \
-  _(  Frame,      frame,       1024  )\
-  _(  Handle,     handle,      1024  )\
-  _(  Connector,  connector,   1024  )\
-  _(  Octagon,    octagon,     1024  )
+  _(  Frame,               frame,       1024  )\
+  _(  TransformHandle,     handle,      1024  )\
+  _(  Connector,           connector,   1024  )\
+  _(  Octagon,             octagon,     1024  )
 
 
 

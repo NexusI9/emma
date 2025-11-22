@@ -2,8 +2,8 @@
 #define _WIDGET_TRANSFORM_BOX_H_
 
 #include "nkengine/include/gui.h"
-#include "runtime/node/handle.h"
-#include "runtime/widgets/handle.hpp"
+#include "runtime/node/transform_handle.h"
+#include "runtime/widgets/transform_handle.hpp"
 #include <cglm/cglm.h>
 #include <imgui/imgui.h>
 
@@ -87,7 +87,7 @@ private:
 
   Gui *gui;
   TransformBoxObjectList objects = {0};
-  Handle handles[transform_box_handles_count];
+  TransformHandle handles[transform_box_handles_count];
 
   // caches
   ImVec2 p0, p1, padded_area_0, padded_area_1;
@@ -98,11 +98,11 @@ private:
   TransformBoxSessionStatus session_status = TransformBoxSessionStatus_Off;
 
   // utils
-  void handle_transform(const HandleType, const ImVec2, const ImVec2,
+  void handle_transform(const TransformHandleType, const ImVec2, const ImVec2,
                         const ImVec2, ImVec2 &, ImVec2 &);
-  void transform_core(const HandleType);
+  void transform_core(const TransformHandleType);
   void cache_initial_attributes();
-  void clamp_mouse(const HandleType, ImVec2 &);
+  void clamp_mouse(const TransformHandleType, ImVec2 &);
 };
 
 } // namespace Widget
