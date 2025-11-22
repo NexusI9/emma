@@ -62,6 +62,7 @@ Widget::TransformBox::add_object(const TransformBoxObjectDescriptor *desc) {
       .set_position = desc->set_position,
       .get_size = desc->get_size,
       .set_size = desc->set_size,
+      .on_selected = desc->on_selected,
   };
 
   return stli_insert(objects.entries, transform_box_objects_capacity,
@@ -94,7 +95,8 @@ StaticListStatus Widget::TransformBox::empty_objects() {
    Prevents the end from overlapping the start and vice-versa.
    Keeps the bounding box from inverting when dragging handles.
 */
-void Widget::TransformBox::clamp_mouse(const TransformHandleType handle, ImVec2 &dest) {
+void Widget::TransformBox::clamp_mouse(const TransformHandleType handle,
+                                       ImVec2 &dest) {
 
   static const float margin = 10.0f;
 
@@ -267,6 +269,11 @@ void Widget::TransformBox::draw() {
 
   if (active_handle >= 0 && ImGui::IsMouseReleased(0))
     active_handle = -1;
+
+  // update callback for selected objects
+  for (size_t i = 0; i < objects.count; i++)
+    if (objects.entries[i].on_selected)
+      objects.entries[i].on_selected(objects.entries[i].handle);
 }
 
 void Widget::TransformBox::handle_transform(const TransformHandleType type,

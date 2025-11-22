@@ -9,9 +9,9 @@
 
 typedef void (*transform_box_set_position_callback)(void *, ImVec2);
 typedef void (*transform_box_get_position_callback)(void *, ImVec2 &);
-
 typedef void (*transform_box_set_size_callback)(void *, ImVec2);
 typedef void (*transform_box_get_size_callback)(void *, ImVec2 &);
+typedef void (*transform_box_on_selected_callback)(void *);
 
 namespace Widget {
 
@@ -36,6 +36,7 @@ typedef struct {
   transform_box_set_size_callback set_size;
   transform_box_get_position_callback get_position;
   transform_box_get_size_callback get_size;
+  transform_box_on_selected_callback on_selected;
 } TransformBoxObject;
 
 typedef struct {
@@ -44,6 +45,7 @@ typedef struct {
   transform_box_set_size_callback set_size;
   transform_box_get_position_callback get_position;
   transform_box_get_size_callback get_size;
+  transform_box_on_selected_callback on_selected;
 } TransformBoxObjectDescriptor;
 
 typedef struct {

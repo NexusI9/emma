@@ -11,13 +11,11 @@ typedef enum {
 } ConnectorStatus;
 
 typedef struct {
-
   alloc_id id;
   vec2 start;
   vec2 end;
   float thickness;
   vec4 color;
-
 } Connector;
 
 

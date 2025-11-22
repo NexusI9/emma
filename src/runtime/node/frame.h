@@ -2,6 +2,7 @@
 #define _FRAME_H_
 
 #include "nkengine/include/utils.h"
+#include "runtime/node/connector_handle.h"
 #include "utils/id.h"
 #include <cglm/cglm.h>
 
@@ -11,8 +12,10 @@ typedef enum {
 } FrameStatus;
 
 typedef struct {
+
   alloc_id id;
   alloc_id octagon_id;
+  alloc_id connector_handle_id[CONNECTOR_HANDLE_COUNT];
 
   const char *label;
   vec2 position;
@@ -51,22 +54,33 @@ static inline FrameStatus frame_set_background(Frame *node, const color value) {
 }
 
 static inline FrameStatus frame_get_size(const Frame *node, vec2 dest) {
-  glm_vec2_copy((float*)node->size, dest);
+  glm_vec2_copy((float *)node->size, dest);
   return FrameStatus_Success;
 }
 
 static inline FrameStatus frame_get_position(const Frame *node, vec2 dest) {
-  glm_vec2_copy((float*)node->position, dest);
+  glm_vec2_copy((float *)node->position, dest);
   return FrameStatus_Success;
 }
 
 static inline FrameStatus frame_get_end_point(const Frame *node, vec2 dest) {
-  glm_vec2_copy((float*)node->end_point, dest);
+  glm_vec2_copy((float *)node->end_point, dest);
   return FrameStatus_Success;
 }
 
 static inline FrameStatus frame_get_background(const Frame *node, color dest) {
-  glm_vec4_copy((float*)node->background, dest);
+  glm_vec4_copy((float *)node->background, dest);
+  return FrameStatus_Success;
+}
+
+static inline FrameStatus frame_set_octagon_id(Frame *node, const alloc_id id) {
+  node->octagon_id = id;
+  return FrameStatus_Success;
+}
+static inline FrameStatus
+frame_set_connector_handle_id(Frame *node, const ConnectorHandleType type,
+                              const alloc_id id) {
+  node->connector_handle_id[type] = id;
   return FrameStatus_Success;
 }
 

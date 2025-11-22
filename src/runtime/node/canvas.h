@@ -4,6 +4,7 @@
 #include "nkengine/include/gui.h"
 #include "nkengine/include/renderer.h"
 #include "runtime/allocator.h"
+#include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "utils/id.h"
 
@@ -17,15 +18,19 @@ typedef enum {
 typedef struct {
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) frames;
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) octagons;
-  ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) selected_frames;
+  ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES *CONNECTOR_HANDLE_COUNT)
+  connector_handles;
 } Canvas;
 
 EXTERN_C_BEGIN
 
 Frame *canvas_create_frame(Canvas *);
 Octagon *canvas_create_octagon(Canvas *);
+ConnectorHandle *canvas_create_connector_handle(Canvas *);
 
 void canvas_align_octagon_to_frame(Canvas *, const Frame *);
+void canvas_align_connector_handle_group_to_frame(Canvas *, const Frame *);
+
 void canvas_set_frame_position(Canvas *, Frame *, const vec2);
 void canvas_set_frame_size(Canvas *, Frame *, const vec2);
 

@@ -5,9 +5,11 @@
 #include "runtime/allocator.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
+#include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "runtime/widgets/canvas.hpp"
+#include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
 #include "runtime/widgets/octagon.hpp"
@@ -46,6 +48,7 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
       if (ImGui::IsMouseHoveringRect(im_vec2(shape->boundbox[i].p0),
                                      im_vec2(shape->boundbox[i].p1))) {
 
+        // register the frame for transform callbacks
         transform_frame_data[i].frame = shape;
         transform_frame_data[i].canvas = node;
 
@@ -55,6 +58,7 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
             .set_position = canvas_shape_set_frame_shape_position,
             .get_size = canvas_shape_get_frame_shape_size,
             .set_size = canvas_shape_set_frame_shape_size,
+            .on_selected = canvas_shape_on_frame_selection,
         };
 
         if (input_key(INPUT_KEY_CAP) == false)
@@ -197,4 +201,14 @@ void Widget::canvas_shape_get_frame_shape_size(void *data, ImVec2 &value) {
   Frame *frame = frame_data->frame->get_node();
 
   value = im_vec2(frame->size);
+}
+
+void Widget::canvas_shape_on_frame_selection(void *data) {
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
+    ConnectorHandle *handle = allocator_connector_handle_entry(
+        frame_data->frame->get_node()->connector_handle_id[i]);
+    ConnectorHandleShape(handle).draw();
+  }
 }

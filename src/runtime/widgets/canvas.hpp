@@ -11,6 +11,7 @@ void canvas_shape_set_frame_shape_position(void *, ImVec2);
 void canvas_shape_get_frame_shape_position(void *, ImVec2 &);
 void canvas_shape_set_frame_shape_size(void *, ImVec2);
 void canvas_shape_get_frame_shape_size(void *, ImVec2 &);
+void canvas_shape_on_frame_selection(void *);
 
 bool canvas_shape_wheel_callback(int, const EmscriptenWheelEvent *, void *);
 
