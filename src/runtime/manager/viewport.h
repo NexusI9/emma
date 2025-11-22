@@ -26,6 +26,8 @@ static inline void viewport_set_zoom_sensitivity(const float value) {
   g_viewport_manager.zoom_sensitivity = value;
 }
 
+static inline float viewport_get_scale() { return g_viewport_manager.scale; }
+
 // x
 static inline float vpx(const float value) {
   return g_viewport_manager.pan[0] + value * g_viewport_manager.scale;

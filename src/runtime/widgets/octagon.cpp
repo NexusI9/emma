@@ -1,6 +1,7 @@
 #include "octagon.hpp"
 
 #include "nkengine/include/gui.hpp"
+#include "runtime/manager/viewport.h"
 #include <imgui/imgui.h>
 
 ImU32 Widget::OctagonShape::vertex_color(const int vertex) {
@@ -42,14 +43,26 @@ void Widget::OctagonShape::draw_labels(ImDrawList *draw_list) {
 
   for (int i = 0; i < OCTAGON_VERTEX_COUNT; i++) {
     // Calculate position
-    ImVec2 vert_pos =
-        ImVec2(node->outer_vertices[i][0], node->outer_vertices[i][1]);
-    ImVec2 label_pos =
-        ImVec2(node->label_coordinates[i][0], node->label_coordinates[i][1]);
+    ImVec2 vert_pos = ImVec2(vpx(node->outer_vertices[i][0]),
+                             vpy(node->outer_vertices[i][1]));
+    ImVec2 label_pos = ImVec2(vpx(node->label_coordinates[i][0]),
+                              vpy(node->label_coordinates[i][1]));
 
     draw_list->AddText(label_pos, ImColor(255, 255, 255, 255), node->labels[i]);
     draw_list->AddCircleFilled(vert_pos, 3.0f, IM_COL32(255, 255, 255, 255));
   }
+}
+
+void Widget::OctagonShape::draw_inner_shape(ImDrawList *draw_list) {
+
+  ImVec2 vp_vertices[OCTAGON_VERTEX_COUNT];
+
+  for (uint8_t i = 0; i < OCTAGON_VERTEX_COUNT; i++)
+    vp_vertices[i] = ImVec2(vpx(node->inner_vertices[i][0]),
+                            vpy(node->inner_vertices[i][1]));
+
+  draw_list->AddConvexPolyFilled(vp_vertices, OCTAGON_VERTEX_COUNT,
+                                 im_color(node->inner_color));
 }
 
 void Widget::OctagonShape::draw_outer_gradient(ImDrawList *draw_list) {
@@ -74,7 +87,7 @@ void Widget::OctagonShape::draw_outer_gradient(ImDrawList *draw_list) {
 
   // a. Center Vertex (Vertex 0)
   ImDrawVert *center_vtx = draw_list->_VtxWritePtr;
-  center_vtx->pos = ImVec2(node->position[0], node->position[1]);
+  center_vtx->pos = ImVec2(vpx(node->position[0]), vpy(node->position[1]));
   center_vtx->uv = ImGui::GetFontTexUvWhitePixel(); // Standard texture
                                                     // coordinate
   center_vtx->col = COLOR_CENTER;
@@ -86,8 +99,8 @@ void Widget::OctagonShape::draw_outer_gradient(ImDrawList *draw_list) {
   for (int i = 0; i < num_segments; i++) {
     // Calculate position
     float angle = i * (2.0f * GLM_PI / num_segments);
-    ImVec2 vtx_pos =
-        ImVec2(node->outer_vertices[i][0], node->outer_vertices[i][1]);
+    ImVec2 vtx_pos = ImVec2(vpx(node->outer_vertices[i][0]),
+                            vpy(node->outer_vertices[i][1]));
 
     ImU32 vtx_color = vertex_color(i);
 
@@ -131,8 +144,6 @@ void Widget::OctagonShape::draw() {
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
   draw_outer_gradient(draw_list);
-  draw_list->AddConvexPolyFilled((ImVec2 *)node->inner_vertices,
-                                 OCTAGON_VERTEX_COUNT,
-                                 im_color(node->inner_color));
+  draw_inner_shape(draw_list);
   draw_labels(draw_list);
 }

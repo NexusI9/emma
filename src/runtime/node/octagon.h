@@ -47,6 +47,9 @@ EXTERN_C_BEGIN
 
 OctagonStatus octagon_create(Octagon *, const OctagonDescriptor *);
 
+OctagonStatus octagon_update_vertices(Octagon *);
+OctagonStatus octagon_update_labels_coordinates(Octagon *);
+
 static inline OctagonStatus octagon_set_outer_offset(Octagon *oct,
                                                      const uint8_t vertex,
                                                      const float value) {
@@ -60,6 +63,9 @@ static inline OctagonStatus octagon_set_outer_offset(Octagon *oct,
   }
 
   oct->outer_offsets[vertex] = value;
+
+  octagon_update_vertices(oct);
+  octagon_update_labels_coordinates(oct);
 
   return OctagonStatus_Success;
 }
@@ -93,11 +99,18 @@ octagon_set_labels(Octagon *oct, const char *labels[OCTAGON_VERTEX_COUNT]) {
 static inline OctagonStatus octagon_set_position(Octagon *oct,
                                                  const vec2 value) {
   glm_vec2_copy((float *)value, oct->position);
+
+  octagon_update_vertices(oct);
+  octagon_update_labels_coordinates(oct);
+
   return OctagonStatus_Success;
 }
 
 static inline OctagonStatus octagon_set_scale(Octagon *oct, const float value) {
   oct->scale = value;
+
+  octagon_update_vertices(oct);
+  octagon_update_labels_coordinates(oct);
   return OctagonStatus_Success;
 }
 
@@ -118,9 +131,6 @@ static inline OctagonStatus octagon_set_outer_color(Octagon *oct,
   glm_vec4_copy((float *)value, oct->outer_color);
   return OctagonStatus_Success;
 }
-
-OctagonStatus octagon_update_vertices(Octagon *);
-OctagonStatus octagon_update_labels_coordinates(Octagon *);
 
 EXTERN_C_END
 

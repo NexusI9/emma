@@ -5,11 +5,6 @@
 #include "runtime/node/frame.h"
 #include "runtime/widgets/core.hpp"
 
-void frame_shape_set_position(void *, ImVec2);
-void frame_shape_get_position(void *, ImVec2 &);
-void frame_shape_set_size(void *, ImVec2);
-void frame_shape_get_size(void *, ImVec2 &);
-
 namespace Widget {
 
 static const float FRAME_SHAPE_BOUNDBOX_THICKNESS = 40.0f;

@@ -22,9 +22,12 @@ typedef struct {
 
 EXTERN_C_BEGIN
 
-
 Frame *canvas_create_frame(Canvas *);
 Octagon *canvas_create_octagon(Canvas *);
+
+void canvas_align_octagon_to_frame(Canvas *, const Frame *);
+void canvas_set_frame_position(Canvas *, Frame *, const vec2);
+void canvas_set_frame_size(Canvas *, Frame *, const vec2);
 
 void canvas_draw_callback(Renderer *, void *);
 

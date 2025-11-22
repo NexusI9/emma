@@ -45,28 +45,13 @@ int main() {
   Frame *frame = canvas_create_frame(&canvas);
   Frame *frame_2 = canvas_create_frame(&canvas);
 
-  frame_set_position(frame_2, (vec2){800, 600});
-
-  // === Octagon Generation ===
-  Octagon *oct = canvas_create_octagon(&canvas);
-  octagon_set_outer_offset(oct, 3, 1.0f);
-  octagon_set_outer_offset(oct, 1, 0.6f);
-  octagon_set_outer_offset(oct, 2, 0.2f);
-  octagon_update_vertices(oct);
-
-  static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
-      "Epic Meaning", "Empowerment", "Social Influence", "Unpredictability",
-      "Avoidance",    "Scarcity",    "Ownership",        "Accomplishment",
-  };
-  octagon_set_labels(oct, octalysis_labels);
-  octagon_update_labels_coordinates(oct);
+  canvas_set_frame_position(&canvas, frame_2, (vec2){800, 600});
 
   Widget::CanvasShape canvas_shape = Widget::CanvasShape(gui, &canvas);
   canvas_shape.sync_shapes();
 
   renderer_add_draw_callback(renderer, canvas_draw_callback, &canvas_shape,
                              RendererDrawMode_All);
-
 
   renderer_draw(renderer);
 

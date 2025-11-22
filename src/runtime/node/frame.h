@@ -12,11 +12,14 @@ typedef enum {
 
 typedef struct {
   alloc_id id;
+  alloc_id octagon_id;
+
   const char *label;
   vec2 position;
   vec2 size;
   vec2 end_point; // pos + size, usefull to get full area for mouse interaction
   color background;
+
 } Frame;
 
 typedef struct {
@@ -44,6 +47,26 @@ static inline FrameStatus frame_set_position(Frame *node, const vec2 value) {
 
 static inline FrameStatus frame_set_background(Frame *node, const color value) {
   glm_vec4_copy((float *)value, node->background);
+  return FrameStatus_Success;
+}
+
+static inline FrameStatus frame_get_size(const Frame *node, vec2 dest) {
+  glm_vec2_copy((float*)node->size, dest);
+  return FrameStatus_Success;
+}
+
+static inline FrameStatus frame_get_position(const Frame *node, vec2 dest) {
+  glm_vec2_copy((float*)node->position, dest);
+  return FrameStatus_Success;
+}
+
+static inline FrameStatus frame_get_end_point(const Frame *node, vec2 dest) {
+  glm_vec2_copy((float*)node->end_point, dest);
+  return FrameStatus_Success;
+}
+
+static inline FrameStatus frame_get_background(const Frame *node, color dest) {
+  glm_vec4_copy((float*)node->background, dest);
   return FrameStatus_Success;
 }
 

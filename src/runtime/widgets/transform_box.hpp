@@ -29,6 +29,7 @@ typedef enum {
 
 typedef struct {
   void *handle;
+  void *user_data;
   ImVec2 init_position;
   ImVec2 init_size;
   transform_box_set_position_callback set_position;

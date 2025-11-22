@@ -4,6 +4,7 @@
 #include "nkengine/include/gui.hpp"
 #include "runtime/allocator.h"
 #include "runtime/manager/viewport.h"
+#include "runtime/node/canvas.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "runtime/widgets/canvas.hpp"
@@ -45,12 +46,15 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
       if (ImGui::IsMouseHoveringRect(im_vec2(shape->boundbox[i].p0),
                                      im_vec2(shape->boundbox[i].p1))) {
 
+        transform_frame_data[i].frame = shape;
+        transform_frame_data[i].canvas = node;
+
         TransformBoxObjectDescriptor object = {
-            .handle = shape,
-            .get_position = frame_shape_get_position,
-            .set_position = frame_shape_set_position,
-            .get_size = frame_shape_get_size,
-            .set_size = frame_shape_set_size,
+            .handle = &transform_frame_data[i],
+            .get_position = canvas_shape_get_frame_shape_position,
+            .set_position = canvas_shape_set_frame_shape_position,
+            .get_size = canvas_shape_get_frame_shape_size,
+            .set_size = canvas_shape_set_frame_shape_size,
         };
 
         if (input_key(INPUT_KEY_CAP) == false)
@@ -134,7 +138,6 @@ void Widget::CanvasShape::sync_boundboxes() {
     boundbox_frame_update(frame_shapes[i].boundbox, frame->position,
                           frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
   }
-  
 }
 
 /**
@@ -151,4 +154,47 @@ bool Widget::canvas_shape_wheel_callback(int type,
   canvas->sync_boundboxes();
 
   return EM_FALSE;
+}
+
+void Widget::canvas_shape_set_frame_shape_position(void *data, ImVec2 value) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = frame_data->frame->get_node();
+
+  canvas_set_frame_position(frame_data->canvas, frame,
+                            (vec2){value.x, value.y});
+
+  boundbox_frame_update(frame_data->frame->boundbox, frame->position,
+                        frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
+}
+
+void Widget::canvas_shape_get_frame_shape_position(void *data, ImVec2 &value) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = frame_data->frame->get_node();
+
+  value = im_vec2(frame->position);
+}
+
+void Widget::canvas_shape_set_frame_shape_size(void *data, ImVec2 value) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = frame_data->frame->get_node();
+
+  canvas_set_frame_size(frame_data->canvas, frame, (vec2){value.x, value.y});
+
+  boundbox_frame_update(frame_data->frame->boundbox, frame->position,
+                        frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
+}
+
+void Widget::canvas_shape_get_frame_shape_size(void *data, ImVec2 &value) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = frame_data->frame->get_node();
+
+  value = im_vec2(frame->size);
 }
