@@ -23,6 +23,7 @@ typedef enum {
   TransformBoxStatus_ObjectAdded,
   TransformBoxStatus_ObjectRemoved,
   TransformBoxStatus_SessionAlreadyStarted,
+  TransformBoxStatus_ClearSelection,
   TransformBoxStatus_OutOfBound,
   TransformBoxStatus_UndefError,
 } TransformBoxStatus;
@@ -36,7 +37,6 @@ typedef struct {
   transform_box_set_size_callback set_size;
   transform_box_get_position_callback get_position;
   transform_box_get_size_callback get_size;
-  transform_box_on_selected_callback on_selected;
 } TransformBoxObject;
 
 typedef struct {
@@ -45,7 +45,6 @@ typedef struct {
   transform_box_set_size_callback set_size;
   transform_box_get_position_callback get_position;
   transform_box_get_size_callback get_size;
-  transform_box_on_selected_callback on_selected;
 } TransformBoxObjectDescriptor;
 
 typedef struct {

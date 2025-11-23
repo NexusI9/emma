@@ -37,12 +37,14 @@ Widget::TransformBox::toggle_object(const TransformBoxObjectDescriptor *desc) {
 Widget::TransformBoxObject *
 Widget::TransformBox::find_object(const void *handle, size_t *index) {
 
-  for (size_t i = 0; i < objects.count; i++)
+  for (size_t i = 0; i < objects.count; i++) {
+
     if (objects.entries[i].handle == handle) {
       if (index)
         *index = i;
       return &objects.entries[i];
     }
+  }
 
   if (index)
     *index = SIZE_MAX;
@@ -62,7 +64,6 @@ Widget::TransformBox::add_object(const TransformBoxObjectDescriptor *desc) {
       .set_position = desc->set_position,
       .get_size = desc->get_size,
       .set_size = desc->set_size,
-      .on_selected = desc->on_selected,
   };
 
   return stli_insert(objects.entries, transform_box_objects_capacity,
@@ -164,12 +165,16 @@ Widget::TransformBoxStatus Widget::TransformBox::session_set_hit() {
 
 Widget::TransformBoxStatus Widget::TransformBox::session_end() {
 
-  if (session_status == TransformBoxSessionStatus_BlankClick)
+  TransformBoxStatus status = TransformBoxStatus_SessionAlreadyStarted;
+
+  if (session_status == TransformBoxSessionStatus_BlankClick) {
     empty_objects();
+    status = TransformBoxStatus_ClearSelection;
+  }
 
   session_status = TransformBoxSessionStatus_Off;
 
-  return TransformBoxStatus_Success;
+  return status;
 }
 
 void Widget::TransformBox::cache_initial_attributes() {
@@ -269,11 +274,6 @@ void Widget::TransformBox::draw() {
 
   if (active_handle >= 0 && ImGui::IsMouseReleased(0))
     active_handle = -1;
-
-  // update callback for selected objects
-  for (size_t i = 0; i < objects.count; i++)
-    if (objects.entries[i].on_selected)
-      objects.entries[i].on_selected(objects.entries[i].handle);
 }
 
 void Widget::TransformBox::handle_transform(const TransformHandleType type,

@@ -11,7 +11,7 @@ class ConnectorHandleShape {
 public:
   ConnectorHandleShape(ConnectorHandle *node) : node(node) {}
   void draw();
-
+  
 private:
   ConnectorHandle *node;
 };

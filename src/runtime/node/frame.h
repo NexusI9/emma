@@ -2,9 +2,12 @@
 #define _FRAME_H_
 
 #include "nkengine/include/utils.h"
+#include "runtime/manager/allocator_list.h"
 #include "runtime/node/connector_handle.h"
 #include "utils/id.h"
 #include <cglm/cglm.h>
+
+#define FRAME_MAX_CONNECTORS 64
 
 typedef enum {
   FrameStatus_Success,
@@ -16,6 +19,7 @@ typedef struct {
   alloc_id id;
   alloc_id octagon_id;
   alloc_id connector_handle_id[CONNECTOR_HANDLE_COUNT];
+  ALLOCATOR_ID_LIST(FRAME_MAX_CONNECTORS) connectors_id;
 
   const char *label;
   vec2 position;
@@ -82,6 +86,21 @@ frame_set_connector_handle_id(Frame *node, const ConnectorHandleType type,
                               const alloc_id id) {
   node->connector_handle_id[type] = id;
   return FrameStatus_Success;
+}
+
+static inline StaticListStatus frame_register_connector(Frame *node,
+                                                        const alloc_id id) {
+
+  return allocator_id_list_push(node->connectors_id.entries,
+                                FRAME_MAX_CONNECTORS,
+                                &node->connectors_id.length, id);
+}
+
+static inline StaticListStatus frame_unregister_connector(Frame *node,
+                                                          const alloc_id id) {
+
+  return allocator_id_list_pop(node->connectors_id.entries,
+                               &node->connectors_id.length, id);
 }
 
 EXTERN_C_END

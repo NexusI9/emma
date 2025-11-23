@@ -39,6 +39,7 @@ private:
   CanvasTransformFrameData transform_frame_data[CANVAS_MAX_FRAMES];
 
   void draw_frame(FrameShape *);
+  void draw_frame_handle_connectors(Frame *, const int);
 };
 
 } // namespace Widget

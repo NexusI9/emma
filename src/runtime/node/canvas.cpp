@@ -1,12 +1,14 @@
 #include "canvas.h"
 
-#include "runtime/allocator.h"
 #include "runtime/geometry/boundbox.h"
 #include "runtime/geometry/vector.h"
+#include "runtime/manager/allocator.h"
+#include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "runtime/widgets/canvas.hpp"
+#include "utils/id.h"
 
 static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
     "Epic Meaning", "Empowerment", "Social Influence", "Unpredictability",
@@ -15,11 +17,17 @@ static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
 
 static const float octagon_base_scale = 100.0f;
 
+static inline void canvas_get_closest_connector_handles(const Frame *,
+                                                        const Frame *,
+                                                        ConnectorHandle **,
+                                                        ConnectorHandle **,
+                                                        const int);
+
 Frame *canvas_create_frame(Canvas *canvas) {
 
   const size_t capacity = allocator_frame_capacity();
 
-  if (canvas->frames.length == capacity)
+  if (canvas->frames[CanvasFrameState_Default].length == capacity)
     return NULL;
 
   Frame *frame = new_frame();
@@ -29,8 +37,9 @@ Frame *canvas_create_frame(Canvas *canvas) {
 
   {
     // === Frame setup ===
-    allocator_id_list_push(canvas->frames.entries, capacity,
-                           &canvas->frames.length, frame->id);
+    allocator_id_list_push(
+        canvas->frames[CanvasFrameState_Default].entries, capacity,
+        &canvas->frames[CanvasFrameState_Default].length, frame->id);
 
     FrameDescriptor frame_desc = {
         .background = {1.0f, 1.0f, 1.0f, 1.0f},
@@ -59,8 +68,9 @@ Frame *canvas_create_frame(Canvas *canvas) {
     for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
       ConnectorHandle *handle = canvas_create_connector_handle(canvas);
       frame_set_connector_handle_id(frame, (ConnectorHandleType)i, handle->id);
-      canvas_align_connector_handle_group_to_frame(canvas, frame);
     }
+
+    canvas_align_connector_handle_group_to_frame(canvas, frame);
   }
 
   return frame;
@@ -151,7 +161,7 @@ void canvas_align_octagon_to_frame(Canvas *canvas, const Frame *frame) {
 void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
                                                   const Frame *frame) {
 
-  static const int gap = 100;
+  static const int gap = 40;
   static const vec2 gaps[] = {
       {0.0f, -1.0f * gap}, // top
       {1.0f * gap, 0.0f},  // right
@@ -185,4 +195,115 @@ void canvas_set_frame_size(Canvas *canvas, Frame *frame, const vec2 value) {
   frame_set_size(frame, value);
   canvas_align_octagon_to_frame(canvas, frame);
   canvas_align_connector_handle_group_to_frame(canvas, frame);
+}
+
+StaticListStatus canvas_register_frame_state(Canvas *canvas, const Frame *frame,
+                                             const CanvasFrameState state) {
+
+  return allocator_id_list_push(canvas->frames[state].entries,
+                                allocator_frame_capacity(),
+                                &canvas->frames[state].length, frame->id);
+}
+
+StaticListStatus canvas_unregister_frame_state(Canvas *canvas,
+                                               const Frame *frame,
+                                               const CanvasFrameState state) {
+
+  return allocator_id_list_pop(canvas->frames[state].entries,
+                               &canvas->frames[state].length, frame->id);
+}
+
+StaticListStatus canvas_empty_frame_state(Canvas *canvas,
+                                          const CanvasFrameState state) {
+  return stli_empty(canvas->frames[state].entries,
+                    &canvas->frames[state].length, sizeof(alloc_id),
+                    "Canvas Frame State list");
+}
+
+void canvas_get_closest_connector_handles(const Frame *frame_a,
+                                          const Frame *frame_b,
+                                          ConnectorHandle **closest_handle_a,
+                                          ConnectorHandle **closest_handle_b,
+                                          const int side) {
+
+  float closest_distance = FLT_MAX;
+  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
+
+    // skipping unwanted sides
+    if ((__builtin_ctz(side) & i) == 0)
+      continue;
+
+    ConnectorHandle *handle_a =
+        allocator_connector_handle_entry(frame_a->connector_handle_id[i]);
+
+    for (uint8_t j = 0; j < CONNECTOR_HANDLE_COUNT; j++) {
+
+      // skipping unwanted sides
+      if ((__builtin_ctz(side) & j) == 0)
+        continue;
+
+      ConnectorHandle *handle_b =
+          allocator_connector_handle_entry(frame_b->connector_handle_id[j]);
+
+      float distance =
+          glm_vec2_distance(handle_a->position, handle_b->position);
+
+      if (distance < closest_distance) {
+        closest_distance = distance;
+        *closest_handle_a = handle_a;
+        *closest_handle_b = handle_b;
+      }
+    }
+  }
+}
+
+void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
+
+  Connector *connector = new_connector();
+  if (!connector) // ERRHANDLE
+    return;
+
+  // make sure it's not connected yet
+  for (size_t i = 0; i < frame_a->connectors_id.length; i++) {
+    for (size_t j = 0; j < frame_b->connectors_id.length; j++) {
+      if (frame_a->connectors_id.entries[i] ==
+          frame_b->connectors_id.entries[j])
+        return;
+    }
+  }
+
+  // retrieve the closest handle position
+  ConnectorHandle *closest_handle_a, *closest_handle_b;
+  canvas_get_closest_connector_handles(
+      frame_a, frame_b, &closest_handle_a, &closest_handle_b,
+      ConnectorHandleSide_Left | ConnectorHandleSide_Right);
+
+  // create connector
+  ConnectorDescriptor cn_desc = {
+      .color = {1.0f, 1.0f, 1.0f, 1.0f},
+      .thickness = 10.0f,
+      .start = closest_handle_a,
+      .end = closest_handle_b,
+  };
+  connector_create(connector, &cn_desc);
+
+  allocator_id_list_push(canvas->connectors.entries,
+                         allocator_connector_capacity(),
+                         &canvas->connectors.length, connector->id);
+
+  frame_register_connector(frame_a, connector->id);
+  frame_register_connector(frame_b, connector->id);
+}
+
+void canvas_disconnect_frames(Canvas *canvas, const Frame *frame_a,
+                              const Frame *frame_b) {}
+
+void canvas_update_frame_connectors(Canvas *canvas, const Frame *frame) {
+
+  for (size_t i = 0; i < frame->connectors_id.length; i++) {
+    Connector *connector =
+        allocator_connector_entry(frame->connectors_id.entries[i]);
+
+    connector_compute_corners(connector);
+  }
 }

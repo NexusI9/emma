@@ -2,7 +2,7 @@
 #include "nkengine/include/gui.h"
 #include "nkengine/include/renderer.h"
 #include "nkengine/include/resource_manager.h"
-#include "runtime/allocator.h"
+#include "runtime/manager/allocator.h"
 #include "runtime/manager/unit.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
@@ -46,6 +46,8 @@ int main() {
   Frame *frame_2 = canvas_create_frame(&canvas);
 
   canvas_set_frame_position(&canvas, frame_2, (vec2){800, 600});
+
+  canvas_connect_frames(&canvas, frame, frame_2);
 
   Widget::CanvasShape canvas_shape = Widget::CanvasShape(gui, &canvas);
   canvas_shape.sync_shapes();

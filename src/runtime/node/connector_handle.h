@@ -19,6 +19,14 @@ typedef enum {
   ConnectorHandleType_Left,
 } ConnectorHandleType;
 
+typedef enum {
+  ConnectorHandleSide_Top = 1 << 0,
+  ConnectorHandleSide_Left = 1 << 1,
+  ConnectorHandleSide_Bottom = 1 << 2,
+  ConnectorHandleSide_Right = 1 << 3,
+  ConnectorHandleSide_All = ~0,
+} ConnectorHandleSide;
+
 typedef struct {
   const char *label;
   alloc_id id;
@@ -69,6 +77,12 @@ static inline ConnectorHandleStatus
 connector_handle_set_scale(ConnectorHandle *handle, const float value) {
   handle->scale = value;
   connector_handle_update_points(handle);
+  return ConnectorHandleStatus_Success;
+}
+
+static inline ConnectorHandleStatus
+connector_handle_get_position(const ConnectorHandle *handle, vec2 dest) {
+  glm_vec2_copy((float *)handle->position, dest);
   return ConnectorHandleStatus_Success;
 }
 

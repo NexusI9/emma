@@ -17,13 +17,6 @@
   _(  Connector,           connector,             1024  )\
   _(  Octagon,             octagon,               1024  )
 
-
-#define ALLOCATOR_ID_LIST(Capacity) \
-struct{\
-  alloc_id entries[Capacity]; \
-  size_t length;\
-}
-
 typedef enum{
   AllocatorStatus_Succes,
   AllocatorStatus_UndefError,
@@ -38,9 +31,6 @@ EXTERN_C_BEGIN
 
 ALLOCATOR_LIST(_);
 #undef _
-
-StaticListStatus allocator_id_list_push(alloc_id*, const size_t, size_t*, const alloc_id);
-StaticListStatus allocator_id_list_pop(alloc_id*, size_t*, const alloc_id);
 
 AllocatorStatus allocator_init();
 

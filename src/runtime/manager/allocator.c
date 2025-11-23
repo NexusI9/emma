@@ -64,18 +64,3 @@ AllocatorStatus allocator_init() {
 
   return AllocatorStatus_Succes;
 }
-
-StaticListStatus allocator_id_list_push(alloc_id *entries,
-                                        const size_t capacity, size_t *length,
-                                        const alloc_id id) {
-
-  return stli_insert(entries, capacity, length, sizeof(alloc_id), (void *)&id,
-                     "Allocator List");
-}
-
-StaticListStatus allocator_id_list_pop(alloc_id *entries, size_t *length,
-                                       const alloc_id id) {
-
-  return stli_remove(entries, length, sizeof(alloc_id), (void *)&id,
-                     "Allocator List");
-}

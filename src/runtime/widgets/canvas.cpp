@@ -2,13 +2,15 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_wgpu.h"
 #include "nkengine/include/gui.hpp"
-#include "runtime/allocator.h"
+#include "runtime/manager/allocator.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
+#include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "runtime/widgets/canvas.hpp"
+#include "runtime/widgets/connector.hpp"
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
@@ -58,16 +60,52 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
             .set_position = canvas_shape_set_frame_shape_position,
             .get_size = canvas_shape_get_frame_shape_size,
             .set_size = canvas_shape_set_frame_shape_size,
-            .on_selected = canvas_shape_on_frame_selection,
         };
 
-        if (input_key(INPUT_KEY_CAP) == false)
-          transform_box.empty_objects();
-
         transform_box.session_set_hit();
-        transform_box.toggle_object(&object);
+
+        TransformBoxObject *found_obj =
+            transform_box.find_object(object.handle, NULL);
+
+        // remove object
+        if (found_obj) {
+
+          canvas_register_frame_state(node, frame, CanvasFrameState_Octagon);
+          canvas_unregister_frame_state(node, frame, CanvasFrameState_Selected);
+
+          transform_box.remove_object(found_obj->handle, NULL);
+
+          // add object
+        } else {
+
+          if (input_key(INPUT_KEY_CAP) == false) {
+            transform_box.empty_objects();
+            canvas_empty_frame_state(node, CanvasFrameState_Selected);
+          }
+
+          canvas_register_frame_state(node, frame, CanvasFrameState_Selected);
+          canvas_unregister_frame_state(node, frame, CanvasFrameState_Octagon);
+
+          transform_box.add_object(&object);
+        }
+
         transform_box.update_bound_from_selection();
       }
+  }
+}
+
+void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
+                                                       const int side) {
+
+  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
+
+    // TODO: maybe make a dedicated draw function for side to prevent branching
+    if ((__builtin_ctz(side) & i) == 0)
+      continue;
+
+    ConnectorHandle *handle =
+        allocator_connector_handle_entry(frame->connector_handle_id[i]);
+    ConnectorHandleShape(handle).draw();
   }
 }
 
@@ -98,15 +136,37 @@ void Widget::CanvasShape::draw() {
                        ImGuiWindowFlags_NoBackground |
                        ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-      for (size_t i = 0; i < node->frames.length; i++)
+      // === frames ===
+      size_t i;
+      for (i = 0; i < node->frames[CanvasFrameState_Default].length; i++)
         draw_frame(&frame_shapes[i]);
 
-      for (size_t i = 0; i < node->octagons.length; i++) {
-        const alloc_id id = node->octagons.entries[i];
-        OctagonShape(allocator_octagon_entry(id)).draw();
+      for (i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
+        Frame *frame = allocator_frame_entry(
+            node->frames[CanvasFrameState_Selected].entries[i]);
+
+        OctagonShape(allocator_octagon_entry(frame->octagon_id)).draw();
       }
 
-      transform_box.session_end();
+      for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
+        Frame *frame = allocator_frame_entry(
+            node->frames[CanvasFrameState_Selected].entries[i]);
+
+        draw_frame_handle_connectors(frame, ConnectorHandleSide_Left |
+                                                ConnectorHandleSide_Right);
+      }
+
+      // === connectors ===
+      for (i = 0; i < node->connectors.length; i++) {
+        Connector *connector =
+            allocator_connector_entry(node->connectors.entries[i]);
+        ConnectorShape(connector).draw();
+      }
+
+      // === transform box ===
+      if (transform_box.session_end() == TransformBoxStatus_ClearSelection)
+        canvas_empty_frame_state(node, CanvasFrameState_Selected);
+
       if (transform_box.objects_count() > 0)
         transform_box.draw();
 
@@ -125,8 +185,8 @@ void Widget::CanvasShape::draw() {
    Sync up the canvas data and generate shapes out of those.
  */
 void Widget::CanvasShape::sync_shapes() {
-  for (size_t i = 0; i < node->frames.length; i++) {
-    const alloc_id id = node->frames.entries[i];
+  for (size_t i = 0; i < node->frames[CanvasFrameState_Default].length; i++) {
+    const alloc_id id = node->frames[CanvasFrameState_Default].entries[i];
     Frame *frame = allocator_frame_entry(id);
     frame_shapes[i] = FrameShape(frame);
     boundbox_frame_update(frame_shapes[i].boundbox, frame->position,
@@ -136,8 +196,8 @@ void Widget::CanvasShape::sync_shapes() {
 
 void Widget::CanvasShape::sync_boundboxes() {
 
-  for (size_t i = 0; i < node->frames.length; i++) {
-    const alloc_id id = node->frames.entries[i];
+  for (size_t i = 0; i < node->frames[CanvasFrameState_Default].length; i++) {
+    const alloc_id id = node->frames[CanvasFrameState_Default].entries[i];
     Frame *frame = allocator_frame_entry(id);
     boundbox_frame_update(frame_shapes[i].boundbox, frame->position,
                           frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
@@ -171,6 +231,9 @@ void Widget::canvas_shape_set_frame_shape_position(void *data, ImVec2 value) {
 
   boundbox_frame_update(frame_data->frame->boundbox, frame->position,
                         frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
+
+  canvas_update_frame_connectors(frame_data->canvas,
+                                 frame_data->frame->get_node());
 }
 
 void Widget::canvas_shape_get_frame_shape_position(void *data, ImVec2 &value) {
@@ -201,14 +264,4 @@ void Widget::canvas_shape_get_frame_shape_size(void *data, ImVec2 &value) {
   Frame *frame = frame_data->frame->get_node();
 
   value = im_vec2(frame->size);
-}
-
-void Widget::canvas_shape_on_frame_selection(void *data) {
-  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
-
-  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
-    ConnectorHandle *handle = allocator_connector_handle_entry(
-        frame_data->frame->get_node()->connector_handle_id[i]);
-    ConnectorHandleShape(handle).draw();
-  }
 }
