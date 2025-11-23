@@ -58,6 +58,8 @@ static inline void vp2_scene(const vec2 src, vec2 dst) {
   dst[1] = vpx_scene(src[1]);
 }
 
+static inline float vp_scale() { return g_viewport_manager.scale; }
+
 EXTERN_C_END
 
 #endif

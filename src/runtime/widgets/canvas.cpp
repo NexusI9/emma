@@ -70,9 +70,7 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
         // remove object
         if (found_obj) {
 
-          canvas_register_frame_state(node, frame, CanvasFrameState_Octagon);
           canvas_unregister_frame_state(node, frame, CanvasFrameState_Selected);
-
           transform_box.remove_object(found_obj->handle, NULL);
 
           // add object
@@ -84,8 +82,6 @@ void Widget::CanvasShape::draw_frame(FrameShape *shape) {
           }
 
           canvas_register_frame_state(node, frame, CanvasFrameState_Selected);
-          canvas_unregister_frame_state(node, frame, CanvasFrameState_Octagon);
-
           transform_box.add_object(&object);
         }
 
@@ -143,7 +139,7 @@ void Widget::CanvasShape::draw() {
 
       for (i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
         Frame *frame = allocator_frame_entry(
-            node->frames[CanvasFrameState_Selected].entries[i]);
+            node->frames[CanvasFrameState_Octagon].entries[i]);
 
         OctagonShape(allocator_octagon_entry(frame->octagon_id)).draw();
       }

@@ -145,5 +145,7 @@ void Widget::OctagonShape::draw() {
 
   draw_outer_gradient(draw_list);
   draw_inner_shape(draw_list);
-  draw_labels(draw_list);
+
+  if (vp_scale() > 0.8f)
+    draw_labels(draw_list);
 }

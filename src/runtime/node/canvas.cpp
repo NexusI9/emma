@@ -127,7 +127,7 @@ ConnectorHandle *canvas_create_connector_handle(Canvas *canvas) {
   ConnectorHandleDescriptor handle_desc = {
       .position = {0.0f, 0.0f},
       .scale = 10.0f,
-      .color = {1.0f, 1.0f, 1.0f, 1.0f},
+      .color = {0.6f, 0.6f, 0.6f, 1.0f},
   };
   connector_handle_create(handle, &handle_desc);
 
@@ -280,8 +280,8 @@ void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
 
   // create connector
   ConnectorDescriptor cn_desc = {
-      .color = {1.0f, 1.0f, 1.0f, 1.0f},
-      .thickness = 10.0f,
+      .color = {0.6f, 0.6f, 0.6f, 1.0f},
+      .thickness = 6.0f,
       .start = closest_handle_a,
       .end = closest_handle_b,
   };
