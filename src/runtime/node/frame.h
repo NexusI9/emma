@@ -25,7 +25,10 @@ typedef struct {
   vec2 position;
   vec2 size;
   vec2 end_point; // pos + size, usefull to get full area for mouse interaction
+  
   color background;
+  vec2 uv0, uv1;
+  WGPUTextureView atlas_view;
 
 } Frame;
 

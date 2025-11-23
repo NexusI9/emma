@@ -7,6 +7,7 @@ void Widget::TransformHandleShape::draw() {
 
   ImDrawList *draw = ImGui::GetWindowDrawList();
   draw->AddRectFilled(get_p0(), get_p1(), IM_COL32(255, 255, 255, 255));
+  
 }
 
 ImVec2 Widget::TransformHandleShape::get_p0() {

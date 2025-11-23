@@ -70,8 +70,36 @@ set(ASAN
 target_compile_options(${PROJECT_NAME} PRIVATE ${ASAN})
 target_link_options(${PROJECT_NAME} PRIVATE ${WASM_FLAGS} ${DEV_FLAGS} ${ASAN})
 
-# Fetch Preload files from engine scope
-set(PRELOAD_FLAGS_STRING ${${ENGINE_NAME}_PRELOAD_FLAGS})
+# ----------------------------
+# Preload files
+# ----------------------------
+file(GLOB_RECURSE PROJECT_PICTURES "${SOURCE_PATH}/*.jpg")
+set(${PROJECT_NAME}_PRELOAD_FILES "")
+
+foreach(entry IN LISTS PROJECT_PICTURES)
+    # Extract filename
+    get_filename_component(fname "${entry}" NAME)
+
+    # Build relative path
+    file(RELATIVE_PATH RELATIVE_FILE_PATH 
+        "${CMAKE_BINARY_DIR}" 
+        "${entry}"
+    )
+
+    # Build preload argument: real@virtual
+    set(preload_arg "${RELATIVE_FILE_PATH}@textures/${fname}")
+
+    # Append to list
+    list(APPEND ${PROJECT_NAME}_PRELOAD_FILES "--preload-file")
+    list(APPEND ${PROJECT_NAME}_PRELOAD_FILES "${preload_arg}")
+endforeach()
+
+# Fetch Preload files from engine
+string(JOIN " " JOIN_PRELOAD ${${PROJECT_NAME}_PRELOAD_FILES})
+set(PRELOAD_FLAGS_STRING 
+    "${${ENGINE_NAME}_PRELOAD_FLAGS} ${JOIN_PRELOAD}"
+)
+
 
 # The "old school" method of setting link flags (required for --preload-file compatibility)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${PRELOAD_FLAGS_STRING}")

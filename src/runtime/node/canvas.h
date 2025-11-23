@@ -13,9 +13,18 @@
 typedef enum {
   CanvasFrameState_Default,
   CanvasFrameState_Octagon,
+  CanvasFrameState_Highlighted,
   CanvasFrameState_Selected,
   CanvasFrameState_COUNT,
 } CanvasFrameState;
+
+
+typedef enum {
+  CanvasModuleState_Default,
+  CanvasModuleState_Selected,
+  CanvasModuleState_COUNT,
+} CanvasModuleState;
+
 
 typedef enum {
   CanvasStatus_Success,
@@ -25,9 +34,8 @@ typedef enum {
 typedef struct {
 
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) frames[CanvasFrameState_COUNT];
-
+  ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) modules[CanvasModuleState_COUNT];
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) octagons;
-
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) connectors;
 
   // connector handles around the frames

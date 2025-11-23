@@ -35,24 +35,45 @@ int main() {
   gui_init(gui, &g);
 
   allocator_init();
-  viewport_set_pan_sensitivity(20.0f);
+  viewport_set_pan_sensitivity(60.0f);
   viewport_set_zoom_sensitivity(0.001f);
   unit_set_step(20.0f);
 
   Canvas canvas;
 
   // === Frame Generation ===
-  static const vec2 frames[] = {
-      {0.0f, 0.0f},
-      {1200.0f, 400.0f},
-      {2300.0f, -300.0f},
+  static const struct {
+    vec2 position;
+    struct {
+      const uint8_t index;
+      const float value;
+    } octagon_data[3];
+  } frames[] = {
+      {
+          .position = {0.0f, 0.0f},
+          .octagon_data = {{1, 0.5}, {6, 0.6}, {2, 0.9}},
+      },
+      {
+          .position = {1200.0f, 400.0f},
+          .octagon_data = {{7, 0.8}, {0, 0.1}, {5, 0.35}},
+      },
+      {
+          .position = {2300.0f, -300.0f},
+          .octagon_data = {{3, 0.9}, {4, 0.6}, {5, 0.7}},
+      },
   };
   static const int frames_count = sizeof(frames) / sizeof(frames[0]);
 
   for (uint8_t i = 0; i < frames_count; i++) {
     Frame *frame = canvas_create_frame(&canvas);
-    canvas_set_frame_position(&canvas, frame, frames[i]);
+    canvas_set_frame_position(&canvas, frame, frames[i].position);
     canvas_register_frame_state(&canvas, frame, CanvasFrameState_Octagon);
+
+    for (uint8_t j = 0; j < 3; j++) {
+      Octagon *oct = allocator_octagon_entry(frame->octagon_id);
+      octagon_set_outer_offset(oct, frames[i].octagon_data[j].index,
+                               frames[i].octagon_data[j].value);
+    }
 
     if (i > 0) {
       Frame *previous_frame = allocator_frame_entry(
