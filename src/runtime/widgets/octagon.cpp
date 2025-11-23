@@ -48,7 +48,10 @@ void Widget::OctagonShape::draw_labels(ImDrawList *draw_list) {
     ImVec2 label_pos = ImVec2(vpx(node->label_coordinates[i][0]),
                               vpy(node->label_coordinates[i][1]));
 
-    draw_list->AddText(label_pos, ImColor(255, 255, 255, 255), node->labels[i]);
+    draw_list->AddText(
+        label_pos,
+        ImColor(255, 255, 255, node->outer_offsets[i] > 0.0f ? 255 : 112),
+        node->labels[i]);
     draw_list->AddCircleFilled(vert_pos, 3.0f, IM_COL32(255, 255, 255, 255));
   }
 }

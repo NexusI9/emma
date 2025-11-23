@@ -9,7 +9,7 @@
 #define OCTAGON_VERTEX_COUNT 8
 static const float OCTAGON_OUTER_ANGLE = -GLM_PI * 0.5f;
 static const float OCTAGON_INNER_ANGLE = GLM_PI * (3.0f / 8.0f);
-static const color OCTAGON_COLOR_OFF = {0.3f, 0.3f, 0.3f, 1.0f};
+static const color OCTAGON_COLOR_OFF = {0.7f, 0.7f, 0.7f, 1.0f};
 
 typedef enum {
   OctagonStatus_Success,
