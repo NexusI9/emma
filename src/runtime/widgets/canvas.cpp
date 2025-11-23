@@ -113,6 +113,7 @@ void Widget::CanvasShape::draw() {
     ImGui_ImplWGPU_NewFrame();
     ImGui::NewFrame();
     {
+
       draw_grid_background();
 
       ImGuiViewport *vp = ImGui::GetMainViewport();

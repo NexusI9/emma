@@ -75,7 +75,9 @@ void Widget::OctagonShape::draw_outer_gradient(ImDrawList *draw_list) {
 
   // Define the colors (using ImU32 format: ABGR by default in ImGui)
   // You can use ImGui::GetColorU32() to convert common formats
-  const ImU32 COLOR_CENTER = IM_COL32(255, 255, 255, 255); // White (Center)
+
+  const ImColor COLOR_CENTER =
+      im_color((float *)OCTAGON_COLOR_OFF); // White (Center)
 
   // We'll calculate the outer colors using a function for smooth
   // interpolation
@@ -102,7 +104,7 @@ void Widget::OctagonShape::draw_outer_gradient(ImDrawList *draw_list) {
     ImVec2 vtx_pos = ImVec2(vpx(node->outer_vertices[i][0]),
                             vpy(node->outer_vertices[i][1]));
 
-    ImU32 vtx_color = vertex_color(i);
+    ImU32 vtx_color = im_color(node->vertices_colors[i]);
 
     // Populate the vertex structure
     ImDrawVert *vtx = draw_list->_VtxWritePtr;
@@ -146,6 +148,6 @@ void Widget::OctagonShape::draw() {
   draw_outer_gradient(draw_list);
   draw_inner_shape(draw_list);
 
-  if (vp_scale() > 0.8f)
+  if (viewport_get_scale() > 0.8f)
     draw_labels(draw_list);
 }

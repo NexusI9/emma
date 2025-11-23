@@ -26,6 +26,8 @@ static inline void viewport_set_zoom_sensitivity(const float value) {
   g_viewport_manager.zoom_sensitivity = value;
 }
 
+static inline const float *viewport_get_pan() { return g_viewport_manager.pan; }
+
 static inline float viewport_get_scale() { return g_viewport_manager.scale; }
 
 // x
@@ -57,8 +59,6 @@ static inline void vp2_scene(const vec2 src, vec2 dst) {
   dst[0] = vpx_scene(src[0]);
   dst[1] = vpx_scene(src[1]);
 }
-
-static inline float vp_scale() { return g_viewport_manager.scale; }
 
 EXTERN_C_END
 

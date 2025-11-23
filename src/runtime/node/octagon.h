@@ -9,6 +9,7 @@
 #define OCTAGON_VERTEX_COUNT 8
 static const float OCTAGON_OUTER_ANGLE = -GLM_PI * 0.5f;
 static const float OCTAGON_INNER_ANGLE = GLM_PI * (3.0f / 8.0f);
+static const color OCTAGON_COLOR_OFF = {0.3f, 0.3f, 0.3f, 1.0f};
 
 typedef enum {
   OctagonStatus_Success,
@@ -37,6 +38,8 @@ typedef struct {
   vec2 label_coordinates[OCTAGON_VERTEX_COUNT];
   name_t labels[OCTAGON_VERTEX_COUNT];
 
+  color vertices_colors[OCTAGON_VERTEX_COUNT];
+
   vec2 position;
   float scale;
   color inner_color, outer_color;
@@ -49,6 +52,7 @@ OctagonStatus octagon_create(Octagon *, const OctagonDescriptor *);
 
 OctagonStatus octagon_update_vertices(Octagon *);
 OctagonStatus octagon_update_labels_coordinates(Octagon *);
+OctagonStatus octagon_update_vertices_color(Octagon *);
 
 static inline OctagonStatus octagon_set_outer_offset(Octagon *oct,
                                                      const uint8_t vertex,
@@ -66,6 +70,7 @@ static inline OctagonStatus octagon_set_outer_offset(Octagon *oct,
 
   octagon_update_vertices(oct);
   octagon_update_labels_coordinates(oct);
+  octagon_update_vertices_color(oct);
 
   return OctagonStatus_Success;
 }

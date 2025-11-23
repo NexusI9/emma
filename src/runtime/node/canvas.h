@@ -18,13 +18,11 @@ typedef enum {
   CanvasFrameState_COUNT,
 } CanvasFrameState;
 
-
 typedef enum {
   CanvasModuleState_Default,
   CanvasModuleState_Selected,
   CanvasModuleState_COUNT,
 } CanvasModuleState;
-
 
 typedef enum {
   CanvasStatus_Success,
@@ -32,16 +30,12 @@ typedef enum {
 } CanvasStatus;
 
 typedef struct {
-
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) frames[CanvasFrameState_COUNT];
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) modules[CanvasModuleState_COUNT];
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) octagons;
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) connectors;
-
-  // connector handles around the frames
   ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES *CONNECTOR_HANDLE_COUNT)
   connector_handles;
-
 } Canvas;
 
 EXTERN_C_BEGIN
@@ -49,6 +43,9 @@ EXTERN_C_BEGIN
 Frame *canvas_create_frame(Canvas *);
 Octagon *canvas_create_octagon(Canvas *);
 ConnectorHandle *canvas_create_connector_handle(Canvas *);
+
+
+CanvasStatus canvas_add_module_to_frame(Canvas *, Frame *, const alloc_id);
 
 void canvas_align_octagon_to_frame(Canvas *, const Frame *);
 void canvas_align_connector_handle_group_to_frame(Canvas *, const Frame *);

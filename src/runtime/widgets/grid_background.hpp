@@ -1,6 +1,7 @@
 #ifndef _GRID_BACKGROUND_HPP_
 #define _GRID_BACKGROUND_HPP_
 
+#include "runtime/manager/viewport.h"
 #include <imgui/imgui.h>
 
 static inline void
@@ -17,14 +18,24 @@ draw_grid_background(float spacing = 32.0f, float dotSize = 3.0f,
   dl->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), bgColor);
 
   // --- 2) Grid dots (squares) ---
-  for (float x = pos.x; x < pos.x + size.x; x += spacing) {
-    for (float y = pos.y; y < pos.y + size.y; y += spacing) {
-      float half = dotSize * 0.5f;
 
-      ImVec2 p0(x - half, y - half);
-      ImVec2 p1(x + half, y + half);
+  if (viewport_get_scale() > 0.6) {
 
-      dl->AddRectFilled(p0, p1, dotColor, 0.0f);
+    const float scale = viewport_get_scale();
+    const float inv_scale = 1.0f / viewport_get_scale();
+    const float *pan = viewport_get_pan();
+
+    for (float x = pos.x + pan[0] * inv_scale; x < pos.x + size.x * inv_scale;
+         x += spacing) {
+      for (float y = pos.y + pan[1] * inv_scale; y < pos.y + size.y * inv_scale;
+           y += spacing) {
+        float half = dotSize * 0.5f;
+
+        ImVec2 p0(x - half, y - half);
+        ImVec2 p1(x + half, y + half);
+
+        dl->AddRectFilled(p0, p1, dotColor, 0.0f);
+      }
     }
   }
 }

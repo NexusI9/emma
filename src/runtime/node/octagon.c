@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "nkengine/include/utils.h"
+
 OctagonStatus octagon_create(Octagon *oct, const OctagonDescriptor *desc) {
 
   oct->label = desc->label;
@@ -87,6 +89,31 @@ OctagonStatus octagon_update_labels_coordinates(Octagon *oct) {
 
     glm_vec2_copy((vec2){x, y}, oct->label_coordinates[i]);
   }
+
+  return OctagonStatus_Success;
+}
+
+OctagonStatus octagon_update_vertices_color(Octagon *oct) {
+
+  // base color
+  static const color colors[] = {
+      // clang-format off
+      { 69  / 255.0f,   251 / 255.0f,   255 / 255.0f,   1.0f },
+      { 112 / 255.0f,   0   / 255.0f,   255 / 255.0f,   1.0f },
+      { 193 / 255.0f,   0   / 255.0f,   173 / 255.0f,   1.0f },
+      { 249 / 255.0f,   0   / 255.0f,   72  / 255.0f,   1.0f },
+      { 249 / 255.0f,   139 / 255.0f,   72  / 255.0f,   1.0f },
+      { 255 / 255.0f,   225 / 255.0f,   21  / 255.0f,   1.0f },
+      { 216 / 255.0f,   255 / 255.0f,   154 / 255.0f,   1.0f },
+      { 131 / 255.0f,   255 / 255.0f,   63  / 255.0f,   1.0f },
+      // clang-format on
+  };
+
+  // lerp
+  for (uint8_t i = 0; i < OCTAGON_VERTEX_COUNT; i++)
+    glm_vec4_copy(oct->outer_offsets[i] > 0.0f ? (float *)colors[i]
+                                               : (float *)OCTAGON_COLOR_OFF,
+                  oct->vertices_colors[i]);
 
   return OctagonStatus_Success;
 }
