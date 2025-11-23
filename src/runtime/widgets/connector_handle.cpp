@@ -16,4 +16,5 @@ void Widget::ConnectorHandleShape::draw() {
   glm_vec2_add(vpos, (vec2){node->scale, node->scale}, end);
 
   draw_list->AddRectFilled(im_vec2(start), im_vec2(end), im_color(node->color));
+
 }

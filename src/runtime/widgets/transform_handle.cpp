@@ -1,4 +1,5 @@
 #include "transform_handle.hpp"
+#include "nkengine/include/gui.hpp"
 #include "runtime/manager/viewport.h"
 
 #include <imgui/imgui.h>
@@ -6,8 +7,9 @@
 void Widget::TransformHandleShape::draw() {
 
   ImDrawList *draw = ImGui::GetWindowDrawList();
-  draw->AddRectFilled(get_p0(), get_p1(), IM_COL32(255, 255, 255, 255));
-  
+  draw->AddRectFilled(get_p0(), get_p1(), im_color(node->color));
+  draw->AddRect(get_p0(), get_p1(), im_color(node->stroke_color), 0, 0,
+                node->stroke_width);
 }
 
 ImVec2 Widget::TransformHandleShape::get_p0() {

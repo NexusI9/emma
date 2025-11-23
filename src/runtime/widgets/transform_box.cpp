@@ -1,4 +1,5 @@
 #include "transform_box.hpp"
+#include "nkengine/include/gui.hpp"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/transform_handle.h"
 #include "runtime/widgets/transform_handle.hpp"
@@ -16,6 +17,9 @@ Widget::TransformBox::TransformBox(Gui *gui) {
         .position = {0.0f},
         .scale = transform_box_handle_size,
         .color = {1.0f, 1.0f, 1.0f, 1.0f},
+        .stroke_width = stroke_width,
+        .stroke_color = {primary_color[0], primary_color[1], primary_color[2],
+                         primary_color[3]},
     };
     transform_handle_create(&handles[i], &desc);
   }
@@ -244,8 +248,8 @@ void Widget::TransformBox::transform_core(const TransformHandleType handle) {
 void Widget::TransformBox::draw() {
 
   ImDrawList *draw = ImGui::GetWindowDrawList();
-  draw->AddRect(vp_im2(p0), vp_im2(p1), IM_COL32(255, 255, 255, 255), 0.0f, 0,
-                2.0f);
+  draw->AddRect(vp_im2(p0), vp_im2(p1), im_color((float *)primary_color),
+                0.0f, 0, stroke_width);
 
   // Area Behaviour (Translate)
   if (active_handle == -1 &&
