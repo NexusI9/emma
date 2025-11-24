@@ -73,26 +73,42 @@ target_link_options(${PROJECT_NAME} PRIVATE ${WASM_FLAGS} ${DEV_FLAGS} ${ASAN})
 # ----------------------------
 # Preload files
 # ----------------------------
-file(GLOB_RECURSE PROJECT_PICTURES "${SOURCE_PATH}/*.jpg")
+set (${PROJECT_NAME}_ASSETS_PATTERNS
+		${SOURCE_PATH}/*.jpg:textures
+		${SOURCE_PATH}/*.png:textures
+)
+
 set(${PROJECT_NAME}_PRELOAD_FILES "")
 
-foreach(entry IN LISTS PROJECT_PICTURES)
-    # Extract filename
-    get_filename_component(fname "${entry}" NAME)
+foreach(assets IN LISTS ${PROJECT_NAME}_ASSETS_PATTERNS)
 
-    # Build relative path
-    file(RELATIVE_PATH RELATIVE_FILE_PATH 
-        "${CMAKE_BINARY_DIR}" 
-        "${entry}"
-    )
+    	string(REPLACE ":" ";" parts "${assets}")
+    	list(GET parts 0 PATTERN)
+    	list(GET parts 1 VIR_DIR)
 
-    # Build preload argument: real@virtual
-    set(preload_arg "${RELATIVE_FILE_PATH}@textures/${fname}")
+	file(GLOB_RECURSE ${PROJECT_NAME}_ASSETS "${PATTERN}")
 
-    # Append to list
-    list(APPEND ${PROJECT_NAME}_PRELOAD_FILES "--preload-file")
-    list(APPEND ${PROJECT_NAME}_PRELOAD_FILES "${preload_arg}")
+	foreach(entry IN LISTS ${PROJECT_NAME}_ASSETS)
+
+		# Extract filename
+		get_filename_component(fname "${entry}" NAME)
+		
+		# Build relative path
+		file(RELATIVE_PATH RELATIVE_FILE_PATH 
+				   "${CMAKE_BINARY_DIR}" 
+				   "${entry}"
+				)
+
+		# Build preload argument: real@virtual
+		set(preload_arg "${RELATIVE_FILE_PATH}@${VIR_DIR}/${fname}")
+
+		# Append to list
+		list(APPEND ${PROJECT_NAME}_PRELOAD_FILES "--preload-file")
+		list(APPEND ${PROJECT_NAME}_PRELOAD_FILES "${preload_arg}")
+	endforeach()
+	
 endforeach()
+
 
 # Fetch Preload files from engine
 string(JOIN " " JOIN_PRELOAD ${${PROJECT_NAME}_PRELOAD_FILES})

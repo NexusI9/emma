@@ -20,6 +20,18 @@ module_manager_create_texture(const char *path,
       .usage = WGPUTextureUsage_CopyDst | WGPUTextureUsage_TextureBinding,
   });
 
+  Texture texture;
+  texture_create_from_file(&texture, &(TextureCreateFileDescriptor){
+                                         .path = path,
+                                         .channels = TextureChannel_RGBA,
+                                         .flip = false,
+                                         .width = resolution,
+                                         .height = resolution,
+                                     });
+
+  rem_write_texture(g_module_manager.atlas_texture, texture.data, texture.size,
+                    texture.channels, 0, REMWriteFlag_STBIFreeData);
+
   g_module_manager.atlas_view =
       rem_new_view(g_module_manager.atlas_texture,
                    &(WGPUTextureViewDescriptor){

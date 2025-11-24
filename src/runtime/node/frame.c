@@ -3,7 +3,7 @@
 #include "utils/id.h"
 
 FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
-
+  node->label = desc->label;
   frame_set_size(node, desc->size);
   frame_set_local_position(node, desc->position);
   frame_set_background(node, desc->background);

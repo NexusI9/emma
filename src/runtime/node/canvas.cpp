@@ -53,7 +53,6 @@ Frame *canvas_create_frame_core(Canvas *canvas,
   {
     // === Frame setup ===
     allocator_id_list_push(list_entries, capacity, list_length, frame->id);
-
     frame_create(frame, frame_desc);
   }
 
@@ -102,7 +101,7 @@ Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
   const ModuleDescriptor *module_desc = module_manager_get_module(module);
 
   FrameDescriptor frame_desc = {
-      .uv0 = {module_desc->uv0[0], module_desc->uv1[1]},
+      .uv0 = {module_desc->uv0[0], module_desc->uv0[1]},
       .uv1 = {module_desc->uv1[0], module_desc->uv1[1]},
       .size = {module_desc->size[0], module_desc->size[1]},
       .label = module_desc->label,
