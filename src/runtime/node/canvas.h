@@ -56,6 +56,7 @@ void canvas_update_frame_connectors(Canvas *, const Frame *);
 
 void canvas_set_frame_position(Canvas *, Frame *, const vec2);
 void canvas_set_frame_size(Canvas *, Frame *, const vec2);
+void canvas_frame_wrap(Canvas *, Frame *);
 
 void canvas_set_module_position(Canvas *, Frame *, const vec2);
 void canvas_set_module_size(Canvas *, Frame *, const vec2);

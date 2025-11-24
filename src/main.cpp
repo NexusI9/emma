@@ -93,6 +93,8 @@ void create_frames(Canvas *canvas) {
                                  frames[i].modules.entries[k].type,
                                  frames[i].modules.entries[k].position);
 
+    canvas_frame_wrap(canvas, frame);
+
     // create connectors
     if (i > 0) {
       Frame *previous_frame = allocator_frame_entry(

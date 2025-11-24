@@ -16,5 +16,5 @@ void Widget::FrameShape::draw() {
                      vpy(node->world_position[1] + node->size[1]));
 
   // Draw the core frame
-  dl->AddRectFilled(p0, p1, im_color(node->background), 2.0f);
+  dl->AddRectFilled(p0, p1, im_color(node->background), 0.0f);
 }

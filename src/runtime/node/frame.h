@@ -60,7 +60,6 @@ static inline const float *frame_get_world_position(const Frame *node) {
   return node->world_position;
 }
 
-
 static inline const float *frame_get_end_point(const Frame *node) {
   return node->end_point;
 }
@@ -71,12 +70,18 @@ static inline const float *frame_get_background(const Frame *node) {
 
 // Mutators
 static inline FrameStatus frame_set_size(Frame *node, const vec2 value) {
+  
   glm_vec2_copy((float *)value, node->size);
+
+  // update endpoint
   glm_vec2_add(node->world_position, node->size, node->end_point);
   return FrameStatus_Success;
 }
 
-static inline FrameStatus frame_set_local_position(Frame *node, const vec2 value) {
+FrameStatus frame_wrap(Frame *node);
+
+static inline FrameStatus frame_set_local_position(Frame *node,
+                                                   const vec2 value) {
   glm_vec2_copy((float *)value, node->local_position);
   return FrameStatus_Success;
 }

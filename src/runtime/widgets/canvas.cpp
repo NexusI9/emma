@@ -25,6 +25,8 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas) {
   this->gui = gui;
   this->node = canvas;
   transform_box = TransformBox(gui);
+  grid_background =
+      GridBackground("textures/dot-pattern.png", TextureResolution_64);
 
   transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
 
@@ -115,8 +117,6 @@ void Widget::CanvasShape::draw() {
     ImGui::NewFrame();
     {
 
-      draw_grid_background();
-
       ImGuiViewport *vp = ImGui::GetMainViewport();
 
       // Push fullscreen position + size
@@ -133,6 +133,8 @@ void Widget::CanvasShape::draw() {
                        ImGuiWindowFlags_NoCollapse |
                        ImGuiWindowFlags_NoBackground |
                        ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+        grid_background.draw_texture(gui->pass_encoder);
 
       // === frames ===
       size_t i;
@@ -250,7 +252,7 @@ void Widget::canvas_shape_get_frame_shape_position(void *data, ImVec2 &value) {
 
   Frame *frame = frame_data->frame->get_node();
 
-  const float* world_pos = frame_get_world_position(frame);
+  const float *world_pos = frame_get_world_position(frame);
   value = ImVec2(world_pos[0], world_pos[1]);
 }
 
@@ -262,8 +264,9 @@ void Widget::canvas_shape_set_frame_shape_size(void *data, ImVec2 value) {
 
   canvas_set_frame_size(frame_data->canvas, frame, (vec2){value.x, value.y});
 
-  boundbox_frame_update(frame_data->frame->boundbox, frame_get_world_position(frame),
-                        frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
+  boundbox_frame_update(frame_data->frame->boundbox,
+                        frame_get_world_position(frame), frame->end_point,
+                        FRAME_SHAPE_BOUNDBOX_THICKNESS);
 }
 
 void Widget::canvas_shape_get_frame_shape_size(void *data, ImVec2 &value) {

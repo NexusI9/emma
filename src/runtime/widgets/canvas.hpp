@@ -3,6 +3,7 @@
 
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/frame.hpp"
+#include "runtime/widgets/grid_background.hpp"
 #include "runtime/widgets/transform_box.hpp"
 
 namespace Widget {
@@ -23,7 +24,6 @@ typedef struct {
 class CanvasShape {
 
 public:
-  CanvasShape(){};
   CanvasShape(Gui *, Canvas *);
 
   void draw();
@@ -34,6 +34,7 @@ private:
   Gui *gui;
   Canvas *node;
   TransformBox transform_box;
+  GridBackground grid_background;
 
   FrameShape frame_shapes[CANVAS_MAX_FRAMES];
   CanvasTransformFrameData transform_frame_data[CANVAS_MAX_FRAMES];

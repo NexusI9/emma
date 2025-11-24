@@ -239,6 +239,12 @@ void canvas_set_frame_size(Canvas *canvas, Frame *frame, const vec2 value) {
   canvas_align_connector_handle_group_to_frame(canvas, frame);
 }
 
+void canvas_frame_wrap(Canvas *canvas, Frame *frame) {
+  frame_wrap(frame);
+  canvas_align_octagon_to_frame(canvas, frame);
+  canvas_align_connector_handle_group_to_frame(canvas, frame);
+}
+
 void canvas_set_module_position(Canvas *canvas, Frame *frame,
                                 const vec2 value) {
   frame_set_local_position(frame, value);
