@@ -14,6 +14,7 @@
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
+#include "runtime/widgets/module.hpp"
 #include "runtime/widgets/octagon.hpp"
 #include "runtime/widgets/transform_box.hpp"
 #include <imgui/imconfig.h>
@@ -153,6 +154,13 @@ void Widget::CanvasShape::draw() {
                                                 ConnectorHandleSide_Right);
       }
 
+      // === modules ===
+      for (i = 0; i < node->modules[CanvasModuleState_Default].length; i++) {
+        Frame *module = allocator_frame_entry(
+            node->modules[CanvasModuleState_Default].entries[i]);
+        ModuleShape(module).draw();
+      }
+
       // === connectors ===
       for (i = 0; i < node->connectors.length; i++) {
         Connector *connector =
@@ -186,8 +194,9 @@ void Widget::CanvasShape::sync_shapes() {
     const alloc_id id = node->frames[CanvasFrameState_Default].entries[i];
     Frame *frame = allocator_frame_entry(id);
     frame_shapes[i] = FrameShape(frame);
-    boundbox_frame_update(frame_shapes[i].boundbox, frame->position,
-                          frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
+    boundbox_frame_update(frame_shapes[i].boundbox,
+                          frame_get_world_position(frame), frame->end_point,
+                          FRAME_SHAPE_BOUNDBOX_THICKNESS);
   }
 }
 
@@ -196,8 +205,9 @@ void Widget::CanvasShape::sync_boundboxes() {
   for (size_t i = 0; i < node->frames[CanvasFrameState_Default].length; i++) {
     const alloc_id id = node->frames[CanvasFrameState_Default].entries[i];
     Frame *frame = allocator_frame_entry(id);
-    boundbox_frame_update(frame_shapes[i].boundbox, frame->position,
-                          frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
+    boundbox_frame_update(frame_shapes[i].boundbox,
+                          frame_get_world_position(frame), frame->end_point,
+                          FRAME_SHAPE_BOUNDBOX_THICKNESS);
   }
 }
 
@@ -226,8 +236,9 @@ void Widget::canvas_shape_set_frame_shape_position(void *data, ImVec2 value) {
   canvas_set_frame_position(frame_data->canvas, frame,
                             (vec2){value.x, value.y});
 
-  boundbox_frame_update(frame_data->frame->boundbox, frame->position,
-                        frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
+  boundbox_frame_update(frame_data->frame->boundbox,
+                        frame_get_world_position(frame), frame->end_point,
+                        FRAME_SHAPE_BOUNDBOX_THICKNESS);
 
   canvas_update_frame_connectors(frame_data->canvas,
                                  frame_data->frame->get_node());
@@ -239,7 +250,8 @@ void Widget::canvas_shape_get_frame_shape_position(void *data, ImVec2 &value) {
 
   Frame *frame = frame_data->frame->get_node();
 
-  value = im_vec2(frame->position);
+  const float* world_pos = frame_get_world_position(frame);
+  value = ImVec2(world_pos[0], world_pos[1]);
 }
 
 void Widget::canvas_shape_set_frame_shape_size(void *data, ImVec2 value) {
@@ -250,7 +262,7 @@ void Widget::canvas_shape_set_frame_shape_size(void *data, ImVec2 value) {
 
   canvas_set_frame_size(frame_data->canvas, frame, (vec2){value.x, value.y});
 
-  boundbox_frame_update(frame_data->frame->boundbox, frame->position,
+  boundbox_frame_update(frame_data->frame->boundbox, frame_get_world_position(frame),
                         frame->end_point, FRAME_SHAPE_BOUNDBOX_THICKNESS);
 }
 

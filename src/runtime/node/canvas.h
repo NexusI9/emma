@@ -4,6 +4,7 @@
 #include "nkengine/include/gui.h"
 #include "nkengine/include/renderer.h"
 #include "runtime/manager/allocator.h"
+#include "runtime/manager/module.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "utils/id.h"
@@ -26,6 +27,7 @@ typedef enum {
 
 typedef enum {
   CanvasStatus_Success,
+  CanvasStatus_ResourceCreationFail,
   CanvasStatus_UndefError,
 } CanvasStatus;
 
@@ -41,11 +43,12 @@ typedef struct {
 EXTERN_C_BEGIN
 
 Frame *canvas_create_frame(Canvas *);
+Frame *canvas_create_module(Canvas *, const ModuleType);
 Octagon *canvas_create_octagon(Canvas *);
 ConnectorHandle *canvas_create_connector_handle(Canvas *);
 
-
-CanvasStatus canvas_add_module_to_frame(Canvas *, Frame *, const alloc_id);
+CanvasStatus canvas_add_module_to_frame(Canvas *, Frame *, const ModuleType,
+                                        const vec2);
 
 void canvas_align_octagon_to_frame(Canvas *, const Frame *);
 void canvas_align_connector_handle_group_to_frame(Canvas *, const Frame *);
@@ -53,6 +56,9 @@ void canvas_update_frame_connectors(Canvas *, const Frame *);
 
 void canvas_set_frame_position(Canvas *, Frame *, const vec2);
 void canvas_set_frame_size(Canvas *, Frame *, const vec2);
+
+void canvas_set_module_position(Canvas *, Frame *, const vec2);
+void canvas_set_module_size(Canvas *, Frame *, const vec2);
 
 StaticListStatus canvas_register_frame_state(Canvas *, const Frame *,
                                              const CanvasFrameState);

@@ -12,33 +12,65 @@
 #include "runtime/widgets/canvas.hpp"
 #include <emscripten/emscripten.h>
 
-void create_modules() {
-
-  module_manager_create_texture("textures/module_atlas.jpg",
-                                TextureResolution_2048);
-
-  module_manager_init_default_modules();
-}
-
 void create_frames(Canvas *canvas) {
   static const struct {
     vec2 position;
+
     struct {
       const uint8_t index;
       const float value;
     } octagon_data[3];
+
+    struct {
+
+      struct {
+        const ModuleType type;
+        const vec2 position;
+      } entries[3];
+
+      uint8_t count;
+
+    } modules;
+
   } frames[] = {
       {
           .position = {0.0f, 0.0f},
           .octagon_data = {{1, 0.5}, {6, 0.6}, {2, 0.9}},
+          .modules =
+              {
+                  .entries =
+                      {
+                          {ModuleType_News, {0.0f, 0.0f}},
+                          {ModuleType_Rate, {0.0f, 460.0f}},
+                      },
+                  .count = 2,
+              },
       },
       {
           .position = {1200.0f, 400.0f},
           .octagon_data = {{7, 0.8}, {0, 0.1}, {5, 0.35}},
+          .modules =
+              {
+                  .entries =
+                      {
+                          {ModuleType_SpinningWheel, {0.0f, 0.0f}},
+                      },
+                  .count = 1,
+              },
       },
       {
           .position = {2300.0f, -300.0f},
           .octagon_data = {{3, 0.9}, {4, 0.6}, {5, 0.7}},
+          .modules =
+              {
+                  .entries =
+                      {
+                          {ModuleType_Ranking, {0.0f, 0.0f}},
+                          {ModuleType_SurveyCheckbox, {0.0f, 320.0f}},
+                          {ModuleType_SurveySlider, {0.0f, 520.0f}},
+                      },
+                  .count = 3,
+              },
       },
   };
   static const int frames_count = sizeof(frames) / sizeof(frames[0]);
@@ -48,12 +80,20 @@ void create_frames(Canvas *canvas) {
     canvas_set_frame_position(canvas, frame, frames[i].position);
     canvas_register_frame_state(canvas, frame, CanvasFrameState_Octagon);
 
+    // add octagons
+    Octagon *oct = allocator_octagon_entry(frame->octagon_id);
     for (uint8_t j = 0; j < 3; j++) {
-      Octagon *oct = allocator_octagon_entry(frame->octagon_id);
       octagon_set_outer_offset(oct, frames[i].octagon_data[j].index,
                                frames[i].octagon_data[j].value);
     }
 
+    // add modules
+    for (uint8_t k = 0; k < frames[i].modules.count; k++)
+      canvas_add_module_to_frame(canvas, frame,
+                                 frames[i].modules.entries[k].type,
+                                 frames[i].modules.entries[k].position);
+
+    // create connectors
     if (i > 0) {
       Frame *previous_frame = allocator_frame_entry(
           canvas->frames[CanvasFrameState_Default].entries[i - 1]);
@@ -90,7 +130,8 @@ int main() {
   viewport_set_zoom_sensitivity(0.001f);
   unit_set_step(20.0f);
 
-  create_modules();
+  module_manager_create_texture("textures/module_atlas.jpg",
+                                TextureResolution_2048);
 
   Canvas canvas;
   create_frames(&canvas);

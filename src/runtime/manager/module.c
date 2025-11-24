@@ -34,32 +34,9 @@ module_manager_create_texture(const char *path,
   return ModuleManagerStatus_Success;
 }
 
-ModuleManagerStatus
-module_manager_register_module(const ModuleType type,
-                               const ModuleDescriptor *desc) {
+const ModuleDescriptor *module_manager_get_module(const ModuleType type) {
 
-  if (type > ModuleType_COUNT) { // ERRHANDLE
-    return ModuleManagerStatus_OutOfBound;
-  }
-
-  Frame *module = new_frame();
-
-  if (!module) // ERRHANDLE
-    return ModuleManagerStatus_UnavailableResource;
-
-  frame_create(module, &(FrameDescriptor){
-                           .label = desc->label,
-                           .size = {desc->size[0], desc->size[1]},
-                           .uv0 = {desc->uv0[0], desc->uv0[1]},
-                           .uv1 = {desc->uv1[0], desc->uv1[1]},
-                       });
-
-  return ModuleManagerStatus_Success;
-}
-
-ModuleManagerStatus module_manager_init_default_modules() {
-
-  static ModuleDescriptor default_modules[ModuleType_COUNT] = {
+  static const ModuleDescriptor default_modules[ModuleType_COUNT] = {
       [ModuleType_News] =
           {
               .label = "Module News",
@@ -106,8 +83,5 @@ ModuleManagerStatus module_manager_init_default_modules() {
           },
   };
 
-  for (uint8_t i = 0; i < ModuleType_COUNT; i++)
-    module_manager_register_module((ModuleType)i, &default_modules[i]);
-
-  return ModuleManagerStatus_Success;
+  return &default_modules[type];
 }

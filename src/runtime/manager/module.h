@@ -25,7 +25,6 @@ typedef enum {
 
 typedef struct {
 
-  ALLOCATOR_ID_LIST(ModuleType_COUNT) modules;
   WGPUTexture atlas_texture;
   WGPUTextureView atlas_view;
 
@@ -46,8 +45,7 @@ ModuleManagerStatus module_manager_create_texture(const char *,
 
 ModuleManagerStatus module_manager_init_default_modules();
 
-ModuleManagerStatus module_manager_register_module(const ModuleType,
-                                                   const ModuleDescriptor *);
+const ModuleDescriptor *module_manager_get_module(const ModuleType);
 
 static inline WGPUTextureView module_view() {
   return g_module_manager.atlas_view;

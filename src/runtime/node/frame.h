@@ -23,7 +23,7 @@ typedef struct {
   ALLOCATOR_ID_LIST(FRAME_MAX_CONNECTORS) connectors_id;
 
   const char *label;
-  vec2 position;
+  vec2 local_position, world_position;
   vec2 size;
   vec2 end_point; // pos + size, usefull to get full area for mouse interaction
 
@@ -47,18 +47,41 @@ EXTERN_C_BEGIN
 
 FrameStatus frame_create(Frame *, const FrameDescriptor *);
 
+// Accessors
+static inline const float *frame_get_size(const Frame *node) {
+  return node->size;
+}
+
+static inline const float *frame_get_local_position(const Frame *node) {
+  return node->local_position;
+}
+
+static inline const float *frame_get_world_position(const Frame *node) {
+  return node->world_position;
+}
+
+
+static inline const float *frame_get_end_point(const Frame *node) {
+  return node->end_point;
+}
+
+static inline const float *frame_get_background(const Frame *node) {
+  return node->background;
+}
+
 // Mutators
 static inline FrameStatus frame_set_size(Frame *node, const vec2 value) {
   glm_vec2_copy((float *)value, node->size);
-  glm_vec2_add(node->position, node->size, node->end_point);
+  glm_vec2_add(node->world_position, node->size, node->end_point);
   return FrameStatus_Success;
 }
 
-static inline FrameStatus frame_set_position(Frame *node, const vec2 value) {
-  glm_vec2_copy((float *)value, node->position);
-  glm_vec2_add(node->position, node->size, node->end_point);
+static inline FrameStatus frame_set_local_position(Frame *node, const vec2 value) {
+  glm_vec2_copy((float *)value, node->local_position);
   return FrameStatus_Success;
 }
+
+FrameStatus frame_update_world_position(Frame *node);
 
 static inline FrameStatus frame_set_background(Frame *node, const color value) {
   glm_vec4_copy((float *)value, node->background);
@@ -105,27 +128,6 @@ static inline StaticListStatus frame_unregister_connector(Frame *node,
 
   return allocator_id_list_pop(node->connectors_id.entries,
                                &node->connectors_id.length, id);
-}
-
-// Accessors
-static inline FrameStatus frame_get_size(const Frame *node, vec2 dest) {
-  glm_vec2_copy((float *)node->size, dest);
-  return FrameStatus_Success;
-}
-
-static inline FrameStatus frame_get_position(const Frame *node, vec2 dest) {
-  glm_vec2_copy((float *)node->position, dest);
-  return FrameStatus_Success;
-}
-
-static inline FrameStatus frame_get_end_point(const Frame *node, vec2 dest) {
-  glm_vec2_copy((float *)node->end_point, dest);
-  return FrameStatus_Success;
-}
-
-static inline FrameStatus frame_get_background(const Frame *node, color dest) {
-  glm_vec4_copy((float *)node->background, dest);
-  return FrameStatus_Success;
 }
 
 EXTERN_C_END
