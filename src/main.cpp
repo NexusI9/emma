@@ -77,6 +77,7 @@ void create_frames(Canvas *canvas) {
 
   for (uint8_t i = 0; i < frames_count; i++) {
     Frame *frame = canvas_create_frame(canvas);
+    unit_snap_vec2((float *)frames[i].position);
     canvas_set_frame_position(canvas, frame, frames[i].position);
     canvas_register_frame_state(canvas, frame, CanvasFrameState_Octagon);
 
@@ -130,7 +131,7 @@ int main() {
   allocator_init();
   viewport_set_pan_sensitivity(60.0f);
   viewport_set_zoom_sensitivity(0.001f);
-  unit_set_step(20.0f);
+  unit_set_step(40.0f);
 
   module_manager_create_texture("textures/module_atlas.jpg",
                                 TextureResolution_2048);

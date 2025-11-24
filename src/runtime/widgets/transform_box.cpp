@@ -1,5 +1,6 @@
 #include "transform_box.hpp"
 #include "nkengine/include/gui.hpp"
+#include "runtime/manager/unit.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/transform_handle.h"
 #include "runtime/widgets/transform_handle.hpp"
@@ -202,10 +203,14 @@ void Widget::TransformBox::transform_core(const TransformHandleType handle) {
 
   ImVec2 offset = ImVec2(mouse.x - drag_start.x, mouse.y - drag_start.y);
 
+  offset.x = unit_snap(offset.x);
+  offset.y = unit_snap(offset.y);
+
   for (uint16_t obj = 0; obj < objects.count; obj++) {
     TransformBoxObject *object = &objects.entries[obj];
     ImVec2 new_pos = object->init_position;
     ImVec2 new_size = object->init_size;
+
     handle_transform(handle, object->init_position, object->init_size, offset,
                      new_pos, new_size);
 
@@ -248,8 +253,8 @@ void Widget::TransformBox::transform_core(const TransformHandleType handle) {
 void Widget::TransformBox::draw() {
 
   ImDrawList *draw = ImGui::GetWindowDrawList();
-  draw->AddRect(vp_im2(p0), vp_im2(p1), im_color((float *)primary_color),
-                0.0f, 0, stroke_width);
+  draw->AddRect(vp_im2(p0), vp_im2(p1), im_color((float *)primary_color), 0.0f,
+                0, stroke_width);
 
   // Area Behaviour (Translate)
   if (active_handle == -1 &&
