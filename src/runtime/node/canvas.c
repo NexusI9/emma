@@ -8,7 +8,6 @@
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
-#include "runtime/widgets/canvas.hpp"
 #include "utils/id.h"
 
 static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
@@ -172,11 +171,6 @@ ConnectorHandle *canvas_create_connector_handle(Canvas *canvas) {
   return handle;
 }
 
-// TODO move it to shape
-void canvas_draw_callback(Renderer *renderer, void *data) {
-  Widget::CanvasShape *canvas_shape = (Widget::CanvasShape *)data;
-  canvas_shape->draw();
-}
 
 void canvas_align_octagon_to_frame(Canvas *canvas, const Frame *frame) {
 

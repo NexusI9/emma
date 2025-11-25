@@ -78,9 +78,8 @@ StaticListStatus canvas_unregister_frame_state(Canvas *, const Frame *,
 StaticListStatus canvas_empty_frame_state(Canvas *, const CanvasFrameState);
 
 void canvas_connect_frames(Canvas *, Frame *, Frame *);
-void canvas_disconnect_frames(Canvas *, Frame *, Frame *);
 
-void canvas_draw_callback(Renderer *, void *);
+void canvas_disconnect_frames(Canvas *, const Frame *, const Frame *);
 
 static inline void
 canvas_enable_interface_state(Canvas *canvas,

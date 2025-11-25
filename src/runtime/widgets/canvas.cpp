@@ -22,8 +22,7 @@
 #include <imgui/imgui_impl_wgpu.h>
 
 Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
-    : tool_bar(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI)),
-      grid_background("textures/dot-pattern.png", TextureResolution_64),
+    : grid_background("textures/dot-pattern.png", TextureResolution_64),
       transform_box(gui) {
 
   this->gui = gui;
@@ -111,86 +110,65 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
 
 void Widget::CanvasShape::draw() {
 
-  gui_draw_begin(gui);
-  gui_draw_update_io(gui);
-  {
-    ImGui_ImplWGPU_NewFrame();
-    ImGui::NewFrame();
-    {
+  ImGuiViewport *vp = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(vp->Pos);
+  ImGui::SetNextWindowSize(vp->Size);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-      ImGuiViewport *vp = ImGui::GetMainViewport();
+  ImGui::Begin("Canvas", NULL,
+               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                   ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+                   ImGuiWindowFlags_NoScrollWithMouse |
+                   ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground |
+                   ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-      // Push fullscreen position + size
-      ImGui::SetNextWindowPos(vp->Pos);
-      ImGui::SetNextWindowSize(vp->Size);
+  grid_background.draw_texture(gui->pass_encoder);
 
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+  // === frames ===
+  size_t i;
+  for (i = 0; i < node->frames[CanvasFrameState_Default].length; i++)
+    draw_frame(&frame_shapes[i]);
 
-      ImGui::Begin("Canvas", NULL,
-                   ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-                       ImGuiWindowFlags_NoScrollWithMouse |
-                       ImGuiWindowFlags_NoCollapse |
-                       ImGuiWindowFlags_NoBackground |
-                       ImGuiWindowFlags_NoBringToFrontOnFocus);
+  if (canvas_interface_state(node) & CanvasInterfaceState_Octagon)
+    for (i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
+      Frame *frame = allocator_frame_entry(
+          node->frames[CanvasFrameState_Octagon].entries[i]);
 
-      grid_background.draw_texture(gui->pass_encoder);
-
-      // === frames ===
-      size_t i;
-      for (i = 0; i < node->frames[CanvasFrameState_Default].length; i++)
-        draw_frame(&frame_shapes[i]);
-
-      if (canvas_interface_state(node) & CanvasInterfaceState_Octagon)
-        for (i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
-          Frame *frame = allocator_frame_entry(
-              node->frames[CanvasFrameState_Octagon].entries[i]);
-
-          OctagonShape(allocator_octagon_entry(frame->octagon_id)).draw();
-        }
-
-      for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
-        Frame *frame = allocator_frame_entry(
-            node->frames[CanvasFrameState_Selected].entries[i]);
-
-        draw_frame_handle_connectors(frame, ConnectorHandleSide_Left |
-                                                ConnectorHandleSide_Right);
-      }
-
-      // === modules ===
-      for (i = 0; i < node->modules[CanvasModuleState_Default].length; i++) {
-        Frame *module = allocator_frame_entry(
-            node->modules[CanvasModuleState_Default].entries[i]);
-        ModuleShape(module).draw();
-      }
-
-      // === connectors ===
-      for (i = 0; i < node->connectors.length; i++) {
-        Connector *connector =
-            allocator_connector_entry(node->connectors.entries[i]);
-        ConnectorShape(connector).draw();
-      }
-
-      // === transform box ===
-      if (transform_box.session_end() == TransformBoxStatus_ClearSelection)
-        canvas_empty_frame_state(node, CanvasFrameState_Selected);
-
-      if (transform_box.objects_count() > 0)
-        transform_box.draw();
-
-      // === GUI ===
-      tool_bar.draw();
-
-      ImGui::End();
-      ImGui::PopStyleVar(2);
+      OctagonShape(allocator_octagon_entry(frame->octagon_id)).draw();
     }
-    ImGui::Render();
-    ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), gui->pass_encoder);
-  }
-  gui_draw_end(gui);
 
-  viewport_update(&g_viewport_manager);
+  for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
+    Frame *frame = allocator_frame_entry(
+        node->frames[CanvasFrameState_Selected].entries[i]);
+
+    draw_frame_handle_connectors(frame, ConnectorHandleSide_Left |
+                                            ConnectorHandleSide_Right);
+  }
+
+  // === modules ===
+  for (i = 0; i < node->modules[CanvasModuleState_Default].length; i++) {
+    Frame *module = allocator_frame_entry(
+        node->modules[CanvasModuleState_Default].entries[i]);
+    ModuleShape(module).draw();
+  }
+
+  // === connectors ===
+  for (i = 0; i < node->connectors.length; i++) {
+    Connector *connector =
+        allocator_connector_entry(node->connectors.entries[i]);
+    ConnectorShape(connector).draw();
+  }
+
+  // === transform box ===
+  if (transform_box.session_end() == TransformBoxStatus_ClearSelection)
+    canvas_empty_frame_state(node, CanvasFrameState_Selected);
+
+  if (transform_box.objects_count() > 0)
+    transform_box.draw();
+
+  ImGui::End();
+  ImGui::PopStyleVar(2);
 }
 
 /**

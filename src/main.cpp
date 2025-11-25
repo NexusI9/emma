@@ -2,6 +2,7 @@
 #include "nkengine/include/gui.h"
 #include "nkengine/include/renderer.h"
 #include "nkengine/include/resource_manager.h"
+#include "runtime/layouts/container.hpp"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/module.h"
@@ -35,7 +36,7 @@ void create_frames(Canvas *canvas) {
 
   } frames[] = {
       {
-          .position = {0.0f, 0.0f},
+          .position = {300.0f, 400.0f},
           .octagon_data = {{1, 0.5}, {6, 0.6}, {2, 0.9}},
           .modules =
               {
@@ -60,7 +61,7 @@ void create_frames(Canvas *canvas) {
               },
       },
       {
-          .position = {2300.0f, -300.0f},
+          .position = {2100.0f, 400.0f},
           .octagon_data = {{3, 0.9}, {4, 0.6}, {5, 0.7}},
           .modules =
               {
@@ -140,9 +141,8 @@ int main() {
   canvas_enable_interface_state(&canvas, CanvasInterfaceState_Octagon);
   canvas_enable_interface_state(&canvas, CanvasInterfaceState_Heatmap);
 
-  Widget::CanvasShape canvas_shape = Widget::CanvasShape(gui, &canvas);
-  canvas_shape.sync_shapes();
-  renderer_add_draw_callback(renderer, canvas_draw_callback, &canvas_shape,
+  Layout::Container container = Layout::Container(gui, &canvas);
+  renderer_add_draw_callback(renderer, container_draw_callback, &container,
                              RendererDrawMode_All);
 
   renderer_draw(renderer);

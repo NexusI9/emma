@@ -1,8 +1,10 @@
 #ifndef _WIDGET_TOOl_BAR_H_
 #define _WIDGET_TOOl_BAR_H_
 
-#include "webgpu/webgpu.h"
+#include "nkengine/include/gui.hpp"
 #include "nkengine/include/texture.h"
+#include "runtime/widgets/tool_button.hpp"
+#include "webgpu/webgpu.h"
 #include <imgui/imgui.h>
 
 namespace Widget {
@@ -14,9 +16,9 @@ public:
   void draw();
 
 private:
-  WGPUTextureView view;
-  const TextureAtlasRegion* bg_sprite;
-  ImVec2 bg_start, bg_end;
+  Component::Sprite bg_sprite;
+  static constexpr uint8_t TOOLS_COUNT = 5;
+  ToolButtonShape tools[TOOLS_COUNT];
 };
 
 } // namespace Widget
