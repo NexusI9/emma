@@ -4,49 +4,7 @@
 #include "runtime/node/frame.h"
 #include "webgpu/webgpu.h"
 
-ModuleManager g_module_manager = {0};
-
-ModuleManagerStatus
-module_manager_create_texture(const char *path,
-                              const TextureResolution resolution) {
-
-  g_module_manager.atlas_texture = rem_new_texture(&(WGPUTextureDescriptor){
-      .label = "Module Atlas Texture",
-      .dimension = WGPUTextureDimension_2D,
-      .format = TEXTURE_FORMAT_OFFSCREEN,
-      .mipLevelCount = 1,
-      .sampleCount = 1,
-      .size = {resolution, resolution, 1},
-      .usage = WGPUTextureUsage_CopyDst | WGPUTextureUsage_TextureBinding,
-  });
-
-  Texture texture;
-  texture_create_from_file(&texture, &(TextureCreateFileDescriptor){
-                                         .path = path,
-                                         .channels = TextureChannel_RGBA,
-                                         .flip = false,
-                                         .width = resolution,
-                                         .height = resolution,
-                                     });
-
-  rem_write_texture(g_module_manager.atlas_texture, texture.data, texture.size,
-                    texture.channels, 0, REMWriteFlag_STBIFreeData);
-
-  g_module_manager.atlas_view =
-      rem_new_view(g_module_manager.atlas_texture,
-                   &(WGPUTextureViewDescriptor){
-                       .label = "Module Atlas Texture View",
-                       .arrayLayerCount = 1,
-                       .baseArrayLayer = 0,
-                       .mipLevelCount = 1,
-                       .aspect = WGPUTextureAspect_All,
-                       .dimension = WGPUTextureViewDimension_2D,
-                   });
-
-  return ModuleManagerStatus_Success;
-}
-
-const ModuleDescriptor *module_manager_get_module(const ModuleType type) {
+const ModuleDescriptor *get_module(const ModuleType type) {
 
   static const ModuleDescriptor default_modules[ModuleType_COUNT] = {
       [ModuleType_News] =

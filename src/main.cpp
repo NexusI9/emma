@@ -3,6 +3,7 @@
 #include "nkengine/include/renderer.h"
 #include "nkengine/include/resource_manager.h"
 #include "runtime/manager/allocator.h"
+#include "runtime/manager/atlas.h"
 #include "runtime/manager/module.h"
 #include "runtime/manager/unit.h"
 #include "runtime/manager/viewport.h"
@@ -127,17 +128,17 @@ int main() {
       .active_scene = NULL,
   };
   gui_init(gui, &g);
+  atlas_create();
 
   allocator_init();
   viewport_set_pan_sensitivity(60.0f);
   viewport_set_zoom_sensitivity(0.001f);
   unit_set_step(40.0f);
 
-  module_manager_create_texture("textures/module_atlas.jpg",
-                                TextureResolution_2048);
-
   Canvas canvas;
   create_frames(&canvas);
+  canvas_enable_interface_state(&canvas, CanvasInterfaceState_Octagon);
+  canvas_enable_interface_state(&canvas, CanvasInterfaceState_Heatmap);
 
   Widget::CanvasShape canvas_shape = Widget::CanvasShape(gui, &canvas);
   canvas_shape.sync_shapes();

@@ -1,5 +1,6 @@
 #include "module.hpp"
 #include "nkengine/include/gui.hpp"
+#include "runtime/manager/atlas.h"
 #include "runtime/manager/module.h"
 #include "runtime/manager/viewport.h"
 
@@ -14,5 +15,7 @@ void Widget::ModuleShape::draw() {
   ImVec2 p1 = ImVec2(vpx(node->world_position[0] + node->size[0]),
                      vpy(node->world_position[1] + node->size[1]));
 
-  dl->AddImage((ImTextureRef)module_view(), p0, p1, im_vec2(node->uv0), im_vec2(node->uv1));
+  dl->AddImage((ImTextureRef)texture_atlas_layer_view(&g_atlas,
+                                                      TextureAtlasLayer_Module),
+               p0, p1, im_vec2(node->uv0), im_vec2(node->uv1));
 }

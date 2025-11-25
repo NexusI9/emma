@@ -134,19 +134,20 @@ void Widget::CanvasShape::draw() {
                        ImGuiWindowFlags_NoBackground |
                        ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-        grid_background.draw_texture(gui->pass_encoder);
+      grid_background.draw_texture(gui->pass_encoder);
 
       // === frames ===
       size_t i;
       for (i = 0; i < node->frames[CanvasFrameState_Default].length; i++)
         draw_frame(&frame_shapes[i]);
 
-      for (i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
-        Frame *frame = allocator_frame_entry(
-            node->frames[CanvasFrameState_Octagon].entries[i]);
+      if (canvas_interface_state(node) & CanvasInterfaceState_Octagon)
+        for (i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
+          Frame *frame = allocator_frame_entry(
+              node->frames[CanvasFrameState_Octagon].entries[i]);
 
-        OctagonShape(allocator_octagon_entry(frame->octagon_id)).draw();
-      }
+          OctagonShape(allocator_octagon_entry(frame->octagon_id)).draw();
+        }
 
       for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
         Frame *frame = allocator_frame_entry(

@@ -98,7 +98,7 @@ Frame *canvas_create_frame(Canvas *canvas) {
 
 Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
 
-  const ModuleDescriptor *module_desc = module_manager_get_module(module);
+  const ModuleDescriptor *module_desc = get_module(module);
 
   FrameDescriptor frame_desc = {
       .uv0 = {module_desc->uv0[0], module_desc->uv0[1]},

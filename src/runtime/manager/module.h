@@ -24,15 +24,6 @@ typedef enum {
 } ModuleManagerStatus;
 
 typedef struct {
-
-  WGPUTexture atlas_texture;
-  WGPUTextureView atlas_view;
-
-} ModuleManager;
-
-extern ModuleManager g_module_manager;
-
-typedef struct {
   const char *label;
   const vec2 uv0, uv1;
   const vec2 size;
@@ -40,16 +31,8 @@ typedef struct {
 
 EXTERN_C_BEGIN
 
-ModuleManagerStatus module_manager_create_texture(const char *,
-                                                  const TextureResolution);
+const ModuleDescriptor *get_module(const ModuleType);
 
-ModuleManagerStatus module_manager_init_default_modules();
-
-const ModuleDescriptor *module_manager_get_module(const ModuleType);
-
-static inline WGPUTextureView module_view() {
-  return g_module_manager.atlas_view;
-}
 
 EXTERN_C_END
 
