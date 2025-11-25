@@ -7,8 +7,7 @@
 
 typedef struct Heatmap Heatmap;
 
-typedef void (*heatmap_color_mapper_callback)(Heatmap *, Frame *, void *,
-                                              color);
+typedef float (*heatmap_intensity_map_callback)(Heatmap *, Frame *, void *);
 
 typedef enum {
   HeatmapStatus_Success,
@@ -23,14 +22,14 @@ struct Heatmap {
   WGPUTexture texture;
   WGPUTextureView views[2];
 
-  heatmap_color_mapper_callback color_mapper;
+  heatmap_intensity_map_callback intensity_mapper;
 };
 
 typedef struct {
   color background;
   AllocIdRefList frames;
   int width, height;
-  heatmap_color_mapper_callback color_mapper;
+  heatmap_intensity_map_callback intensity_mapper;
 } HeatmapDescriptor;
 
 EXTERN_C_BEGIN

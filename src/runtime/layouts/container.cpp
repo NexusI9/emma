@@ -51,11 +51,12 @@ void Layout::Container::draw() {
 
     {
       canvas_shape.draw(display_state_enabled(DisplayState_Octagon));
-      nav_bar.draw();
       tool_bar.draw();
 
-      if (get_display_state() & DisplayState_Heatmap)
+      if (display_state_enabled(DisplayState_Heatmap))
         heatmap.draw();
+
+      nav_bar.draw();
     }
 
     ImGui::End();

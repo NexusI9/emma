@@ -7,7 +7,7 @@ HeatmapStatus heatmap_create(Heatmap *map, const HeatmapDescriptor *desc) {
 
   glm_vec4_copy((float *)desc->background, map->background);
   map->frames = desc->frames;
-  map->color_mapper = desc->color_mapper;
+  map->intensity_mapper = desc->intensity_mapper;
   
   map->texture = rem_new_texture(&(WGPUTextureDescriptor){
       .dimension = WGPUTextureDimension_2D,
