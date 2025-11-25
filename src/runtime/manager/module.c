@@ -4,9 +4,9 @@
 #include "runtime/node/frame.h"
 #include "webgpu/webgpu.h"
 
-const ModuleDescriptor *get_module(const ModuleType type) {
+const TextureAtlasRegion *get_module(const ModuleType type) {
 
-  static const ModuleDescriptor default_modules[ModuleType_COUNT] = {
+  static const TextureAtlasRegion default_modules[ModuleType_COUNT] = {
       [ModuleType_News] =
           {
               .label = "Module News",

@@ -61,7 +61,6 @@ typedef enum {
 class TransformBox {
 
 public:
-  TransformBox(){};
   TransformBox(Gui *gui);
 
   TransformBoxObject *find_object(const void *, size_t *);

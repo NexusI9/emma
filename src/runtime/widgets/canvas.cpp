@@ -3,6 +3,7 @@
 #include "imgui/imgui_impl_wgpu.h"
 #include "nkengine/include/gui.hpp"
 #include "runtime/manager/allocator.h"
+#include "runtime/manager/atlas.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/connector.h"
@@ -20,13 +21,13 @@
 #include <imgui/imconfig.h>
 #include <imgui/imgui_impl_wgpu.h>
 
-Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas) {
+Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
+    : tool_bar(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI)),
+      grid_background("textures/dot-pattern.png", TextureResolution_64),
+      transform_box(gui) {
 
   this->gui = gui;
   this->node = canvas;
-  transform_box = TransformBox(gui);
-  grid_background =
-      GridBackground("textures/dot-pattern.png", TextureResolution_64);
 
   transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
 
@@ -177,6 +178,9 @@ void Widget::CanvasShape::draw() {
 
       if (transform_box.objects_count() > 0)
         transform_box.draw();
+
+      // === GUI ===
+      tool_bar.draw();
 
       ImGui::End();
       ImGui::PopStyleVar(2);

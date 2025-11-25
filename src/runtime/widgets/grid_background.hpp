@@ -12,7 +12,6 @@ namespace Widget {
 class GridBackground {
 
 public:
-  GridBackground() {}
   GridBackground(const char *, const TextureResolution);
   void draw();
   void draw_texture(WGPURenderPassEncoder);

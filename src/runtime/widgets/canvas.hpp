@@ -4,6 +4,7 @@
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
+#include "runtime/widgets/tool_bar.hpp"
 #include "runtime/widgets/transform_box.hpp"
 
 namespace Widget {
@@ -35,6 +36,7 @@ private:
   Canvas *node;
   TransformBox transform_box;
   GridBackground grid_background;
+  ToolBarShape tool_bar;
 
   FrameShape frame_shapes[CANVAS_MAX_FRAMES];
   CanvasTransformFrameData transform_frame_data[CANVAS_MAX_FRAMES];
