@@ -13,18 +13,39 @@ const TextureAtlasRegion *ui_sprite(const UISprite type) {
               .uv1 = {scale * 698.0f / tex_res, scale * 136.0f / tex_res},
               .size = {scale * 698.0f, scale * 136.0f},
           },
-      [UISprite_IconFrame] =
+      [UISprite_ToolBar_Icon_Frame] =
           {
               .label = "Icon Frame",
               .uv0 = {scale * 698.0f / tex_res, scale * 0.0f / tex_res},
               .uv1 = {scale * 773.0f / tex_res, scale * 75.0f / tex_res},
               .size = {scale * 75.0f, scale * 75.0f},
           },
-      [UISprite_IconModule] =
+      [UISprite_ToolBar_Icon_Module] =
           {
               .label = "Icon Module",
               .uv0 = {scale * 773.0f / tex_res, scale * 0.0f / tex_res},
               .uv1 = {scale * 848.0f / tex_res, scale * 75.0f / tex_res},
+              .size = {scale * 75.0f, scale * 75.0f},
+          },
+      [UISprite_ToolBar_Icon_Shape] =
+          {
+              .label = "Icon Shape",
+              .uv0 = {scale * 848.0f / tex_res, scale * 0.0f / tex_res},
+              .uv1 = {scale * 923.0f / tex_res, scale * 75.0f / tex_res},
+              .size = {scale * 75.0f, scale * 75.0f},
+          },
+      [UISprite_ToolBar_Icon_Note] =
+          {
+              .label = "Icon Note",
+              .uv0 = {scale * 923.0f / tex_res, scale * 0.0f / tex_res},
+              .uv1 = {scale * 998.0f / tex_res, scale * 75.0f / tex_res},
+              .size = {scale * 75.0f, scale * 75.0f},
+          },
+      [UISprite_ToolBar_Icon_Persona] =
+          {
+              .label = "Icon Persona",
+              .uv0 = {scale * 698.0f / tex_res, scale * 75.0f / tex_res},
+              .uv1 = {scale * 773.0f / tex_res, scale * 150.0f / tex_res},
               .size = {scale * 75.0f, scale * 75.0f},
           },
 

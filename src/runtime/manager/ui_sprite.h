@@ -5,8 +5,11 @@
 
 typedef enum {
   UISprite_ToolBar,
-  UISprite_IconFrame,
-  UISprite_IconModule,
+  UISprite_ToolBar_Icon_Frame,
+  UISprite_ToolBar_Icon_Module,
+  UISprite_ToolBar_Icon_Shape,
+  UISprite_ToolBar_Icon_Note,
+  UISprite_ToolBar_Icon_Persona,
   UISprite_COUNT,
 } UISprite;
 

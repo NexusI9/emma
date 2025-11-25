@@ -6,11 +6,11 @@
 Widget::ToolBarShape::ToolBarShape(WGPUTextureView view)
     : bg_sprite(view, ui_sprite(UISprite_ToolBar)),
       tools{
-          ToolButtonShape(view, ui_sprite(UISprite_IconFrame)),
-          ToolButtonShape(view, ui_sprite(UISprite_IconModule)),
-          ToolButtonShape(view, ui_sprite(UISprite_IconFrame)),
-          ToolButtonShape(view, ui_sprite(UISprite_IconFrame)),
-          ToolButtonShape(view, ui_sprite(UISprite_IconFrame)),
+          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Frame)),
+          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Module)),
+          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Shape)),
+          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Note)),
+          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Persona)),
       } {
 
   const float scale = context_dpi();
