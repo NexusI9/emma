@@ -9,7 +9,6 @@
 #include "runtime/node/frame.h"
 #include "utils/id.h"
 
-#define CANVAS_MAX_FRAMES 1024
 
 typedef enum {
   CanvasFrameState_Default,
@@ -19,11 +18,6 @@ typedef enum {
   CanvasFrameState_COUNT,
 } CanvasFrameState;
 
-typedef enum {
-  CanvasInterfaceState_Default = 0,
-  CanvasInterfaceState_Octagon = 1 << 0,
-  CanvasInterfaceState_Heatmap = 1 << 1,
-} CanvasInterfaceState;
 
 typedef enum {
   CanvasModuleState_Default,
@@ -38,14 +32,13 @@ typedef enum {
 } CanvasStatus;
 
 typedef struct {
-  ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) frames[CanvasFrameState_COUNT];
-  ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) modules[CanvasModuleState_COUNT];
-  ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) octagons;
-  ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES) connectors;
-  ALLOCATOR_ID_LIST(CANVAS_MAX_FRAMES *CONNECTOR_HANDLE_COUNT)
+  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) frames[CanvasFrameState_COUNT];
+  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) modules[CanvasModuleState_COUNT];
+  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) octagons;
+  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) connectors;
+  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES *CONNECTOR_HANDLE_COUNT)
   connector_handles;
 
-  unsigned int interface_state;
 } Canvas;
 
 EXTERN_C_BEGIN
@@ -81,21 +74,6 @@ void canvas_connect_frames(Canvas *, Frame *, Frame *);
 
 void canvas_disconnect_frames(Canvas *, const Frame *, const Frame *);
 
-static inline void
-canvas_enable_interface_state(Canvas *canvas,
-                              const CanvasInterfaceState state) {
-  canvas->interface_state |= state;
-}
-
-static inline void
-canvas_disable_interface_state(Canvas *canvas,
-                               const CanvasInterfaceState state) {
-  canvas->interface_state &= ~state;
-}
-
-static inline unsigned int canvas_interface_state(Canvas *canvas) {
-  return canvas->interface_state;
-}
 
 EXTERN_C_END
 #endif

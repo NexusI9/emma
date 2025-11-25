@@ -2,11 +2,11 @@
 #include "nkengine/include/gui.hpp"
 #include "runtime/node/canvas.h"
 
-Layout::NavBar::NavBar(Gui *gui, Canvas *canvas)
-    : canvas(canvas), gui(gui), oct_switch((canvas_interface_state(canvas) &
-                                            CanvasInterfaceState_Octagon)),
-      heat_switch(
-          (canvas_interface_state(canvas) & CanvasInterfaceState_Heatmap)) {
+Layout::NavBar::NavBar(Gui *gui, Canvas *canvas, NavBarSwitchConfig octa_config,
+                       NavBarSwitchConfig heatmap_config)
+    : canvas(canvas), gui(gui), oct_switch(octa_config.init_state),
+      heat_switch(heatmap_config.init_state), octalysis_config(octa_config),
+      heatmap_config(heatmap_config) {
 
   // TODO COLOR
   {
@@ -69,38 +69,40 @@ void Layout::NavBar::draw() {
   right_panel.Begin("Right Panel");
   {
     const float base_y = ImGui::GetCursorPosY();
-    static const float switch_padding_top = 11.0f;
-    static const float text_padding_top = 20.0f;
-    static const float text_gap = 8.0f;
-    const unsigned int display_state = canvas_interface_state(canvas);
-
-    {
-      ImGui::SetCursorPosY(base_y + text_padding_top);
-      ImGui::Text("Octalysis");
-
-      ImGui::SameLine(0.0f, gui_scale(gui, text_gap));
-
-      ImGui::SetCursorPosY(base_y + switch_padding_top);
-      bool oct_state = oct_switch.Draw("##oct_switch");
-      if (oct_state && ((display_state & CanvasInterfaceState_Octagon) == 0)) {
-
-        canvas_enable_interface_state(canvas, CanvasInterfaceState_Octagon);
-
-      } else if (!oct_state && (display_state & CanvasInterfaceState_Octagon)) {
-
-        canvas_disable_interface_state(canvas, CanvasInterfaceState_Octagon);
-      }
-    }
+    draw_switch(&oct_switch, "##oct_switch", "Octalysis", &octalysis_config,
+                base_y);
     ImGui::SameLine(0.0f, gui_scale(gui, 16));
-    {
-      ImGui::SetCursorPosY(base_y + text_padding_top);
-      ImGui::Text("Heatmap");
-
-      ImGui::SameLine(0.0f, gui_scale(gui, text_gap));
-
-      ImGui::SetCursorPosY(base_y + switch_padding_top);
-      heat_switch.Draw("##heat_switch");
-    }
+    draw_switch(&heat_switch, "##heat_switch", "Heatmap", &heatmap_config,
+                base_y);
   }
   right_panel.End();
+}
+
+void Layout::NavBar::draw_switch(UI::Switch *component, const char *id,
+                                 const char *label, NavBarSwitchConfig *config,
+                                 const float base_y) {
+
+  static const float switch_padding_top = 11.0f;
+  static const float text_padding_top = 20.0f;
+  static const float text_gap = 8.0f;
+
+  {
+    ImGui::SetCursorPosY(base_y + text_padding_top);
+    ImGui::Text("%s", label);
+
+    ImGui::SameLine(0.0f, gui_scale(gui, text_gap));
+
+    ImGui::SetCursorPosY(base_y + switch_padding_top);
+
+    bool switch_state = component->Draw(id);
+
+    if (switch_state && !config->getter(config->user_data)) {
+
+      config->setter(true, config->user_data);
+
+    } else if (!switch_state && config->getter(config->user_data)) {
+
+      config->setter(false, config->user_data);
+    }
+  }
 }

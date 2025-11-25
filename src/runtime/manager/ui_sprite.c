@@ -10,8 +10,8 @@ const TextureAtlasRegion *ui_sprite(const UISprite type) {
           {
               .label = "Tool Bar",
               .uv0 = {scale * 0.0f / tex_res, scale * 0.0f / tex_res},
-              .uv1 = {scale * 698.0f / tex_res, scale * 136.0f / tex_res},
-              .size = {scale * 698.0f, scale * 136.0f},
+              .uv1 = {scale * 698.0f / tex_res, scale * 178.0f / tex_res},
+              .size = {scale * 698.0f, scale * 178.0f},
           },
       [UISprite_ToolBar_Icon_Frame] =
           {

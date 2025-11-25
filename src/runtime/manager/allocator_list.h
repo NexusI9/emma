@@ -10,6 +10,11 @@
     size_t length;                                                             \
   }
 
+typedef struct {
+  alloc_id *entries;
+  size_t *length;
+} AllocIdRefList;
+
 EXTERN_C_BEGIN
 
 static inline StaticListStatus allocator_id_list_push(alloc_id *entries,

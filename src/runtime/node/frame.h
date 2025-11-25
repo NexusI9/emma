@@ -17,8 +17,7 @@ typedef enum {
 
 typedef struct {
 
-  alloc_id id;
-  alloc_id octagon_id;
+  alloc_id id, octagon_id, factor_id;
   alloc_id connector_handle_id[CONNECTOR_HANDLE_COUNT];
   ALLOCATOR_ID_LIST(FRAME_MAX_CONNECTORS) connectors_id;
 
@@ -70,7 +69,7 @@ static inline const float *frame_get_background(const Frame *node) {
 
 // Mutators
 static inline FrameStatus frame_set_size(Frame *node, const vec2 value) {
-  
+
   glm_vec2_copy((float *)value, node->size);
 
   // update endpoint

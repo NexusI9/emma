@@ -1,12 +1,28 @@
 #include "container.hpp"
 #include "runtime/layouts/nav_bar.hpp"
 #include "runtime/manager/atlas.h"
+#include "runtime/node/canvas.h"
+#include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas.hpp"
+#include "runtime/widgets/heatmap.hpp"
 
-Layout::Container::Container(Gui *gui, Canvas *canvas)
+Layout::Container::Container(Gui *gui, Canvas *canvas, Heatmap *heatmap)
     : gui(gui), canvas_shape(gui, canvas),
       tool_bar(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI)),
-      nav_bar(gui, canvas) {
+      heatmap(heatmap),
+      nav_bar(gui, canvas,
+              {
+                  .setter = container_set_octalysis_state,
+                  .getter = container_get_octalysis_state,
+                  .init_state = display_state_enabled(DisplayState_Octagon),
+                  .user_data = this,
+              },
+              {
+                  .setter = container_set_heatmap_state,
+                  .getter = container_get_heatmap_state,
+                  .init_state = display_state_enabled(DisplayState_Heatmap),
+                  .user_data = this,
+              }) {
 
   canvas_shape.sync_shapes();
 }
@@ -34,9 +50,12 @@ void Layout::Container::draw() {
                      ImGuiWindowFlags_NoBringToFrontOnFocus);
 
     {
-      canvas_shape.draw();
+      canvas_shape.draw(display_state_enabled(DisplayState_Octagon));
       nav_bar.draw();
       tool_bar.draw();
+
+      if (get_display_state() & DisplayState_Heatmap)
+        heatmap.draw();
     }
 
     ImGui::End();
@@ -54,4 +73,34 @@ void container_draw_callback(Renderer *renderer, void *data) {
 
   Layout::Container *container = (Layout::Container *)data;
   container->draw();
+}
+
+void container_set_octalysis_state(bool value, void *data) {
+
+  if (value)
+    ((Layout::Container *)data)
+        ->enable_display_state(Layout::Container::DisplayState_Octagon);
+  else
+    ((Layout::Container *)data)
+        ->disable_display_state(Layout::Container::DisplayState_Octagon);
+}
+
+void container_set_heatmap_state(bool value, void *data) {
+
+  if (value)
+    ((Layout::Container *)data)
+        ->enable_display_state(Layout::Container::DisplayState_Heatmap);
+  else
+    ((Layout::Container *)data)
+        ->disable_display_state(Layout::Container::DisplayState_Heatmap);
+}
+
+bool container_get_octalysis_state(void *data) {
+  return ((Layout::Container *)data)
+      ->display_state_enabled(Layout::Container::DisplayState_Octagon);
+}
+
+bool container_get_heatmap_state(void *data) {
+  return ((Layout::Container *)data)
+      ->display_state_enabled(Layout::Container::DisplayState_Heatmap);
 }

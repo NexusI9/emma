@@ -27,7 +27,7 @@ class CanvasShape {
 public:
   CanvasShape(Gui *, Canvas *);
 
-  void draw();
+  void draw(bool);
   void sync_shapes();
   void sync_boundboxes();
 
@@ -37,8 +37,8 @@ private:
   TransformBox transform_box;
   GridBackground grid_background;
 
-  FrameShape frame_shapes[CANVAS_MAX_FRAMES];
-  CanvasTransformFrameData transform_frame_data[CANVAS_MAX_FRAMES];
+  FrameShape frame_shapes[ALLOCATOR_MAX_FRAMES];
+  CanvasTransformFrameData transform_frame_data[ALLOCATOR_MAX_FRAMES];
 
   void draw_frame(FrameShape *);
   void draw_frame_handle_connectors(Frame *, const int);

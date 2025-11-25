@@ -108,7 +108,7 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
   }
 }
 
-void Widget::CanvasShape::draw() {
+void Widget::CanvasShape::draw(bool show_octagon) {
 
   grid_background.draw_texture(gui->pass_encoder);
 
@@ -117,7 +117,7 @@ void Widget::CanvasShape::draw() {
   for (i = 0; i < node->frames[CanvasFrameState_Default].length; i++)
     draw_frame(&frame_shapes[i]);
 
-  if (canvas_interface_state(node) & CanvasInterfaceState_Octagon)
+  if (show_octagon)
     for (i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
       Frame *frame = allocator_frame_entry(
           node->frames[CanvasFrameState_Octagon].entries[i]);

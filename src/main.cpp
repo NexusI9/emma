@@ -10,6 +10,7 @@
 #include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/frame.h"
+#include "runtime/node/heatmap.h"
 #include "runtime/node/octagon.h"
 #include "runtime/widgets/canvas.hpp"
 #include <emscripten/emscripten.h>
@@ -138,10 +139,17 @@ int main() {
 
   Canvas canvas;
   create_frames(&canvas);
-  canvas_enable_interface_state(&canvas, CanvasInterfaceState_Octagon);
-  canvas_enable_interface_state(&canvas, CanvasInterfaceState_Heatmap);
 
-  Layout::Container container = Layout::Container(gui, &canvas);
+  Heatmap heatmap;
+  HeatmapDescriptor hm_desc = {};
+  glm_vec4_copy((vec4){0.0f, 0.0f, 0.0f, 0.4f}, hm_desc.background);
+  hm_desc.frames = {canvas.frames->entries, &canvas.frames->length};
+  hm_desc.height = context_height();
+  hm_desc.width = context_width();
+  heatmap_create(&heatmap, &hm_desc);
+
+  Layout::Container container = Layout::Container(gui, &canvas, &heatmap);
+  
   renderer_add_draw_callback(renderer, container_draw_callback, &container,
                              RendererDrawMode_All);
 

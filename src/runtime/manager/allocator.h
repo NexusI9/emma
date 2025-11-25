@@ -9,6 +9,8 @@
 #include "runtime/node/connector_handle.h"
 #include "utils/id.h"
 
+#define ALLOCATOR_MAX_FRAMES 1024
+
 // clang-format off
 #define ALLOCATOR_LIST(_) \
   _(  Frame,               frame,                 1024  )\

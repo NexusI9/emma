@@ -7,15 +7,29 @@
 
 namespace Layout {
 
+typedef void (*navbar_switch_set_state)(bool, void *);
+typedef bool (*navbar_switch_get_state)(void *);
+
+typedef struct {
+  const bool init_state;
+  navbar_switch_set_state setter;
+  navbar_switch_get_state getter;
+  void *user_data;
+} NavBarSwitchConfig;
+
 class NavBar {
 
 public:
-  NavBar(Gui *gui, Canvas *canvas);
+  NavBar(Gui *, Canvas *, NavBarSwitchConfig, NavBarSwitchConfig);
   void draw();
 
 private:
   Gui *gui;
   Canvas *canvas;
+
+  NavBarSwitchConfig octalysis_config;
+  NavBarSwitchConfig heatmap_config;
+
   static constexpr ImVec2 margin = ImVec2(50.0, 20.0);
   static constexpr uint8_t height = 42;
   static constexpr ImColor bg_color = ImColor(52, 52, 52, 255);
@@ -25,6 +39,9 @@ private:
 
   UI::Frame left_panel, right_panel;
   UI::Switch oct_switch, heat_switch;
+
+  void draw_switch(UI::Switch *, const char *, const char *,
+                   NavBarSwitchConfig *, const float);
 };
 
 } // namespace Layout
