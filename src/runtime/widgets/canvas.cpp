@@ -110,19 +110,6 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
 
 void Widget::CanvasShape::draw() {
 
-  ImGuiViewport *vp = ImGui::GetMainViewport();
-  ImGui::SetNextWindowPos(vp->Pos);
-  ImGui::SetNextWindowSize(vp->Size);
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-  ImGui::Begin("Canvas", NULL,
-               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                   ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-                   ImGuiWindowFlags_NoScrollWithMouse |
-                   ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground |
-                   ImGuiWindowFlags_NoBringToFrontOnFocus);
-
   grid_background.draw_texture(gui->pass_encoder);
 
   // === frames ===
@@ -166,9 +153,6 @@ void Widget::CanvasShape::draw() {
 
   if (transform_box.objects_count() > 0)
     transform_box.draw();
-
-  ImGui::End();
-  ImGui::PopStyleVar(2);
 }
 
 /**

@@ -2,6 +2,7 @@
 #define _LAYOUT_CONTAINER_H_
 
 #include "nkengine/include/renderer.h"
+#include "runtime/layouts/nav_bar.hpp"
 #include "runtime/widgets/canvas.hpp"
 
 EXTERN_C_BEGIN
@@ -20,8 +21,12 @@ public:
 
 private:
   Gui *gui;
+  
   Widget::CanvasShape canvas_shape;
   Widget::ToolBarShape tool_bar;
+  Layout::NavBar nav_bar;
+  
+
 };
 
 } // namespace Layout

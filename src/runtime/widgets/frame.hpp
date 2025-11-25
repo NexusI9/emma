@@ -1,5 +1,5 @@
-#ifndef _WIDGET_FRAME_H_
-#define _WIDGET_FRAME_H_
+#ifndef _EMMA_WIDGET_FRAME_H_
+#define _EMMA_WIDGET_FRAME_H_
 
 #include "runtime/geometry/boundbox_frame.h"
 #include "runtime/node/frame.h"
