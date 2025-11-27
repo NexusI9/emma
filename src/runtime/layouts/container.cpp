@@ -10,7 +10,12 @@ Layout::Container::Container(Gui *gui, Canvas *canvas,
                              Heatmap hm[HeatmapType_COUNT])
     : gui(gui), canvas_shape(gui, canvas),
       tool_bar(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI)),
-      heatmaps{&hm[0], &hm[1], &hm[2], &hm[3]},
+      heatmaps{
+          {gui, &hm[0]},
+          {gui, &hm[1]},
+          {gui, &hm[2]},
+          {gui, &hm[3]},
+      },
       nav_bar(gui, canvas,
               {
                   .setter = container_set_octalysis_state,

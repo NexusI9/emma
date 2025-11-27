@@ -11,8 +11,6 @@
 #include <cstdlib>
 #include <imgui/imgui.h>
 
-Widget::HeatmapShape::HeatmapShape(Heatmap *map) { node = map; }
-
 void Widget::HeatmapShape::compute_offline(WGPUCommandEncoder encoder) {
 
   const float *pan = viewport_get_pan();
@@ -111,4 +109,46 @@ void Widget::HeatmapShape::draw() {
                ImVec2(pan[0] + vp->Size.x - init_offset.x,
                       pan[1] + vp->Size.y - init_offset.y),
                ImVec2(0, 0), ImVec2(1, 1));
+
+  draw_gradient(dl);
+}
+
+void Widget::HeatmapShape::draw_gradient(ImDrawList *dl) {
+
+  ImGui::BeginGroup();
+
+  gradient.draw_vertical(dl);
+
+  static constexpr ImVec2 line_top_end =
+      ImVec2(gradient_anchor.x + 40, gradient_anchor.y);
+
+  static constexpr ImVec2 line_bottom_start =
+      ImVec2(gradient_anchor.x, gradient_anchor.y + gradient_height);
+
+  static constexpr ImVec2 line_bottom_end =
+      ImVec2(gradient_anchor.x + 40, gradient_anchor.y + gradient_height);
+
+  ImGui::SetCursorPos(gui_scale_im_vec2(
+      gui, ImVec2(gradient_anchor.x, gradient_anchor.y - 50)));
+
+  ImGui::SetWindowFontScale(1.5f);
+  ImGui::Text("%s", node->label);
+  ImGui::SetWindowFontScale(1.0f);
+
+  draw_gradient_legend(dl, gradient_anchor, line_top_end, node->axes[0]);
+  draw_gradient_legend(dl, line_bottom_start, line_bottom_end, node->axes[1]);
+
+  ImGui::EndGroup();
+}
+
+void Widget::HeatmapShape::draw_gradient_legend(ImDrawList *dl, ImVec2 start,
+                                                ImVec2 end, const char *label) {
+
+  static const int line_value = 140;
+  dl->AddLine(gui_scale_im_vec2(gui, start), gui_scale_im_vec2(gui, end),
+              ImColor(line_value, line_value, line_value, 255), 3.0f);
+
+  ImGui::SetCursorPos(gui_scale_im_vec2(gui, ImVec2(end.x + 10, end.y - 8)));
+
+  ImGui::Text("%s", label);
 }

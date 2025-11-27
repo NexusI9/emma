@@ -43,6 +43,8 @@ struct Heatmap {
   uint8_t blur;
   float scale;
 
+  ColormapUniform color_map;
+
   WGPUTexture textures[HeatmapTexture_COUNT];
   WGPUTextureView views[HeatmapTexture_COUNT];
   ComputePass compute_passes[HeatmapComputePass_COUNT];

@@ -118,7 +118,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
           .heatmap =
               {
                   .label = "Excitment",
-                  .axes = {"Boredom", "Excitment"},
+                  .axes = {"Boredom", "Thrilling"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
               },
           .color_map =
@@ -139,7 +139,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
           .heatmap =
               {
                   .label = "Reward",
-                  .axes = {"Low", "High"},
+                  .axes = {"Pointless", "Valuable"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
               },
           .color_map =
@@ -148,10 +148,10 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
                   .count = 4,
                   .colors =
                       {
-                          {0.278, 0.337, 0.416, 1.0}, // blue
-                          {0.204, 0.820, 0.820, 1.0}, // cyan
-                          {0.941, 0.780, 0.369, 1.0}, // soft gold
-                          {0.972, 0.706, 0.000, 1.0}, // red
+                          {0.2, 0.3, 0.4, 1.0}, // blue
+                          {0.2, 0.8, 0.8, 1.0}, // cyan
+                          {0.9, 0.7, 0.3, 1.0}, // soft gold
+                          {1.0, 0.9, 0.0, 1.0}, // red
                       },
 
               },
@@ -159,8 +159,8 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
       {
           .heatmap =
               {
-                  .label = "Social bounding",
-                  .axes = {"Isolation", "Social Connection"},
+                  .label = "Social Bounding",
+                  .axes = {"Isolation", "Belonging"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
               },
           .color_map =
@@ -169,10 +169,10 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
                   .count = 4,
                   .colors =
                       {
-                          {0.290, 0.333, 0.408, 1.0}, // blue grey
-                          {0.369, 0.353, 0.639, 1.0}, // muted violet
-                          {0.478, 0.302, 0.824, 1.0}, // purple
-                          {1.000, 0.306, 0.737, 1.0}, // neon magenta
+                          {0.2, 0.3, 0.4, 1.0}, // blue grey
+                          {0.5, 0.4, 0.6, 1.0}, // muted violet
+                          {0.8, 0.3, 0.9, 1.0}, // purple
+                          {1.0, 0.3, 0.7, 1.0}, // neon magenta
                       },
 
               },
@@ -180,8 +180,8 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
       {
           .heatmap =
               {
-                  .label = "Challenge",
-                  .axes = {"High friction", "Ease"},
+                  .label = "Friction",
+                  .axes = {"Smooth", "Painful"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
               },
           .color_map =
@@ -190,10 +190,10 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
                   .count = 4,
                   .colors =
                       {
-                          {0.839, 0.416, 0.180, 1.0}, // deep orange
-                          {0.953, 0.651, 0.510, 1.0}, // soft peach
-                          {0.482, 0.776, 0.494, 1.0}, // calm green
-                          {0.306, 0.651, 0.294, 1.0}, // clear green
+                          {0.2, 0.2, 0.5, 1.0}, // calm green
+                          {0.3, 0.4, 0.7, 1.0}, // clear green
+                          {0.9, 0.6, 0.5, 1.0}, // soft peach
+                          {0.9, 0.3, 0.1, 1.0}, // deep orange
                       },
 
               },
