@@ -101,10 +101,11 @@ void Widget::HeatmapShape::draw() {
   // TODO: cache vp size ?
   ImGuiViewport *vp = ImGui::GetMainViewport();
 
+  // bg
   dl->AddRectFilled(ImVec2(0, 0), vp->Size, im_color(node->background));
 
+  // baked heatmap
   const float *pan = viewport_get_pan();
-
   dl->AddImage((ImTextureRef)node->views[HeatmapTexture_Color_Offscreen],
                ImVec2(pan[0] - init_offset.x, pan[1] - init_offset.y),
                ImVec2(pan[0] + vp->Size.x - init_offset.x,

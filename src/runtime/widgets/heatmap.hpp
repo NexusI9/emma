@@ -15,6 +15,9 @@ public:
 
   void draw();
   void compute_offline(WGPUCommandEncoder);
+  const char *get_label() { return node->label; }
+  const char *get_axis_0() { return node->axes[0]; }
+  const char *get_axis_1() { return node->axes[1]; }
 
 private:
   Heatmap *node;

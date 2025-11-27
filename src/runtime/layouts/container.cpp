@@ -26,6 +26,17 @@ Layout::Container::Container(Gui *gui, Canvas *canvas,
               }) {
 
   canvas_shape.sync_shapes();
+
+  {
+    heatmap_list_shape = UI::Frame();
+    heatmap_list_shape.background_color = nav_bar.bg_color;
+    heatmap_list_shape.border_color = nav_bar.bd_color;
+    heatmap_list_shape.padding = gui_scale_im_vec2(gui, nav_bar.padding);
+    heatmap_list_shape.border_radius = gui_scale(gui, nav_bar.bd_radius);
+    heatmap_list_shape.position =
+        ImVec2(gui_scale(gui, 1275), gui_scale(gui, 80));
+    heatmap_list_shape.size = ImVec2(0, 0);
+  }
 }
 
 void Layout::Container::draw() {
@@ -47,8 +58,10 @@ void Layout::Container::draw() {
     canvas_shape.draw(display_state_enabled(DisplayState_Octagon));
     tool_bar.draw();
 
-    if (display_state_enabled(DisplayState_Heatmap))
+    if (display_state_enabled(DisplayState_Heatmap)) {
       heatmaps[active_heatmap].draw();
+      draw_heatmap_list();
+    }
 
     nav_bar.draw();
   }
@@ -61,6 +74,22 @@ void Layout::Container::draw() {
   gui_command_end(gui);
 
   viewport_update(&g_viewport_manager);
+}
+
+void Layout::Container::draw_heatmap_list() {
+
+  heatmap_list_shape.Begin("##Heatmap list");
+
+  ImGui::Text("Factors:");
+  ImGui::Dummy(ImVec2(gui_scale(gui, 3.0f), gui_scale(gui, 3.0f)));
+  for (int i = 0; i < HeatmapType_COUNT; i++) {
+    if (ImGui::RadioButton(heatmaps[i].get_label(), active_heatmap == i)) {
+      active_heatmap = (HeatmapType)i;
+      heatmap_require_update = true;
+    }
+    ImGui::Dummy(ImVec2(gui_scale(gui, 3.0f), gui_scale(gui, 3.0f)));
+  }
+  heatmap_list_shape.End();
 }
 
 void container_draw_callback(Renderer *renderer, void *data) {

@@ -64,6 +64,9 @@ private:
   Widget::CanvasShape canvas_shape;
   Widget::ToolBarShape tool_bar;
   Layout::NavBar nav_bar;
+  UI::Frame heatmap_list_shape;
+
+  void draw_heatmap_list();
 };
 
 } // namespace Layout
