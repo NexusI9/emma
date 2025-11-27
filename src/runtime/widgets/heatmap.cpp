@@ -15,8 +15,9 @@ Widget::HeatmapShape::HeatmapShape(Heatmap *map) { node = map; }
 
 void Widget::HeatmapShape::compute_offline(WGPUCommandEncoder encoder) {
 
-  init_offset.x = vpx(0);
-  init_offset.y = vpy(0);
+  const float *pan = viewport_get_pan();
+  init_offset.x = pan[0];
+  init_offset.y = pan[1];
 
   require_update = false;
 
@@ -104,9 +105,11 @@ void Widget::HeatmapShape::draw() {
 
   dl->AddRectFilled(ImVec2(0, 0), vp->Size, im_color(node->background));
 
+  const float* pan = viewport_get_pan();
+  
   dl->AddImage(
       (ImTextureRef)node->views[HeatmapTexture_Color_Offscreen],
-      ImVec2(vpx(0) - init_offset.x, vpy(0) - init_offset.y),
-      ImVec2(vpx(vp->Size.x) - init_offset.x, vpy(vp->Size.y) - init_offset.y),
+      ImVec2(pan[0] - init_offset.x, pan[1] - init_offset.y),
+      ImVec2(pan[0] + vp->Size.x - init_offset.x, pan[1] + vp->Size.y - init_offset.y),
       ImVec2(0, 0), ImVec2(1, 1));
 }
