@@ -56,7 +56,7 @@ void Layout::NavBar::draw() {
   {
     const float base_y = ImGui::GetCursorPosY();
     ImGui::SetCursorPosY(base_y + gui_scale(gui, 3));
-    ImGui::Text("EMMA");
+    ImGui::Text("EMMA [v0.15 - alpha]");
     ImGui::SetCursorPosX(gui_scale(gui, margin.x));
     ImGui::SetWindowFontScale(0.8f);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));

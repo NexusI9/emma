@@ -141,15 +141,28 @@ int main() {
   create_frames(&canvas);
 
   Heatmap heatmap;
-  HeatmapDescriptor hm_desc = {};
-  glm_vec4_copy((vec4){0.0f, 0.0f, 0.0f, 0.4f}, hm_desc.background);
-  hm_desc.frames = {canvas.frames->entries, &canvas.frames->length};
-  hm_desc.height = context_height();
-  hm_desc.width = context_width();
-  heatmap_create(&heatmap, &hm_desc);
+  HeatmapDescriptor map_desc = {};
+  ColormapUniform map_color = {
+      .count = 4,
+      .colors =
+          {
+              {0.0f, 0.0f, 1.0f, 1.0f}, // blue
+              {0.0f, 1.0f, 0.0f, 1.0f}, // green
+              {1.0f, 1.0f, 0.0f, 1.0f}, // yellow
+              {1.0f, 0.0f, 0.0f, 1.0f}, // red
+          },
+  };
+  glm_vec4_copy((vec4){0.0f, 0.0f, 0.0f, 0.4f}, map_desc.background);
+  map_desc.frames = {canvas.frames->entries, &canvas.frames->length};
+  map_desc.height = context_height() * context_dpi();
+  map_desc.width = context_width() * context_dpi();
+  map_desc.blur = 8;
+  map_desc.scale = 1.0f / 4;
+  map_desc.color_map = &map_color;
+  heatmap_create(&heatmap, &map_desc);
 
   Layout::Container container = Layout::Container(gui, &canvas, &heatmap);
-  
+
   renderer_add_draw_callback(renderer, container_draw_callback, &container,
                              RendererDrawMode_All);
 

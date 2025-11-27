@@ -20,15 +20,15 @@ void Widget::ModuleShape::draw() {
                p0, p1, im_vec2(node->uv0), im_vec2(node->uv1));
 }
 
-void Widget::ModuleShape::draw_fill(ImColor color) {
+void Widget::ModuleShape::draw_fill(ImColor color, const float scale) {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
-  ImVec2 p0 =
-      ImVec2(vpx(node->world_position[0]), vpy(node->world_position[1]));
+  ImVec2 p0 = ImVec2(vpx(node->world_position[0]) * scale,
+                     vpy(node->world_position[1]) * scale);
 
-  ImVec2 p1 = ImVec2(vpx(node->world_position[0] + node->size[0]),
-                     vpy(node->world_position[1] + node->size[1]));
+  ImVec2 p1 = ImVec2(vpx(node->world_position[0] + node->size[0]) * scale,
+                     vpy(node->world_position[1] + node->size[1]) * scale);
 
   dl->AddRectFilled(p0, p1, color);
 }

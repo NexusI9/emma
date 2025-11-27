@@ -11,7 +11,7 @@ class ModuleShape {
 public:
   ModuleShape(Frame *node) : node(node) {}
   void draw();
-  void draw_fill(ImColor);
+  void draw_fill(ImColor, const float);
   
 private:
   Frame *node;

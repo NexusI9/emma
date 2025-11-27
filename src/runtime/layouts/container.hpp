@@ -45,13 +45,14 @@ public:
     return get_display_state() & state;
   }
 
+  Widget::HeatmapShape heatmap;
+
 private:
   Gui *gui;
   unsigned int display_state;
 
   Widget::CanvasShape canvas_shape;
   Widget::ToolBarShape tool_bar;
-  Widget::HeatmapShape heatmap;
   Layout::NavBar nav_bar;
 };
 

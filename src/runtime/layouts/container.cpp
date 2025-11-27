@@ -29,43 +29,33 @@ Layout::Container::Container(Gui *gui, Canvas *canvas, Heatmap *heatmap)
 
 void Layout::Container::draw() {
 
-  gui_draw_begin(gui);
+  gui_command_begin(gui);
   gui_draw_update_io(gui);
+
+  if (display_state_enabled(DisplayState_Heatmap) && heatmap.require_update)
+    heatmap.compute_offline(gui->command_encoder);
+
+  gui_draw_swapchain_begin(gui);
+  ImGui_ImplWGPU_NewFrame();
+  ImGui::NewFrame();
+
+  UI::FullScreenWindow().Begin("Root container");
   {
-    ImGui_ImplWGPU_NewFrame();
-    ImGui::NewFrame();
+    canvas_shape.draw(display_state_enabled(DisplayState_Octagon));
+    tool_bar.draw();
 
-    ImGuiViewport *vp = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(vp->Pos);
-    ImGui::SetNextWindowSize(vp->Size);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    if (display_state_enabled(DisplayState_Heatmap))
+      heatmap.draw();
 
-    ImGui::Begin("Root Container", NULL,
-                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
-                     ImGuiWindowFlags_NoScrollWithMouse |
-                     ImGuiWindowFlags_NoCollapse |
-                     ImGuiWindowFlags_NoBackground |
-                     ImGuiWindowFlags_NoBringToFrontOnFocus);
-
-    {
-      canvas_shape.draw(display_state_enabled(DisplayState_Octagon));
-      tool_bar.draw();
-
-      if (display_state_enabled(DisplayState_Heatmap))
-        heatmap.draw();
-
-      nav_bar.draw();
-    }
-
-    ImGui::End();
-    ImGui::PopStyleVar(2);
-
-    ImGui::Render();
-    ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), gui->pass_encoder);
+    nav_bar.draw();
   }
-  gui_draw_end(gui);
+  UI::FullScreenWindow().End();
+
+  ImGui::Render();
+  ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), gui->pass_encoder);
+
+  gui_draw_swapchain_end(gui);
+  gui_command_end(gui);
 
   viewport_update(&g_viewport_manager);
 }
@@ -78,22 +68,26 @@ void container_draw_callback(Renderer *renderer, void *data) {
 
 void container_set_octalysis_state(bool value, void *data) {
 
-  if (value)
-    ((Layout::Container *)data)
-        ->enable_display_state(Layout::Container::DisplayState_Octagon);
-  else
-    ((Layout::Container *)data)
-        ->disable_display_state(Layout::Container::DisplayState_Octagon);
+  Layout::Container *container = (Layout::Container *)data;
+
+  if (value) {
+    container->enable_display_state(Layout::Container::DisplayState_Octagon);
+  } else {
+    container->disable_display_state(Layout::Container::DisplayState_Octagon);
+  }
 }
 
 void container_set_heatmap_state(bool value, void *data) {
 
-  if (value)
-    ((Layout::Container *)data)
-        ->enable_display_state(Layout::Container::DisplayState_Heatmap);
-  else
-    ((Layout::Container *)data)
-        ->disable_display_state(Layout::Container::DisplayState_Heatmap);
+  Layout::Container *container = (Layout::Container *)data;
+
+  if (value) {
+    container->enable_display_state(Layout::Container::DisplayState_Heatmap);
+  } else {
+    container->disable_display_state(Layout::Container::DisplayState_Heatmap);
+  }
+
+  container->heatmap.require_update = true;
 }
 
 bool container_get_octalysis_state(void *data) {
