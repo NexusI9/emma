@@ -10,12 +10,7 @@ Layout::Container::Container(Gui *gui, Canvas *canvas,
                              Heatmap hm[HeatmapType_COUNT])
     : gui(gui), canvas_shape(gui, canvas),
       tool_bar(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI)),
-      heatmaps{
-          Widget::HeatmapShape(&hm[0]),
-          Widget::HeatmapShape(&hm[1]),
-          Widget::HeatmapShape(&hm[2]),
-          Widget::HeatmapShape(&hm[3]),
-      },
+      heatmaps{&hm[0], &hm[1], &hm[2], &hm[3]},
       nav_bar(gui, canvas,
               {
                   .setter = container_set_octalysis_state,
@@ -38,9 +33,10 @@ void Layout::Container::draw() {
   gui_command_begin(gui);
   gui_draw_update_io(gui);
 
- // if (display_state_enabled(DisplayState_Heatmap) &&
- //     heatmaps[active_heatmap].require_update)
- //   heatmaps[active_heatmap].compute_offline(gui->command_encoder);
+  if (display_state_enabled(DisplayState_Heatmap) && heatmap_require_update) {
+    heatmap_require_update = false;
+    heatmaps[active_heatmap].compute_offline(gui->command_encoder);
+  }
 
   gui_draw_swapchain_begin(gui);
   ImGui_ImplWGPU_NewFrame();
@@ -51,10 +47,8 @@ void Layout::Container::draw() {
     canvas_shape.draw(display_state_enabled(DisplayState_Octagon));
     tool_bar.draw();
 
-    printf("draw\n");
-    
-    //if (display_state_enabled(DisplayState_Heatmap))
-    //  heatmaps[active_heatmap].draw();
+    if (display_state_enabled(DisplayState_Heatmap))
+      heatmaps[active_heatmap].draw();
 
     nav_bar.draw();
   }
@@ -96,7 +90,7 @@ void container_set_heatmap_state(bool value, void *data) {
     container->disable_display_state(Layout::Container::DisplayState_Heatmap);
   }
 
-  container->heatmaps[container->active_heatmap].require_update = true;
+  container->heatmap_require_update = true;
 }
 
 bool container_get_octalysis_state(void *data) {

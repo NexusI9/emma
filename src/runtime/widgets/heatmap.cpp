@@ -19,8 +19,6 @@ void Widget::HeatmapShape::compute_offline(WGPUCommandEncoder encoder) {
   init_offset.x = pan[0];
   init_offset.y = pan[1];
 
-  require_update = false;
-
   // draw zones with intensity
   compute_render_pass(encoder);
 

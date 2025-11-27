@@ -266,13 +266,13 @@ int main() {
   Heatmap heatmaps[4];
   create_heatmaps(&canvas, heatmaps);
 
-  printf("done\n");
+  // need to allocate on the heap, may be too heavy for the stack (causes server
+  // crash)
+  Layout::Container *container = new Layout::Container(gui, &canvas, heatmaps);
+  renderer_add_draw_callback(renderer, container_draw_callback, container,
+                             RendererDrawMode_All);
 
-  Layout::Container container = Layout::Container(gui, &canvas, heatmaps);
-  // renderer_add_draw_callback(renderer, container_draw_callback, &container,
-  //                            RendererDrawMode_All);
-  //
-  //  renderer_draw(renderer);
+  renderer_draw(renderer);
 
   return 0;
 }

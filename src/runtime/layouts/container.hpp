@@ -55,10 +55,11 @@ public:
 
   Widget::HeatmapShape heatmaps[HeatmapType_COUNT];
   HeatmapType active_heatmap = HeatmapType_Excitment;
+  bool heatmap_require_update = false;
 
 private:
   Gui *gui;
-  unsigned int display_state;
+  unsigned int display_state = 0;
 
   Widget::CanvasShape canvas_shape;
   Widget::ToolBarShape tool_bar;

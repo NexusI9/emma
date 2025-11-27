@@ -10,12 +10,11 @@ namespace Widget {
 class HeatmapShape {
 
 public:
+  HeatmapShape() {}
   HeatmapShape(Heatmap *);
 
   void draw();
   void compute_offline(WGPUCommandEncoder);
-
-  bool require_update = false;
 
 private:
   Heatmap *node;
