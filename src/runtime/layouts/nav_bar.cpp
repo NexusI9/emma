@@ -60,7 +60,7 @@ void Layout::NavBar::draw() {
     ImGui::SetCursorPosX(gui_scale(gui, margin.x));
     ImGui::SetWindowFontScale(0.8f);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
-    ImGui::Text("Emmotional Mapper");
+    ImGui::Text("Emotional Mapper");
     ImGui::PopStyleColor();
     ImGui::SetWindowFontScale(1.0f);
   }

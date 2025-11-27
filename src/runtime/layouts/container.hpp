@@ -22,14 +22,22 @@ namespace Layout {
 class Container {
 
 public:
-  Container(Gui *, Canvas *, Heatmap *);
-  void draw();
-
   typedef enum {
     DisplayState_Default = 0,
     DisplayState_Octagon = 1 << 0,
     DisplayState_Heatmap = 1 << 1,
   } DisplayState;
+
+  typedef enum {
+    HeatmapType_Excitment,
+    HeatmapType_Reward,
+    HeatmapType_Social,
+    HeatmapType_Challenge,
+    HeatmapType_COUNT,
+  } HeatmapType;
+
+  Container(Gui *, Canvas *, Heatmap[HeatmapType_COUNT]);
+  void draw();
 
   void enable_display_state(const DisplayState state) {
     display_state |= state;
@@ -45,7 +53,8 @@ public:
     return get_display_state() & state;
   }
 
-  Widget::HeatmapShape heatmap;
+  Widget::HeatmapShape heatmaps[HeatmapType_COUNT];
+  HeatmapType active_heatmap = HeatmapType_Excitment;
 
 private:
   Gui *gui;

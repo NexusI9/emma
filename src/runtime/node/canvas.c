@@ -10,6 +10,8 @@
 #include "runtime/node/octagon.h"
 #include "utils/id.h"
 
+#include <string.h>
+
 static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
     "Epic Meaning", "Empowerment", "Social Influence", "Unpredictability",
     "Avoidance",    "Scarcity",    "Ownership",        "Accomplishment",
@@ -23,6 +25,22 @@ typedef enum {
 } CanvasFrameCreateFlags;
 
 static const float octagon_base_scale = 100.0f;
+
+CanvasStatus canvas_create(Canvas *canvas) {
+
+  size_t i;
+  for (i = 0; i < CanvasFrameState_COUNT; i++)
+    canvas->frames[i].length = 0;
+
+  for (i = 0; i < CanvasModuleState_COUNT; i++)
+    canvas->modules[i].length = 0;
+
+  canvas->octagons.length = 0;
+  canvas->connectors.length = 0;
+  canvas->connector_handles.length = 0;
+
+  return CanvasStatus_Success;
+}
 
 static inline void canvas_get_closest_connector_handles(const Frame *,
                                                         const Frame *,
@@ -170,7 +188,6 @@ ConnectorHandle *canvas_create_connector_handle(Canvas *canvas) {
 
   return handle;
 }
-
 
 void canvas_align_octagon_to_frame(Canvas *canvas, const Frame *frame) {
 

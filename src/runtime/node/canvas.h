@@ -9,7 +9,6 @@
 #include "runtime/node/frame.h"
 #include "utils/id.h"
 
-
 typedef enum {
   CanvasFrameState_Default,
   CanvasFrameState_Octagon,
@@ -17,7 +16,6 @@ typedef enum {
   CanvasFrameState_Selected,
   CanvasFrameState_COUNT,
 } CanvasFrameState;
-
 
 typedef enum {
   CanvasModuleState_Default,
@@ -32,6 +30,7 @@ typedef enum {
 } CanvasStatus;
 
 typedef struct {
+
   ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) frames[CanvasFrameState_COUNT];
   ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) modules[CanvasModuleState_COUNT];
   ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) octagons;
@@ -43,6 +42,7 @@ typedef struct {
 
 EXTERN_C_BEGIN
 
+CanvasStatus canvas_create(Canvas *);
 Frame *canvas_create_frame(Canvas *);
 Frame *canvas_create_module(Canvas *, const ModuleType);
 Octagon *canvas_create_octagon(Canvas *);
@@ -73,7 +73,6 @@ StaticListStatus canvas_empty_frame_state(Canvas *, const CanvasFrameState);
 void canvas_connect_frames(Canvas *, Frame *, Frame *);
 
 void canvas_disconnect_frames(Canvas *, const Frame *, const Frame *);
-
 
 EXTERN_C_END
 #endif

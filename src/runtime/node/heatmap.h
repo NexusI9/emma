@@ -35,6 +35,9 @@ typedef enum {
 
 struct Heatmap {
 
+  const char *axes[2];
+  const char *label;
+
   color background;
   AllocIdRefList frames;
   uint8_t blur;
@@ -55,6 +58,8 @@ typedef struct {
   uint8_t blur;
   float scale;
   ColormapUniform *color_map;
+  const char *axes[2];
+  const char *label;
 } HeatmapDescriptor;
 
 EXTERN_C_BEGIN

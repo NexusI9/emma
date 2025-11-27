@@ -17,7 +17,11 @@ HeatmapStatus heatmap_create(Heatmap *map, const HeatmapDescriptor *desc) {
   map->intensity_mapper = desc->intensity_mapper;
   map->blur = desc->blur;
   map->scale = fmaxf(0.1f, desc->scale);
+  map->label = desc->label;
 
+  map->axes[0] = desc->axes[0];
+  map->axes[1] = desc->axes[1];
+  
   // === On screen texture (BGRA): used to render imgui ===
   heatmap_create_texture(&map->textures[HeatmapTexture_Color_Onscreen],
                          &map->views[HeatmapTexture_Color_Onscreen],

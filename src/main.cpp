@@ -35,7 +35,7 @@ void create_frames(Canvas *canvas) {
 
     } modules;
 
-  } frames[] = {
+  } cframes[] = {
       {
           .position = {300.0f, 400.0f},
           .octagon_data = {{1, 0.5}, {6, 0.6}, {2, 0.9}},
@@ -76,26 +76,26 @@ void create_frames(Canvas *canvas) {
               },
       },
   };
-  static const int frames_count = sizeof(frames) / sizeof(frames[0]);
+  static const int frames_count = sizeof(cframes) / sizeof(cframes[0]);
 
   for (uint8_t i = 0; i < frames_count; i++) {
     Frame *frame = canvas_create_frame(canvas);
-    unit_snap_vec2((float *)frames[i].position);
-    canvas_set_frame_position(canvas, frame, frames[i].position);
+    unit_snap_vec2((float *)cframes[i].position);
+    canvas_set_frame_position(canvas, frame, cframes[i].position);
     canvas_register_frame_state(canvas, frame, CanvasFrameState_Octagon);
 
     // add octagons
     Octagon *oct = allocator_octagon_entry(frame->octagon_id);
     for (uint8_t j = 0; j < 3; j++) {
-      octagon_set_outer_offset(oct, frames[i].octagon_data[j].index,
-                               frames[i].octagon_data[j].value);
+      octagon_set_outer_offset(oct, cframes[i].octagon_data[j].index,
+                               cframes[i].octagon_data[j].value);
     }
 
     // add modules
-    for (uint8_t k = 0; k < frames[i].modules.count; k++)
+    for (uint8_t k = 0; k < cframes[i].modules.count; k++)
       canvas_add_module_to_frame(canvas, frame,
-                                 frames[i].modules.entries[k].type,
-                                 frames[i].modules.entries[k].position);
+                                 cframes[i].modules.entries[k].type,
+                                 cframes[i].modules.entries[k].position);
 
     canvas_frame_wrap(canvas, frame);
 
@@ -105,6 +105,128 @@ void create_frames(Canvas *canvas) {
           canvas->frames[CanvasFrameState_Default].entries[i - 1]);
       canvas_connect_frames(canvas, previous_frame, frame);
     }
+  }
+}
+
+void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
+
+  static struct {
+    HeatmapDescriptor heatmap;
+    ColormapUniform color_map;
+  } maps[] = {
+      {
+          .heatmap =
+              {
+                  .label = "Excitment",
+                  .axes = {"Boredom", "Excitment"},
+                  .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
+              },
+          .color_map =
+              {
+
+                  .count = 4,
+                  .colors =
+                      {
+                          {0.0f, 0.0f, 1.0f, 1.0f}, // blue
+                          {0.0f, 1.0f, 0.0f, 1.0f}, // green
+                          {1.0f, 1.0f, 0.0f, 1.0f}, // yellow
+                          {1.0f, 0.0f, 0.0f, 1.0f}, // red
+                      },
+
+              },
+      },
+      {
+          .heatmap =
+              {
+                  .label = "Reward",
+                  .axes = {"Low", "High"},
+                  .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
+              },
+          .color_map =
+              {
+
+                  .count = 4,
+                  .colors =
+                      {
+                          {0.278, 0.337, 0.416, 1.0}, // blue
+                          {0.204, 0.820, 0.820, 1.0}, // cyan
+                          {0.941, 0.780, 0.369, 1.0}, // soft gold
+                          {0.972, 0.706, 0.000, 1.0}, // red
+                      },
+
+              },
+      },
+      {
+          .heatmap =
+              {
+                  .label = "Social bounding",
+                  .axes = {"Isolation", "Social Connection"},
+                  .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
+              },
+          .color_map =
+              {
+
+                  .count = 4,
+                  .colors =
+                      {
+                          {0.290, 0.333, 0.408, 1.0}, // blue grey
+                          {0.369, 0.353, 0.639, 1.0}, // muted violet
+                          {0.478, 0.302, 0.824, 1.0}, // purple
+                          {1.000, 0.306, 0.737, 1.0}, // neon magenta
+                      },
+
+              },
+      },
+      {
+          .heatmap =
+              {
+                  .label = "Challenge",
+                  .axes = {"High friction", "Ease"},
+                  .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
+              },
+          .color_map =
+              {
+
+                  .count = 4,
+                  .colors =
+                      {
+                          {0.839, 0.416, 0.180, 1.0}, // deep orange
+                          {0.953, 0.651, 0.510, 1.0}, // soft peach
+                          {0.482, 0.776, 0.494, 1.0}, // calm green
+                          {0.306, 0.651, 0.294, 1.0}, // clear green
+                      },
+
+              },
+      },
+
+  };
+
+  static const int maps_count = sizeof(maps) / sizeof(maps[0]);
+
+  for (uint8_t i = 0; i < maps_count; i++) {
+
+    HeatmapDescriptor desc = {
+        // fixed attributes
+        .frames = {canvas->frames->entries, &canvas->frames->length},
+        .height = (int)(context_height() * context_dpi()),
+        .width = (int)(context_width() * context_dpi()),
+        .blur = 8,
+        .scale = 1.0f / 4,
+        // custom attributes
+        .label = maps[i].heatmap.label,
+        .axes = {maps[i].heatmap.axes[0], maps[i].heatmap.axes[1]},
+        .color_map = &maps[i].color_map,
+        .background =
+            {
+                maps[i].heatmap.background[0],
+                maps[i].heatmap.background[1],
+                maps[i].heatmap.background[2],
+                maps[i].heatmap.background[3],
+            },
+
+    };
+
+    heatmap_create(&dest[i], &desc);
   }
 }
 
@@ -138,35 +260,19 @@ int main() {
   unit_set_step(40.0f);
 
   Canvas canvas;
+  canvas_create(&canvas);
   create_frames(&canvas);
 
-  Heatmap heatmap;
-  HeatmapDescriptor map_desc = {};
-  ColormapUniform map_color = {
-      .count = 4,
-      .colors =
-          {
-              {0.0f, 0.0f, 1.0f, 1.0f}, // blue
-              {0.0f, 1.0f, 0.0f, 1.0f}, // green
-              {1.0f, 1.0f, 0.0f, 1.0f}, // yellow
-              {1.0f, 0.0f, 0.0f, 1.0f}, // red
-          },
-  };
-  glm_vec4_copy((vec4){0.0f, 0.0f, 0.0f, 0.4f}, map_desc.background);
-  map_desc.frames = {canvas.frames->entries, &canvas.frames->length};
-  map_desc.height = context_height() * context_dpi();
-  map_desc.width = context_width() * context_dpi();
-  map_desc.blur = 8;
-  map_desc.scale = 1.0f / 4;
-  map_desc.color_map = &map_color;
-  heatmap_create(&heatmap, &map_desc);
+  Heatmap heatmaps[4];
+  create_heatmaps(&canvas, heatmaps);
 
-  Layout::Container container = Layout::Container(gui, &canvas, &heatmap);
+  printf("done\n");
 
-  renderer_add_draw_callback(renderer, container_draw_callback, &container,
-                             RendererDrawMode_All);
-
-  renderer_draw(renderer);
+  Layout::Container container = Layout::Container(gui, &canvas, heatmaps);
+  // renderer_add_draw_callback(renderer, container_draw_callback, &container,
+  //                            RendererDrawMode_All);
+  //
+  //  renderer_draw(renderer);
 
   return 0;
 }

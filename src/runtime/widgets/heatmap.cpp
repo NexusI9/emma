@@ -105,11 +105,11 @@ void Widget::HeatmapShape::draw() {
 
   dl->AddRectFilled(ImVec2(0, 0), vp->Size, im_color(node->background));
 
-  const float* pan = viewport_get_pan();
-  
-  dl->AddImage(
-      (ImTextureRef)node->views[HeatmapTexture_Color_Offscreen],
-      ImVec2(pan[0] - init_offset.x, pan[1] - init_offset.y),
-      ImVec2(pan[0] + vp->Size.x - init_offset.x, pan[1] + vp->Size.y - init_offset.y),
-      ImVec2(0, 0), ImVec2(1, 1));
+  const float *pan = viewport_get_pan();
+
+  dl->AddImage((ImTextureRef)node->views[HeatmapTexture_Color_Offscreen],
+               ImVec2(pan[0] - init_offset.x, pan[1] - init_offset.y),
+               ImVec2(pan[0] + vp->Size.x - init_offset.x,
+                      pan[1] + vp->Size.y - init_offset.y),
+               ImVec2(0, 0), ImVec2(1, 1));
 }
