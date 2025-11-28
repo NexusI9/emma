@@ -7,6 +7,7 @@
 #include "runtime/manager/viewport.h"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/module.hpp"
+#include "utils/input.h"
 #include "webgpu/webgpu.h"
 #include <cstdlib>
 #include <imgui/imgui.h>
@@ -93,7 +94,7 @@ void Widget::HeatmapShape::compute_render_pass(WGPUCommandEncoder encoder) {
 }
 
 void Widget::HeatmapShape::draw() {
-  
+
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
   // TODO: cache vp size ?
@@ -104,11 +105,12 @@ void Widget::HeatmapShape::draw() {
 
   // baked heatmap
   const float *pan = viewport_get_pan();
-  dl->AddImage((ImTextureRef)node->views[HeatmapTexture_Color_Offscreen],
-               ImVec2(pan[0] - init_offset.x, pan[1] - init_offset.y),
-               ImVec2(pan[0] + vp->Size.x - init_offset.x,
-                      pan[1] + vp->Size.y - init_offset.y),
-               ImVec2(0, 0), ImVec2(1, 1));
+
+  // only display map if no movement
+
+  if (!input_wheel_moving())
+    dl->AddImage((ImTextureRef)node->views[HeatmapTexture_Color_Offscreen],
+                 vp->Pos, vp->Size, ImVec2(0, 0), ImVec2(1, 1));
 
   draw_gradient(dl);
 }

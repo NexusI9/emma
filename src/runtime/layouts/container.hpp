@@ -36,6 +36,12 @@ public:
     HeatmapType_COUNT,
   } HeatmapType;
 
+  typedef enum {
+    HeatmapState_None = 0,
+    HeatmapState_WheelMove = 1 << 0,
+    HeatmapState_RequireUpdate = 1 << 1,
+  } HeatmapState;
+
   Container(Gui *, Canvas *, Heatmap[HeatmapType_COUNT]);
   void draw();
 
@@ -55,7 +61,7 @@ public:
 
   Widget::HeatmapShape heatmaps[HeatmapType_COUNT];
   HeatmapType active_heatmap = HeatmapType_Excitment;
-  bool heatmap_require_update = false;
+  unsigned int heatmap_state = HeatmapState_None;
 
 private:
   Gui *gui;

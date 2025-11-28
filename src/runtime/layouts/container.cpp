@@ -5,6 +5,7 @@
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
+#include "utils/input.h"
 
 Layout::Container::Container(Gui *gui, Canvas *canvas,
                              Heatmap hm[HeatmapType_COUNT])
@@ -33,6 +34,7 @@ Layout::Container::Container(Gui *gui, Canvas *canvas,
   canvas_shape.sync_shapes();
 
   {
+    // === Create heamap select shape ===
     heatmap_list_shape = UI::Frame();
     heatmap_list_shape.background_color = nav_bar.bg_color;
     heatmap_list_shape.border_color = nav_bar.bd_color;
@@ -49,9 +51,20 @@ void Layout::Container::draw() {
   gui_command_begin(gui);
   gui_draw_update_io(gui);
 
-  if (display_state_enabled(DisplayState_Heatmap) && heatmap_require_update) {
-    heatmap_require_update = false;
-    heatmaps[active_heatmap].compute_offline(gui->command_encoder);
+  if (display_state_enabled(DisplayState_Heatmap)) {
+
+    if ((HeatmapState_WheelMove & heatmap_state) && !input_wheel_moving())
+      heatmap_state |= HeatmapState_RequireUpdate;
+
+    if (input_wheel_moving())
+      heatmap_state |= HeatmapState_WheelMove;
+    else
+      heatmap_state &= ~HeatmapState_WheelMove;
+
+    if (HeatmapState_RequireUpdate & heatmap_state) {
+      heatmap_state &= ~HeatmapState_RequireUpdate;
+      heatmaps[active_heatmap].compute_offline(gui->command_encoder);
+    }
   }
 
   gui_draw_swapchain_begin(gui);
@@ -90,7 +103,7 @@ void Layout::Container::draw_heatmap_list() {
   for (int i = 0; i < HeatmapType_COUNT; i++) {
     if (ImGui::RadioButton(heatmaps[i].get_label(), active_heatmap == i)) {
       active_heatmap = (HeatmapType)i;
-      heatmap_require_update = true;
+      heatmap_state |= HeatmapState_RequireUpdate;
     }
     ImGui::Dummy(ImVec2(gui_scale(gui, 3.0f), gui_scale(gui, 3.0f)));
   }
@@ -124,7 +137,7 @@ void container_set_heatmap_state(bool value, void *data) {
     container->disable_display_state(Layout::Container::DisplayState_Heatmap);
   }
 
-  container->heatmap_require_update = true;
+  container->heatmap_state |= Layout::Container::HeatmapState_RequireUpdate;
 }
 
 bool container_get_octalysis_state(void *data) {
