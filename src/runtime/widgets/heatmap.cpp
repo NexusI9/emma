@@ -93,7 +93,7 @@ void Widget::HeatmapShape::compute_render_pass(WGPUCommandEncoder encoder) {
 }
 
 void Widget::HeatmapShape::draw() {
-
+  
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
   // TODO: cache vp size ?

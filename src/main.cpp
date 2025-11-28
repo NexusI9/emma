@@ -118,7 +118,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
           .heatmap =
               {
                   .label = "Excitment",
-                  .axes = {"Boredom", "Thrilling"},
+                  .axes = {"Boredom", "Thrill"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
               },
           .color_map =
