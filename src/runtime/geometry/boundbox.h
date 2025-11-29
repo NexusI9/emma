@@ -1,8 +1,8 @@
 #ifndef _BOUNDBOX_H_
 #define _BOUNDBOX_H_
 
-#include "runtime/geometry/core.h"
 #include "nkengine/include/utils.h"
+#include "runtime/geometry/core.h"
 #include <cglm/cglm.h>
 
 typedef enum {
@@ -12,11 +12,41 @@ typedef enum {
   BoundBoxEdge_Left,
 } BoundBoxEdge;
 
-typedef RectCoordinate boundbox_edges[4];
+/**
+
+  Since frames shape have selectable content insinde them, we can't define
+  they're whole area as the selection trigger, as a result we need to compute an
+  invisibile frame around them so they only get selected when we click within
+  this area.
+
+  +---+-----------------+---+
+  | .-|-----------------|-. |
+  +-;-+                 +-;-+
+  | ; |                 | ; |
+  | ; |                 | ; |
+  | ; |                 | ; |
+  | ; |                 | ; |
+  | ; |                 | ; |
+  | ; |                 | ; |
+  | ; |                 | ; |
+  | ; |                 | ; |
+  +-;-+-----------------+-;-+
+  | '-|-----------------|-' |
+  +---+-----------------+---+
+
+
+ */
+
+#define BOUNDBOX_FRAME_RECT_COUNT 4
+typedef RectCoordinate BoundboxFrame[BOUNDBOX_FRAME_RECT_COUNT];
 
 EXTERN_C_BEGIN
 
-void boundbox_edges_from_points(const vec2, const vec2, boundbox_edges);
+void boundbox_edges_from_points(const vec2, const vec2, BoundboxFrame);
+
+void boundbox_frame_update(BoundboxFrame, const vec2, const vec2, const float);
+
+void boundbox_update(RectCoordinate *, const vec2, const vec2, const float);
 
 static inline void boundbox_top_from_points(const vec2 p0, const vec2 p1,
                                             RectCoordinate *edge) {

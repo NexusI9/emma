@@ -5,7 +5,11 @@
 #include <stddef.h>
 
 FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
+
   node->label = desc->label;
+  node->boundbox.update_callback = desc->boundbox_update_callback;
+  node->boundbox.padding = desc->boundbox_padding;
+
   frame_set_size(node, desc->size);
   frame_set_local_position(node, desc->position);
   frame_set_background(node, desc->background);
@@ -61,6 +65,10 @@ FrameStatus frame_update_world_position(Frame *node) {
   return FrameStatus_Success;
 }
 
+/**
+   Compute children mix and max box size and wrap the frame position and scale
+   around it (auto-resize)
+ */
 FrameStatus frame_wrap(Frame *node) {
 
   vec2 children_start = {INFINITY, INFINITY};

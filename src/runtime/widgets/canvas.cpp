@@ -29,32 +29,27 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
   this->node = canvas;
 
   transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
-
-  HTMLEventWheel event = {
-      .callback = canvas_shape_wheel_callback,
-      .destructor = NULL,
-      .data = this,
-      .size = 0,
-  };
-  html_event_add_wheel(&event);
 }
 
-void Widget::CanvasShape::draw_frame(FrameShape *shape) {
-
-  Frame *frame = shape->get_node();
-  shape->draw();
+void Widget::CanvasShape::draw_frame(Frame *frame,
+                                     const TransformBoxDraw transform_type,
+                                     const uint8_t boundboxes_count) {
+  FrameShape(frame).draw();
 
   // add to selection
   if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
 
     transform_box.session_set_blank_click();
 
-    for (uint8_t i = 0; i < BOUNDBOX_FRAME_RECT_COUNT; i++)
-      if (ImGui::IsMouseHoveringRect(im_vec2(shape->boundbox[i].p0),
-                                     im_vec2(shape->boundbox[i].p1))) {
+    for (uint8_t i = 0; i < boundboxes_count; i++)
+      if (ImGui::IsMouseHoveringRect(
+              ImVec2(vpx(frame->boundbox.entries[i].p0[0]),
+                     vpy(frame->boundbox.entries[i].p0[1])),
+              ImVec2(vpx(frame->boundbox.entries[i].p1[0]),
+                     vpy(frame->boundbox.entries[i].p1[1])))) {
 
         // register the frame for transform callbacks
-        transform_frame_data[i].frame = shape;
+        transform_frame_data[i].frame = frame;
         transform_frame_data[i].canvas = node;
 
         TransformBoxObjectDescriptor object = {
@@ -114,8 +109,11 @@ void Widget::CanvasShape::draw(bool show_octagon) {
 
   // === frames ===
   size_t i;
-  for (i = 0; i < node->frames[CanvasFrameState_Default].length; i++)
-    draw_frame(&frame_shapes[i]);
+  for (i = 0; i < node->frames[CanvasFrameState_Default].length; i++) {
+    Frame *frame = allocator_frame_entry(
+        node->frames[CanvasFrameState_Default].entries[i]);
+    draw_frame(frame, TransformBoxDraw_All, BOUNDBOX_FRAME_RECT_COUNT);
+  }
 
   if (show_octagon)
     for (i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
@@ -152,72 +150,26 @@ void Widget::CanvasShape::draw(bool show_octagon) {
     canvas_empty_frame_state(node, CanvasFrameState_Selected);
 
   if (transform_box.objects_count() > 0)
-    transform_box.draw();
-}
-
-/**
-   Sync up the canvas data and generate shapes out of those.
- */
-void Widget::CanvasShape::sync_shapes() {
-  for (size_t i = 0; i < node->frames[CanvasFrameState_Default].length; i++) {
-    const alloc_id id = node->frames[CanvasFrameState_Default].entries[i];
-    Frame *frame = allocator_frame_entry(id);
-    frame_shapes[i] = FrameShape(frame);
-    boundbox_frame_update(frame_shapes[i].boundbox,
-                          frame_get_world_position(frame), frame->end_point,
-                          FRAME_SHAPE_BOUNDBOX_THICKNESS);
-  }
-}
-
-void Widget::CanvasShape::sync_boundboxes() {
-
-  for (size_t i = 0; i < node->frames[CanvasFrameState_Default].length; i++) {
-    const alloc_id id = node->frames[CanvasFrameState_Default].entries[i];
-    Frame *frame = allocator_frame_entry(id);
-    boundbox_frame_update(frame_shapes[i].boundbox,
-                          frame_get_world_position(frame), frame->end_point,
-                          FRAME_SHAPE_BOUNDBOX_THICKNESS);
-  }
-}
-
-/**
-   On wheel change we need to update each objects boundbox.
-   Another solution could be integrate a system of "require_change" triggered by
-   the viewport, but we'll use the html event based solution for now as it comes
-   builtin with the engine.
- */
-bool Widget::canvas_shape_wheel_callback(int type,
-                                         const EmscriptenWheelEvent *event,
-                                         void *data) {
-
-  CanvasShape *canvas = (CanvasShape *)data;
-  canvas->sync_boundboxes();
-
-  return EM_FALSE;
+    transform_box.draw(TransformBoxDraw_All);
 }
 
 void Widget::canvas_shape_set_frame_shape_position(void *data, ImVec2 value) {
 
   CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
 
-  Frame *frame = frame_data->frame->get_node();
+  Frame *frame = frame_data->frame;
 
   canvas_set_frame_position(frame_data->canvas, frame,
                             (vec2){value.x, value.y});
 
-  boundbox_frame_update(frame_data->frame->boundbox,
-                        frame_get_world_position(frame), frame->end_point,
-                        FRAME_SHAPE_BOUNDBOX_THICKNESS);
-
-  canvas_update_frame_connectors(frame_data->canvas,
-                                 frame_data->frame->get_node());
+  canvas_update_frame_connectors(frame_data->canvas, frame_data->frame);
 }
 
 void Widget::canvas_shape_get_frame_shape_position(void *data, ImVec2 &value) {
 
   CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
 
-  Frame *frame = frame_data->frame->get_node();
+  Frame *frame = frame_data->frame;
 
   const float *world_pos = frame_get_world_position(frame);
   value = ImVec2(world_pos[0], world_pos[1]);
@@ -227,20 +179,16 @@ void Widget::canvas_shape_set_frame_shape_size(void *data, ImVec2 value) {
 
   CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
 
-  Frame *frame = frame_data->frame->get_node();
+  Frame *frame = frame_data->frame;
 
   canvas_set_frame_size(frame_data->canvas, frame, (vec2){value.x, value.y});
-
-  boundbox_frame_update(frame_data->frame->boundbox,
-                        frame_get_world_position(frame), frame->end_point,
-                        FRAME_SHAPE_BOUNDBOX_THICKNESS);
 }
 
 void Widget::canvas_shape_get_frame_shape_size(void *data, ImVec2 &value) {
 
   CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
 
-  Frame *frame = frame_data->frame->get_node();
+  Frame *frame = frame_data->frame;
 
   value = im_vec2(frame->size);
 }

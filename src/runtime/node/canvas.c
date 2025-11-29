@@ -1,5 +1,4 @@
 #include "canvas.h"
-
 #include "runtime/geometry/boundbox.h"
 #include "runtime/geometry/vector.h"
 #include "runtime/manager/allocator.h"
@@ -9,7 +8,6 @@
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "utils/id.h"
-
 #include <string.h>
 
 static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
@@ -104,6 +102,8 @@ Frame *canvas_create_frame(Canvas *canvas) {
       .background = {1.0f, 1.0f, 1.0f, 1.0f},
       .position = {200, 200},
       .size = {360, 700},
+      .boundbox_update_callback = boundbox_frame_update,
+      .boundbox_padding = FRAME_BOUNDBOX_THICKNESS,
   };
 
   return canvas_create_frame_core(
@@ -122,6 +122,8 @@ Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
       .uv1 = {module_desc->uv1[0], module_desc->uv1[1]},
       .size = {module_desc->size[0], module_desc->size[1]},
       .label = module_desc->label,
+      .boundbox_update_callback = boundbox_update,
+      .boundbox_padding = 0.0f,
   };
 
   return canvas_create_frame_core(
@@ -221,7 +223,7 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
       {-1.0f * gap, 0.0f}, // left
   };
 
-  boundbox_edges edges;
+  BoundboxFrame edges;
   boundbox_edges_from_points(frame->local_position, frame->end_point, edges);
 
   for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
@@ -239,7 +241,6 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
 
 void canvas_set_frame_position(Canvas *canvas, Frame *frame, const vec2 value) {
   frame_set_local_position(frame, value);
-  frame_update_world_position(frame);
   canvas_align_octagon_to_frame(canvas, frame);
   canvas_align_connector_handle_group_to_frame(canvas, frame);
 }

@@ -250,14 +250,16 @@ void Widget::TransformBox::transform_core(const TransformHandleType handle) {
   update_bound(new_pos, new_size);
 }
 
-void Widget::TransformBox::draw() {
+void Widget::TransformBox::draw(const TransformBoxDraw draw_flag) {
 
   ImDrawList *draw = ImGui::GetWindowDrawList();
+
+  // Add frame
   draw->AddRect(vp_im2(p0), vp_im2(p1), im_color((float *)primary_color), 0.0f,
                 0, stroke_width);
 
   // Area Behaviour (Translate)
-  if (active_handle == -1 &&
+  if ((draw_flag & TransformBoxDraw_Move) && active_handle == -1 &&
       ImGui::IsMouseHoveringRect(vp_im2(padded_area_0),
                                  vp_im2(padded_area_1)) &&
       ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
@@ -267,6 +269,15 @@ void Widget::TransformBox::draw() {
 
   // Handle Behaviour (Scale)
   for (uint8_t i = 0; i < transform_box_handles_count; i++) {
+
+    if ((TransformBoxDraw_All & draw_flag) == 0)
+      if (((TransformBoxDraw_Move & draw_flag) &&
+           i != TransformHandleType_MM) ||
+          ((TransformBoxDraw_Scale & draw_flag) &&
+           i == TransformHandleType_MM) ||
+          (TransformBoxDraw_None & draw_flag))
+        continue;
+
     TransformHandleShape handle = TransformHandleShape(&handles[i]);
     handle.draw();
 

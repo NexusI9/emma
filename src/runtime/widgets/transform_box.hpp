@@ -58,6 +58,13 @@ typedef enum {
   TransformBoxSessionStatus_Hit,
 } TransformBoxSessionStatus;
 
+typedef enum {
+  TransformBoxDraw_None = 0,
+  TransformBoxDraw_Scale = 1 << 0,
+  TransformBoxDraw_Move = 1 << 1,
+  TransformBoxDraw_All = ~0,
+} TransformBoxDraw;
+
 class TransformBox {
 
 public:
@@ -78,7 +85,7 @@ public:
 
   uint16_t objects_count() { return objects.count; }
 
-  void draw();
+  void draw(const TransformBoxDraw);
 
 private:
   static constexpr float area_padding = 20.0f;

@@ -2,7 +2,6 @@
 
 #include "imgui/imgui.h"
 #include "nkengine/include/gui.hpp"
-#include "runtime/geometry/boundbox_frame.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/frame.h"
 

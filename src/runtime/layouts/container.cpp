@@ -31,8 +31,6 @@ Layout::Container::Container(Gui *gui, Canvas *canvas,
                   .user_data = this,
               }) {
 
-  canvas_shape.sync_shapes();
-
   {
     // === Create heamap select shape ===
     heatmap_list_shape = UI::Frame();

@@ -1,6 +1,7 @@
 #ifndef _WIDGET_CANVAS_HPP_
 #define _WIDGET_CANVAS_HPP_
 
+#include "runtime/geometry/core.h"
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
@@ -15,11 +16,9 @@ void canvas_shape_set_frame_shape_size(void *, ImVec2);
 void canvas_shape_get_frame_shape_size(void *, ImVec2 &);
 void canvas_shape_on_frame_selection(void *);
 
-bool canvas_shape_wheel_callback(int, const EmscriptenWheelEvent *, void *);
-
 typedef struct {
   Canvas *canvas;
-  FrameShape *frame;
+  Frame *frame;
 } CanvasTransformFrameData;
 
 class CanvasShape {
@@ -28,8 +27,6 @@ public:
   CanvasShape(Gui *, Canvas *);
 
   void draw(bool);
-  void sync_shapes();
-  void sync_boundboxes();
 
 private:
   Gui *gui;
@@ -37,10 +34,9 @@ private:
   TransformBox transform_box;
   GridBackground grid_background;
 
-  FrameShape frame_shapes[ALLOCATOR_MAX_FRAMES];
   CanvasTransformFrameData transform_frame_data[ALLOCATOR_MAX_FRAMES];
 
-  void draw_frame(FrameShape *);
+  void draw_frame(Frame *, const TransformBoxDraw, const uint8_t);
   void draw_frame_handle_connectors(Frame *, const int);
 };
 
