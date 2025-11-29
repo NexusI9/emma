@@ -29,17 +29,18 @@ typedef enum {
   CanvasStatus_UndefError,
 } CanvasStatus;
 
+typedef ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) FrameAllocList;
+
 typedef struct {
 
-  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) frames[CanvasFrameState_COUNT];
-  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) modules[CanvasModuleState_COUNT];
-  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) octagons;
-  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) connectors;
+  FrameAllocList frames[CanvasFrameState_COUNT];
+  FrameAllocList modules[CanvasModuleState_COUNT];
+  FrameAllocList octagons;
+  FrameAllocList connectors;
   ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES *CONNECTOR_HANDLE_COUNT)
   connector_handles;
 
 } Canvas;
-
 
 EXTERN_C_BEGIN
 
@@ -68,7 +69,6 @@ StaticListStatus canvas_register_frame_state(Canvas *, const Frame *,
 
 StaticListStatus canvas_unregister_frame_state(Canvas *, const Frame *,
                                                const CanvasFrameState);
-
 
 StaticListStatus canvas_empty_frame_state(Canvas *, const CanvasFrameState);
 

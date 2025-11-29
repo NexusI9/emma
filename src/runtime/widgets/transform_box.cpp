@@ -69,6 +69,7 @@ Widget::TransformBox::add_object(const TransformBoxObjectDescriptor *desc) {
       .set_position = desc->set_position,
       .get_size = desc->get_size,
       .set_size = desc->set_size,
+      .session_end = desc->session_end,
   };
 
   return stli_insert(objects.entries, transform_box_objects_capacity,
@@ -290,8 +291,16 @@ void Widget::TransformBox::draw() {
   if (active_handle >= 0 && ImGui::IsMouseDown(0))
     transform_core((TransformHandleType)active_handle);
 
-  if (active_handle >= 0 && ImGui::IsMouseReleased(0))
+  // end session
+  if (active_handle >= 0 && ImGui::IsMouseReleased(0)) {
     active_handle = -1;
+
+    for (size_t i = 0; i < objects_count(); i++) {
+
+      if (objects.entries[i].session_end)
+        objects.entries[i].session_end(objects.entries[i].handle);
+    }
+  }
 }
 
 void Widget::TransformBox::handle_transform(const TransformHandleType type,

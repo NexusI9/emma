@@ -164,5 +164,17 @@ static inline StaticListStatus frame_unregister_connector(Frame *node,
                                &node->connectors_id.length, id);
 }
 
+static inline bool frame_collide(const Frame *frame_a, const Frame *frame_b) {
+
+  RectCoordinate a_coo, b_coo;
+  glm_vec2_copy((float *)frame_a->world_position, a_coo.p0);
+  glm_vec2_copy((float *)frame_a->end_point, a_coo.p1);
+
+  glm_vec2_copy((float *)frame_b->world_position, b_coo.p0);
+  glm_vec2_copy((float *)frame_b->end_point, b_coo.p1);
+
+  return boundbox_collide(&a_coo, &b_coo);
+}
+
 EXTERN_C_END
 #endif

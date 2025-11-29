@@ -5,6 +5,6 @@
 
 typedef uint64_t alloc_id;
 
-#define ID_UNDEFINED UINT64_MAX
+static const uint64_t ID_UNDEFINED = UINT64_MAX;
 
 #endif

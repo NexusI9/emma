@@ -76,6 +76,8 @@ static inline void boundbox_left_from_points(const vec2 p0, const vec2 p1,
   glm_vec2_copy((float *)p0, edge->p1);
 }
 
+bool boundbox_collide(const RectCoordinate *, const RectCoordinate *);
+
 EXTERN_C_END
 
 #endif

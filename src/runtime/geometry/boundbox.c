@@ -61,3 +61,27 @@ void boundbox_frame_update(BoundboxFrame box, const vec2 start, const vec2 end,
   box[3].p1[0] = max_x + thickness;
   box[3].p1[1] = max_y;
 }
+
+
+bool boundbox_collide(const RectCoordinate *a, const RectCoordinate *b) {
+
+    // Extract coordinates
+    float ax0 = a->p0[0];
+    float ay0 = a->p0[1];
+    float ax1 = a->p1[0];
+    float ay1 = a->p1[1];
+
+    float bx0 = b->p0[0];
+    float by0 = b->p0[1];
+    float bx1 = b->p1[0];
+    float by1 = b->p1[1];
+
+    // AABB overlap test (no separation axis)
+    bool separated =
+        ax1 < bx0 ||  // a is left of b
+        ax0 > bx1 ||  // a is right of b
+        ay1 < by0 ||  // a is above b
+        ay0 > by1;    // a is below b
+
+    return !separated;
+}

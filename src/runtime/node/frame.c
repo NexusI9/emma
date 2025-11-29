@@ -10,6 +10,7 @@ FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
   node->boundbox.update_callback = desc->boundbox->update_callback;
   node->boundbox.padding = desc->boundbox->padding;
   node->boundbox.count = desc->boundbox->count;
+  node->children.length = 0;
 
   frame_set_size(node, desc->size);
   frame_set_world_position(node, desc->position);
@@ -20,23 +21,28 @@ FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
   return FrameStatus_Success;
 }
 
-StaticListStatus frame_add_child(Frame *node, const alloc_id id) {
+StaticListStatus frame_add_child(Frame *parent, const alloc_id id) {
 
-  StaticListStatus push = allocator_id_list_push(
-      node->children.entries, FRAME_MAX_CHILDREN, &node->children.length, id);
+  StaticListStatus push =
+      allocator_id_list_push(parent->children.entries, FRAME_MAX_CHILDREN,
+                             &parent->children.length, id);
 
-  if (push == StaticListStatus_Success) {
-    Frame *child = allocator_frame_entry(id);
-    child->parent = node->id;
-  }
+  if (push != StaticListStatus_Success)
+    return push;
+
+  Frame *child = allocator_frame_entry(id);
+  child->parent = parent->id;
+
+  glm_vec2_sub(child->world_position, parent->world_position,
+               child->local_position);
 
   return push;
 }
 
 StaticListStatus frame_remove_child(Frame *node, const alloc_id id) {
 
-  StaticListStatus pop = allocator_id_list_pop(node->children.entries,
-                                               &node->connectors_id.length, id);
+  StaticListStatus pop =
+      allocator_id_list_pop(node->children.entries, &node->children.length, id);
 
   if (pop == StaticListStatus_Success) {
     Frame *child = allocator_frame_entry(id);
@@ -85,8 +91,8 @@ FrameStatus frame_set_world_position(Frame *node, const vec2 value) {
     Frame *child = allocator_frame_entry(node->children.entries[i]);
     frame_update_world_position(child);
     child->boundbox.update_callback(child->boundbox.entries,
-                                   frame_get_world_position(child),
-                                   child->end_point, child->boundbox.padding);
+                                    frame_get_world_position(child),
+                                    child->end_point, child->boundbox.padding);
   }
 
   return FrameStatus_Success;

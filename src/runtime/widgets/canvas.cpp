@@ -2,6 +2,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_wgpu.h"
 #include "nkengine/include/gui.hpp"
+#include "runtime/geometry/boundbox.h"
+#include "runtime/geometry/core.h"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/manager/atlas.h"
@@ -19,6 +21,7 @@
 #include "runtime/widgets/module.hpp"
 #include "runtime/widgets/octagon.hpp"
 #include "runtime/widgets/transform_box.hpp"
+#include "utils/id.h"
 #include <cstdlib>
 #include <imgui/imconfig.h>
 #include <imgui/imgui_impl_wgpu.h>
@@ -37,15 +40,13 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
     CanvasTransformConfiguration *fm_conf =
         &transform_configuration[CanvasTransformConfigurationType_Frame];
 
-    fm_conf->transform_mode = TransformBoxMode_All,
-    fm_conf->get_position = canvas_shape_get_frame_shape_position,
-    fm_conf->set_position = canvas_shape_set_frame_shape_position,
-    fm_conf->get_size = canvas_shape_get_frame_shape_size,
-    fm_conf->set_size = canvas_shape_set_frame_shape_size,
-    fm_conf->selection_list = {
-        .entries = node->frames[CanvasFrameState_Selected].entries,
-        .length = &node->frames[CanvasFrameState_Selected].length,
-    };
+    fm_conf->transform_mode = TransformBoxMode_All;
+    fm_conf->get_position = canvas_shape_get_frame_shape_position;
+    fm_conf->set_position = canvas_shape_set_frame_shape_position;
+    fm_conf->get_size = canvas_shape_get_frame_shape_size;
+    fm_conf->set_size = canvas_shape_set_frame_shape_size;
+    fm_conf->selection_list = &node->frames[CanvasFrameState_Selected];
+    // fm_conf->parent_list = (group list)
   }
 
   {
@@ -53,15 +54,14 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
     CanvasTransformConfiguration *md_conf =
         &transform_configuration[CanvasTransformConfigurationType_Module];
 
-    md_conf->transform_mode = TransformBoxMode_Move,
-    md_conf->get_position = canvas_shape_get_frame_shape_position,
-    md_conf->set_position = canvas_shape_set_frame_shape_position,
-    md_conf->get_size = canvas_shape_get_frame_shape_size,
-    md_conf->set_size = canvas_shape_set_frame_shape_size,
-    md_conf->selection_list = {
-        .entries = node->modules[CanvasModuleState_Selected].entries,
-        .length = &node->modules[CanvasModuleState_Selected].length,
-    };
+    md_conf->transform_mode = TransformBoxMode_Move;
+    md_conf->get_position = canvas_shape_get_frame_shape_position;
+    md_conf->set_position = canvas_shape_set_frame_shape_position;
+    md_conf->get_size = canvas_shape_get_frame_shape_size;
+    md_conf->set_size = canvas_shape_set_frame_shape_size;
+    md_conf->session_end = canvas_shape_on_module_session_end;
+    md_conf->selection_list = &node->modules[CanvasModuleState_Selected];
+    md_conf->parent_list = &node->frames[CanvasModuleState_Default];
   }
 }
 
@@ -69,18 +69,8 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
    Handle the boundbox interaction along with the transformation for frames
    and modules.
  */
-void Widget::CanvasShape::draw_frame_transform(
+void Widget::CanvasShape::draw_frame_transform_begin(
     Frame *frame, const CanvasTransformConfiguration *conf) {
-
-  // DEBUG
-  for (uint8_t i = 0; i < frame->boundbox.count; i++) {
-    ImGui::GetWindowDrawList()->AddRectFilled(
-        ImVec2(vpx(frame->boundbox.entries[i].p0[0]),
-               vpy(frame->boundbox.entries[i].p0[1])),
-        ImVec2(vpx(frame->boundbox.entries[i].p1[0]),
-               vpy(frame->boundbox.entries[i].p1[1])),
-        ImColor(255, 0, 0, 255));
-  }
 
   // add to selection
   if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
@@ -95,6 +85,7 @@ void Widget::CanvasShape::draw_frame_transform(
         CanvasTransformFrameData data;
         data.frame = frame;
         data.canvas = node;
+        data.parent_list = conf->parent_list;
 
         // register the frame for transform callbacks
         if (stli_insert(transform_frame_data.entries, ALLOCATOR_MAX_FRAMES,
@@ -111,6 +102,7 @@ void Widget::CanvasShape::draw_frame_transform(
             .set_position = conf->set_position,
             .get_size = conf->get_size,
             .set_size = conf->set_size,
+            .session_end = conf->session_end,
         };
 
         transform_box.session_set_hit();
@@ -121,8 +113,8 @@ void Widget::CanvasShape::draw_frame_transform(
         // remove object
         if (found_obj) {
           // mark as unselected
-          allocator_id_list_pop(conf->selection_list.entries,
-                                conf->selection_list.length, frame->id);
+          allocator_id_list_pop(conf->selection_list->entries,
+                                &conf->selection_list->length, frame->id);
 
           transform_box.remove_object(found_obj->handle, NULL);
 
@@ -148,9 +140,9 @@ void Widget::CanvasShape::draw_frame_transform(
           }
 
           // mark as selected
-          allocator_id_list_push(conf->selection_list.entries,
+          allocator_id_list_push(conf->selection_list->entries,
                                  ALLOCATOR_MAX_FRAMES,
-                                 conf->selection_list.length, frame->id);
+                                 &conf->selection_list->length, frame->id);
 
           transform_box.add_object(&object);
         }
@@ -191,7 +183,7 @@ void Widget::CanvasShape::draw(bool show_octagon) {
 
     FrameShape(frame).draw();
 
-    draw_frame_transform(
+    draw_frame_transform_begin(
         frame,
         &transform_configuration[CanvasTransformConfigurationType_Frame]);
   }
@@ -220,7 +212,7 @@ void Widget::CanvasShape::draw(bool show_octagon) {
 
     ModuleShape(module).draw();
 
-    draw_frame_transform(
+    draw_frame_transform_begin(
         module,
         &transform_configuration[CanvasTransformConfigurationType_Module]);
   }
@@ -277,4 +269,35 @@ void Widget::canvas_shape_get_frame_shape_size(void *data, ImVec2 &value) {
   Frame *frame = frame_data->frame;
 
   value = im_vec2(frame->size);
+}
+
+/**
+   On Mouse release we check if some frames that have parent moved out of the
+   parent bound to break the relationship. And and vice versa, i.e. if a child
+   is included in a parent bound then add it as child.
+ */
+
+void Widget::canvas_shape_on_module_session_end(void *data) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = allocator_frame_entry(frame_data->frame->id);
+
+  // check if still within parent bound
+  if (frame_data->frame->parent != ID_UNDEFINED) {
+
+    Frame *parent = allocator_frame_entry(frame->parent);
+
+    if (!frame_collide(parent, frame))
+      frame_remove_child(parent, frame->id);
+  }
+
+  // check if the frame is within a parent frame scope
+  if (frame_data->parent_list)
+    for (size_t i = 0; i < frame_data->parent_list->length; i++) {
+      Frame *parent =
+          allocator_frame_entry(frame_data->parent_list->entries[i]);
+      if (frame_collide(parent, frame))
+        frame_add_child(parent, frame->id);
+    }
 }
