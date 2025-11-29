@@ -23,6 +23,12 @@ typedef enum {
 } FrameStatus;
 
 typedef struct {
+  size_t count;
+  frame_boundbox_updater update_callback;
+  float padding;
+} FrameBoundboxDescriptor;
+
+typedef struct {
 
   alloc_id id, octagon_id, factor_id;
   alloc_id connector_handle_id[CONNECTOR_HANDLE_COUNT];
@@ -54,8 +60,7 @@ typedef struct {
   const vec2 size;
   const color background;
   const vec2 uv0, uv1;
-  const frame_boundbox_updater boundbox_update_callback;
-  const float boundbox_padding;
+  const FrameBoundboxDescriptor *boundbox;
 } FrameDescriptor;
 
 EXTERN_C_BEGIN
@@ -92,7 +97,7 @@ static inline FrameStatus frame_set_size(Frame *node, const vec2 value) {
 
   node->boundbox.update_callback(node->boundbox.entries,
                                  frame_get_world_position(node),
-                                 node->end_point, FRAME_BOUNDBOX_THICKNESS);
+                                 node->end_point, node->boundbox.padding);
 
   return FrameStatus_Success;
 }
@@ -106,9 +111,11 @@ static inline FrameStatus frame_set_local_position(Frame *node,
   frame_update_world_position(node);
   node->boundbox.update_callback(node->boundbox.entries,
                                  frame_get_world_position(node),
-                                 node->end_point, FRAME_BOUNDBOX_THICKNESS);
+                                 node->end_point, node->boundbox.padding);
   return FrameStatus_Success;
 }
+
+FrameStatus frame_set_world_position(Frame *node, const vec2 value);
 
 static inline FrameStatus frame_set_background(Frame *node, const color value) {
   glm_vec4_copy((float *)value, node->background);

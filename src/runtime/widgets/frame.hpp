@@ -12,6 +12,7 @@ public:
   FrameShape() {}
   FrameShape(Frame *node) : node(node) {}
   void draw();
+  
   Frame *get_node() { return node; }
 
 private:

@@ -40,6 +40,7 @@ typedef struct {
 
 } Canvas;
 
+
 EXTERN_C_BEGIN
 
 CanvasStatus canvas_create(Canvas *);
@@ -67,6 +68,7 @@ StaticListStatus canvas_register_frame_state(Canvas *, const Frame *,
 
 StaticListStatus canvas_unregister_frame_state(Canvas *, const Frame *,
                                                const CanvasFrameState);
+
 
 StaticListStatus canvas_empty_frame_state(Canvas *, const CanvasFrameState);
 

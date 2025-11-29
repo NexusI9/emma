@@ -2,6 +2,7 @@
 #define _WIDGET_CANVAS_HPP_
 
 #include "runtime/geometry/core.h"
+#include "runtime/manager/allocator_list.h"
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
@@ -21,6 +22,21 @@ typedef struct {
   Frame *frame;
 } CanvasTransformFrameData;
 
+typedef struct {
+  TransformBoxMode transform_mode;
+  transform_box_get_size_callback get_size;
+  transform_box_get_position_callback get_position;
+  transform_box_set_size_callback set_size;
+  transform_box_set_position_callback set_position;
+  AllocIdRefList selection_list;
+} CanvasTransformConfiguration;
+
+typedef enum {
+  CanvasTransformConfigurationType_Frame,
+  CanvasTransformConfigurationType_Module,
+  CanvasTransformConfigurationType_COUNT,
+} CanvasTransformConfigurationType;
+
 class CanvasShape {
 
 public:
@@ -34,11 +50,18 @@ private:
   TransformBox transform_box;
   GridBackground grid_background;
 
-  CanvasTransformFrameData transform_frame_data[ALLOCATOR_MAX_FRAMES];
+  struct {
+    CanvasTransformFrameData entries[ALLOCATOR_MAX_FRAMES];
+    size_t count;
+  } transform_frame_data;
 
-  void draw_frame(Frame *, const TransformBoxDraw, const uint8_t);
+  CanvasTransformConfiguration
+      transform_configuration[CanvasTransformConfigurationType_COUNT] = {};
+
+  void draw_frame_transform(Frame *, const CanvasTransformConfiguration *);
+
   void draw_frame_handle_connectors(Frame *, const int);
-};
+}; // namespace Widget
 
 } // namespace Widget
 

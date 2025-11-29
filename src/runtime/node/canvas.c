@@ -102,8 +102,15 @@ Frame *canvas_create_frame(Canvas *canvas) {
       .background = {1.0f, 1.0f, 1.0f, 1.0f},
       .position = {200, 200},
       .size = {360, 700},
-      .boundbox_update_callback = boundbox_frame_update,
-      .boundbox_padding = FRAME_BOUNDBOX_THICKNESS,
+      // TODO: replace the boundbox descriptor by a discriminator
+      // "SelectionType" to automatically setup the right boundbox configuration
+      // within the frame constructor ?
+      .boundbox =
+          &(FrameBoundboxDescriptor){
+              .update_callback = boundbox_frame_update,
+              .padding = FRAME_BOUNDBOX_THICKNESS,
+              .count = BOUNDBOX_FRAME_RECT_COUNT,
+          },
   };
 
   return canvas_create_frame_core(
@@ -112,7 +119,7 @@ Frame *canvas_create_frame(Canvas *canvas) {
       &canvas->frames[CanvasFrameState_Default].length,
       CanvasFrameCreateFlags_All);
 }
-
+ 
 Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
 
   const TextureAtlasRegion *module_desc = get_module(module);
@@ -122,8 +129,12 @@ Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
       .uv1 = {module_desc->uv1[0], module_desc->uv1[1]},
       .size = {module_desc->size[0], module_desc->size[1]},
       .label = module_desc->label,
-      .boundbox_update_callback = boundbox_update,
-      .boundbox_padding = 0.0f,
+      .boundbox =
+          &(FrameBoundboxDescriptor){
+              .update_callback = boundbox_update,
+              .padding = -FRAME_BOUNDBOX_THICKNESS / 2.0f,
+              .count = 1,
+          },
   };
 
   return canvas_create_frame_core(
@@ -240,7 +251,7 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
 }
 
 void canvas_set_frame_position(Canvas *canvas, Frame *frame, const vec2 value) {
-  frame_set_local_position(frame, value);
+  frame_set_world_position(frame, value);
   canvas_align_octagon_to_frame(canvas, frame);
   canvas_align_connector_handle_group_to_frame(canvas, frame);
 }
@@ -259,7 +270,7 @@ void canvas_frame_wrap(Canvas *canvas, Frame *frame) {
 
 void canvas_set_module_position(Canvas *canvas, Frame *frame,
                                 const vec2 value) {
-  frame_set_local_position(frame, value);
+  frame_set_local_position(frame, value); // !! Relative to parent
   frame_update_world_position(frame);
   canvas_align_connector_handle_group_to_frame(canvas, frame);
 }
