@@ -1,6 +1,5 @@
 #include "boundbox.h"
 #include "runtime/geometry/core.h"
-#include "runtime/manager/viewport.h"
 #include <stdint.h>
 
 void boundbox_edges_from_points(const vec2 p0, const vec2 p1,
@@ -33,10 +32,10 @@ void boundbox_update(RectCoordinate *rect, const vec2 p0, const vec2 p1,
 void boundbox_frame_update(BoundboxFrame box, const vec2 start, const vec2 end,
                            const float thickness) {
 
-  float min_x = vpx(fminf(start[0], end[0]));
-  float min_y = vpy(fminf(start[1], end[1]));
-  float max_x = vpx(fmaxf(start[0], end[0]));
-  float max_y = vpy(fmaxf(start[1], end[1]));
+  float min_x = fminf(start[0], end[0]);
+  float min_y = fminf(start[1], end[1]);
+  float max_x = fmaxf(start[0], end[0]);
+  float max_y = fmaxf(start[1], end[1]);
 
   // Top
   box[0].p0[0] = min_x;

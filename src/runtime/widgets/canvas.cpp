@@ -72,6 +72,16 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
 void Widget::CanvasShape::draw_frame_transform(
     Frame *frame, const CanvasTransformConfiguration *conf) {
 
+  // DEBUG
+  for (uint8_t i = 0; i < frame->boundbox.count; i++) {
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        ImVec2(vpx(frame->boundbox.entries[i].p0[0]),
+               vpy(frame->boundbox.entries[i].p0[1])),
+        ImVec2(vpx(frame->boundbox.entries[i].p1[0]),
+               vpy(frame->boundbox.entries[i].p1[1])),
+        ImColor(255, 0, 0, 255));
+  }
+
   // add to selection
   if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
 

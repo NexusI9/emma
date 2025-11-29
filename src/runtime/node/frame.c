@@ -84,7 +84,7 @@ FrameStatus frame_set_world_position(Frame *node, const vec2 value) {
   for (size_t i = 0; i < node->children.length; i++) {
     Frame *child = allocator_frame_entry(node->children.entries[i]);
     frame_update_world_position(child);
-    node->boundbox.update_callback(child->boundbox.entries,
+    child->boundbox.update_callback(child->boundbox.entries,
                                    frame_get_world_position(child),
                                    child->end_point, child->boundbox.padding);
   }
