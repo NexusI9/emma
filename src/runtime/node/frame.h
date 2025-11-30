@@ -39,12 +39,16 @@ typedef struct {
   vec2 size;
   vec2 end_point; // pos + size, usefull to get full area for mouse interaction
 
+  // interactive boundboxes used for click
   struct {
     RectCoordinate entries[BOUNDBOX_FRAME_RECT_COUNT];
     size_t count;
     frame_boundbox_updater update_callback;
     float padding;
   } boundbox;
+
+  // more generic boundbox covering the whole frame area
+  RectCoordinate area;
 
   color background;
   vec2 uv0, uv1;
@@ -88,7 +92,18 @@ static inline const float *frame_get_background(const Frame *node) {
   return node->background;
 }
 
+static inline const alloc_id
+frame_get_connector_handle(const Frame *node, const ConnectorHandleSide side) {
+  return node->connector_handle_id[__builtin_ctz(side)];
+}
+
 // Mutators
+
+static inline void frame_update_area(Frame *node) {
+  glm_vec2_copy(node->world_position, node->area.p0);
+  glm_vec2_copy(node->end_point, node->area.p1);
+}
+
 static inline FrameStatus frame_set_size(Frame *node, const vec2 value) {
 
   glm_vec2_copy((float *)value, node->size);
@@ -98,7 +113,7 @@ static inline FrameStatus frame_set_size(Frame *node, const vec2 value) {
   node->boundbox.update_callback(node->boundbox.entries,
                                  frame_get_world_position(node),
                                  node->end_point, node->boundbox.padding);
-
+  frame_update_area(node);
   return FrameStatus_Success;
 }
 
@@ -112,6 +127,7 @@ static inline FrameStatus frame_set_local_position(Frame *node,
   node->boundbox.update_callback(node->boundbox.entries,
                                  frame_get_world_position(node),
                                  node->end_point, node->boundbox.padding);
+  frame_update_area(node);
   return FrameStatus_Success;
 }
 
@@ -166,14 +182,7 @@ static inline StaticListStatus frame_unregister_connector(Frame *node,
 
 static inline bool frame_collide(const Frame *frame_a, const Frame *frame_b) {
 
-  RectCoordinate a_coo, b_coo;
-  glm_vec2_copy((float *)frame_a->world_position, a_coo.p0);
-  glm_vec2_copy((float *)frame_a->end_point, a_coo.p1);
-
-  glm_vec2_copy((float *)frame_b->world_position, b_coo.p0);
-  glm_vec2_copy((float *)frame_b->end_point, b_coo.p1);
-
-  return boundbox_collide(&a_coo, &b_coo);
+  return boundbox_collide(&frame_a->area, &frame_b->area);
 }
 
 EXTERN_C_END

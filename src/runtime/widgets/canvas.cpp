@@ -311,8 +311,39 @@ void Widget::CanvasShape::draw_connector_handle_transform_trigger(
                                   (vec2){mouse.x, mouse.y});
     connector_compute_corners(connector);
 
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+
+      // check if the handle is within a frame area and handle links accordingly
+      for (size_t i = 0; i < node->frames[CanvasFrameState_Default].length;
+           i++) {
+
+        Frame *frame = allocator_frame_entry(
+            node->frames[CanvasFrameState_Default].entries[i]);
+
+        if (boundbox_contain_point(&frame->area,
+                                   active_connector_handle->position)) {
+
+          // retrieve connector direction to link it either to the right or left
+          // frame handle
+          const ConnectorDirection dir = connector_get_direction(connector);
+          const ConnectorHandle *frame_handle =
+              allocator_connector_handle_entry(frame_get_connector_handle(
+                  frame, (dir == ConnectorDirection_Right)
+                             ? ConnectorHandleSide_Right
+                             : ConnectorHandleSide_Left));
+
+          if (&connector->handles[0] == active_connector_handle) {
+            connector_set_start_handle(connector, frame_handle);
+            connector_compute_corners(connector);
+          } else if (&connector->handles[1] == active_connector_handle) {
+            connector_set_end_handle(connector, frame_handle);
+            connector_compute_corners(connector);
+          }
+        }
+      }
+
       active_connector_handle = nullptr;
+    }
   }
 }
 

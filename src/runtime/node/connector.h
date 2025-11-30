@@ -13,6 +13,11 @@ typedef enum {
   ConnectorStatus_UndefError,
 } ConnectorStatus;
 
+typedef enum {
+  ConnectorDirection_Left,
+  ConnectorDirection_Right,
+} ConnectorDirection;
+
 typedef vec2 connector_corners[4];
 
 typedef struct {
@@ -64,8 +69,10 @@ connector_set_end_handle(Connector *connector, const ConnectorHandle *handle) {
  */
 static inline ConnectorStatus
 connector_update_handle_position(Connector *connector) {
-  connector_handle_set_position(&connector->handles[0], connector->h0->position);
-  connector_handle_set_position(&connector->handles[1], connector->h1->position);
+  connector_handle_set_position(&connector->handles[0],
+                                connector->h0->position);
+  connector_handle_set_position(&connector->handles[1],
+                                connector->h1->position);
   return ConnectorStatus_Success;
 }
 
@@ -105,6 +112,12 @@ static inline float connector_get_thickness(Connector *connector) {
 
 static inline const vec2 *connector_get_corners(Connector *connector) {
   return connector->corners;
+}
+
+static inline ConnectorDirection connector_get_direction(Connector *connector) {
+  return (connector->handles[0].position[0] < connector->handles[1].position[0])
+             ? ConnectorDirection_Right
+             : ConnectorDirection_Left;
 }
 
 EXTERN_C_END

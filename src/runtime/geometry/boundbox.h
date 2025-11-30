@@ -78,6 +78,8 @@ static inline void boundbox_left_from_points(const vec2 p0, const vec2 p1,
 
 bool boundbox_collide(const RectCoordinate *, const RectCoordinate *);
 
+bool boundbox_contain_point(const RectCoordinate *, const vec2);
+
 EXTERN_C_END
 
 #endif

@@ -85,3 +85,12 @@ bool boundbox_collide(const RectCoordinate *a, const RectCoordinate *b) {
 
     return !separated;
 }
+
+
+/**
+   Note: Only works if p0 is min and p1 is max
+ */
+bool boundbox_contain_point(const RectCoordinate *r, const vec2 p) {
+    return (p[0] >= r->p0[0] && p[0] <= r->p1[0] &&
+            p[1] >= r->p0[1] && p[1] <= r->p1[1]);
+}
