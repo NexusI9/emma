@@ -1,5 +1,6 @@
 #include "frame.h"
 #include "runtime/manager/allocator.h"
+#include "runtime/manager/allocator_list.h"
 #include "utils/id.h"
 #include <math.h>
 #include <stddef.h>
@@ -22,6 +23,10 @@ FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
 }
 
 StaticListStatus frame_add_child(Frame *parent, const alloc_id id) {
+
+  if (allocator_id_list_find(parent->children.entries, parent->children.length,
+                             id) != NULL)
+    return StaticListStatus_DuplicateEntry;
 
   StaticListStatus push =
       allocator_id_list_push(parent->children.entries, FRAME_MAX_CHILDREN,

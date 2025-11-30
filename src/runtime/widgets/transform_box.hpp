@@ -88,21 +88,23 @@ public:
   TransformBoxStatus session_set_blank_click();
   TransformBoxStatus session_set_hit();
   TransformBoxStatus session_end();
+  TransformBoxSessionStatus session_satus() { return session_status; }
 
   uint16_t objects_count() { return objects.count; }
 
   unsigned int mode = TransformBoxMode_All;
+  ImGuiMouseButton button;
   void draw();
-
-private:
+  
+  static constexpr color primary_color = {87.0f / 255.0f, 154.0f / 255.0f,
+                                          212.0f / 255.0f, 1.0f};
   static constexpr float area_padding = 20.0f;
   static constexpr uint8_t transform_box_handles_count = 9;
   static constexpr float transform_box_handle_size = 10.0f;
-  static constexpr color primary_color = {87.0f / 255.0f, 154.0f / 255.0f,
-                                          212.0f / 255.0f, 1.0f};
 
   static constexpr float stroke_width = 4.0f;
 
+private:
   Gui *gui;
   TransformBoxObjectList objects = {0};
   TransformHandle handles[transform_box_handles_count];

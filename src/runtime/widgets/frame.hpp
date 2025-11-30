@@ -12,8 +12,12 @@ public:
   FrameShape() {}
   FrameShape(Frame *node) : node(node) {}
   void draw();
-  
+  void draw_fill(ImColor, const float);
+  void draw_texture();
+
   Frame *get_node() { return node; }
+  bool area_hovered();
+  bool boundbox_hovered();
 
 private:
   Frame *node;

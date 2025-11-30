@@ -6,7 +6,7 @@
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/heatmap.h"
-#include "runtime/widgets/module.hpp"
+#include "runtime/widgets/frame.hpp"
 #include "utils/input.h"
 #include "webgpu/webgpu.h"
 #include <cstdlib>
@@ -80,7 +80,7 @@ void Widget::HeatmapShape::compute_render_pass(WGPUCommandEncoder encoder) {
       int rd_g = ((float)rand() / RAND_MAX) * 255;
       int rd_b = ((float)rand() / RAND_MAX) * 255;
 
-      ModuleShape(module).draw_fill(ImColor(rd_r, rd_g, rd_b, 255),
+      FrameShape(module).draw_fill(ImColor(rd_r, rd_g, rd_b, 255),
                                     node->scale);
     }
   }

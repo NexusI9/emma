@@ -119,7 +119,7 @@ Frame *canvas_create_frame(Canvas *canvas) {
       &canvas->frames[CanvasFrameState_Default].length,
       CanvasFrameCreateFlags_All);
 }
- 
+
 Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
 
   const TextureAtlasRegion *module_desc = get_module(module);
@@ -268,9 +268,22 @@ void canvas_frame_wrap(Canvas *canvas, Frame *frame) {
   canvas_align_connector_handle_group_to_frame(canvas, frame);
 }
 
-void canvas_set_module_position(Canvas *canvas, Frame *frame,
-                                const vec2 value) {
+/**
+   Used when we add a module to a frame
+ */
+void canvas_set_module_local_position(Canvas *canvas, Frame *frame,
+                                      const vec2 value) {
   frame_set_local_position(frame, value); // !! Relative to parent
+  frame_update_world_position(frame);
+  canvas_align_connector_handle_group_to_frame(canvas, frame);
+}
+
+/**
+   Used when we transform a module on the canvas
+ */
+void canvas_set_module_world_position(Canvas *canvas, Frame *frame,
+                                      const vec2 value) {
+  frame_set_world_position(frame, value);
   frame_update_world_position(frame);
   canvas_align_connector_handle_group_to_frame(canvas, frame);
 }
@@ -404,7 +417,7 @@ CanvasStatus canvas_add_module_to_frame(Canvas *canvas, Frame *frame,
       StaticListStatus_Success) // ERRHANDLE
     return CanvasStatus_ResourceCreationFail;
 
-  canvas_set_module_position(canvas, module, position);
+  canvas_set_module_local_position(canvas, module, position);
 
   return CanvasStatus_Success;
 }

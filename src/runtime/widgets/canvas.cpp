@@ -18,7 +18,6 @@
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
-#include "runtime/widgets/module.hpp"
 #include "runtime/widgets/octagon.hpp"
 #include "runtime/widgets/transform_box.hpp"
 #include "utils/id.h"
@@ -41,11 +40,12 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
         &transform_configuration[CanvasTransformConfigurationType_Frame];
 
     fm_conf->transform_mode = TransformBoxMode_All;
-    fm_conf->get_position = canvas_shape_get_frame_shape_position;
-    fm_conf->set_position = canvas_shape_set_frame_shape_position;
-    fm_conf->get_size = canvas_shape_get_frame_shape_size;
-    fm_conf->set_size = canvas_shape_set_frame_shape_size;
+    fm_conf->get_position = canvas_shape_get_frame_position;
+    fm_conf->set_position = canvas_shape_set_frame_position;
+    fm_conf->get_size = canvas_shape_get_frame_size;
+    fm_conf->set_size = canvas_shape_set_frame_size;
     fm_conf->selection_list = &node->frames[CanvasFrameState_Selected];
+    fm_conf->button = ImGuiMouseButton_Right;
     // fm_conf->parent_list = (group list)
   }
 
@@ -55,13 +55,14 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
         &transform_configuration[CanvasTransformConfigurationType_Module];
 
     md_conf->transform_mode = TransformBoxMode_Move;
-    md_conf->get_position = canvas_shape_get_frame_shape_position;
-    md_conf->set_position = canvas_shape_set_frame_shape_position;
-    md_conf->get_size = canvas_shape_get_frame_shape_size;
-    md_conf->set_size = canvas_shape_set_frame_shape_size;
+    md_conf->get_position = canvas_shape_get_frame_position;
+    md_conf->get_size = canvas_shape_get_frame_size;
+    md_conf->set_position = canvas_shape_set_module_position;
+    md_conf->set_size = canvas_shape_set_module_size;
     md_conf->session_end = canvas_shape_on_module_session_end;
     md_conf->selection_list = &node->modules[CanvasModuleState_Selected];
     md_conf->parent_list = &node->frames[CanvasModuleState_Default];
+    md_conf->button = ImGuiMouseButton_Left;
   }
 }
 
@@ -69,86 +70,105 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
    Handle the boundbox interaction along with the transformation for frames
    and modules.
  */
-void Widget::CanvasShape::draw_frame_transform_begin(
-    Frame *frame, const CanvasTransformConfiguration *conf) {
+void Widget::CanvasShape::draw_frame_transform_trigger(
+    FrameShape *frame, const CanvasTransformConfiguration *conf) {
 
-  // add to selection
-  if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+  Frame *frame_node = frame->get_node();
 
-    for (uint8_t i = 0; i < frame->boundbox.count; i++)
-      if (ImGui::IsMouseHoveringRect(
-              ImVec2(vpx(frame->boundbox.entries[i].p0[0]),
-                     vpy(frame->boundbox.entries[i].p0[1])),
-              ImVec2(vpx(frame->boundbox.entries[i].p1[0]),
-                     vpy(frame->boundbox.entries[i].p1[1])))) {
+  // no matter the button, if a click happened and hit a frame *area*, we update
+  // the transform session status to "Has Hit"
+  if ((ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
+       ImGui::IsMouseClicked(ImGuiMouseButton_Left)) &&
+      frame->area_hovered())
+    transform_box.session_set_hit();
 
-        CanvasTransformFrameData data;
-        data.frame = frame;
-        data.canvas = node;
-        data.parent_list = conf->parent_list;
+  // but we only add to selection if the button actually matches the
+  // configuration button and hit the
+  if (ImGui::IsMouseClicked(conf->button) && frame->boundbox_hovered()) {
 
-        // register the frame for transform callbacks
-        if (stli_insert(transform_frame_data.entries, ALLOCATOR_MAX_FRAMES,
-                        &transform_frame_data.count,
-                        sizeof(CanvasTransformFrameData), &data,
-                        "Canvas Transform Frame Data") !=
-            StaticListStatus_Success)
-          return;
+    CanvasTransformFrameData data;
+    data.frame = frame_node;
+    data.canvas = node;
+    data.parent_list = conf->parent_list;
 
-        TransformBoxObjectDescriptor object = {
-            .handle =
-                &transform_frame_data.entries[transform_frame_data.count - 1],
-            .get_position = conf->get_position,
-            .set_position = conf->set_position,
-            .get_size = conf->get_size,
-            .set_size = conf->set_size,
-            .session_end = conf->session_end,
-        };
+    // register the frame for transform callbacks
+    if (stli_insert(transform_frame_data.entries, ALLOCATOR_MAX_FRAMES,
+                    &transform_frame_data.count,
+                    sizeof(CanvasTransformFrameData), &data,
+                    "Canvas Transform Frame Data") != StaticListStatus_Success)
+      return;
 
-        transform_box.session_set_hit();
+    TransformBoxObjectDescriptor object = {
+        .handle = &transform_frame_data.entries[transform_frame_data.count - 1],
+        .get_position = conf->get_position,
+        .set_position = conf->set_position,
+        .get_size = conf->get_size,
+        .set_size = conf->set_size,
+        .session_end = conf->session_end,
+    };
 
-        TransformBoxObject *found_obj =
-            transform_box.find_object(object.handle, NULL);
+    TransformBoxObject *found_obj =
+        transform_box.find_object(object.handle, NULL);
 
-        // remove object
-        if (found_obj) {
-          // mark as unselected
-          allocator_id_list_pop(conf->selection_list->entries,
-                                &conf->selection_list->length, frame->id);
+    // remove object
+    if (found_obj) {
+      // mark as unselected
+      allocator_id_list_pop(conf->selection_list->entries,
+                            &conf->selection_list->length, frame_node->id);
 
-          transform_box.remove_object(found_obj->handle, NULL);
+      transform_box.remove_object(found_obj->handle, NULL);
 
-          // remove it from the cached callback data
-          for (size_t i = 0; i < transform_frame_data.count; i++)
-            if (transform_frame_data.entries[i].frame == frame)
-              stli_remove_at_index(transform_frame_data.entries,
-                                   &transform_frame_data.count,
-                                   sizeof(CanvasTransformFrameData), i);
+      // remove it from the cached callback data
+      for (size_t i = 0; i < transform_frame_data.count; i++)
+        if (transform_frame_data.entries[i].frame == frame_node)
+          stli_remove_at_index(transform_frame_data.entries,
+                               &transform_frame_data.count,
+                               sizeof(CanvasTransformFrameData), i);
 
-          // add object
-        } else {
+      // add object
+    } else {
 
-          transform_box.mode = conf->transform_mode;
-
-          // if not CAP input or if the configuration's Transform Mode is
-          // different from the current one, we empty the selection.
-          if (input_key(INPUT_KEY_CAP) == false ||
-              transform_box.mode != conf->transform_mode) {
-
-            transform_box.empty_objects();
-            canvas_empty_frame_state(node, CanvasFrameState_Selected);
-          }
-
-          // mark as selected
-          allocator_id_list_push(conf->selection_list->entries,
-                                 ALLOCATOR_MAX_FRAMES,
-                                 &conf->selection_list->length, frame->id);
-
-          transform_box.add_object(&object);
-        }
-
-        transform_box.update_bound_from_selection();
+      // prevent selecting the inner content of the frame when the frame is
+      // already selected but we click inside (on the content) to move it (and
+      // not selecting the content).
+      if (transform_box.objects_count() &&
+          transform_box.button != conf->button) {
+        return;
       }
+
+      transform_box.mode = conf->transform_mode;
+      transform_box.button = conf->button;
+
+      // if not CAP input or if the configuration's Transform Mode is
+      // empty and different from the current one, we empty the selection.
+      if (input_key(INPUT_KEY_CAP) == false) {
+        transform_box.empty_objects();
+        canvas_empty_frame_state(node, CanvasFrameState_Selected);
+      }
+
+      // mark as selected
+      allocator_id_list_push(conf->selection_list->entries,
+                             ALLOCATOR_MAX_FRAMES,
+                             &conf->selection_list->length, frame_node->id);
+
+      transform_box.add_object(&object);
+    }
+
+    transform_box.update_bound_from_selection();
+  }
+}
+
+void Widget::CanvasShape::draw_frame_highlight_trigger(FrameShape *frame) {
+
+  if (!transform_box.objects_count() && frame->area_hovered()) {
+
+    Frame *frame_node = frame->get_node();
+    dl->AddRect(
+        ImVec2(vpx(frame_node->world_position[0]),
+               vpy(frame_node->world_position[1])),
+        ImVec2(vpx(frame_node->end_point[0]), vpy(frame_node->end_point[1])),
+        ImColor(im_color(transform_box.primary_color)), 0, 0,
+        transform_box.stroke_width);
   }
 }
 
@@ -168,11 +188,14 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
   }
 }
 
-void Widget::CanvasShape::draw(bool show_octagon) {
+void Widget::CanvasShape::draw(const unsigned int flags) {
+
+  dl = ImGui::GetWindowDrawList();
 
   grid_background.draw_texture(gui->pass_encoder);
 
-  if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
+      ImGui::IsMouseClicked(ImGuiMouseButton_Left))
     transform_box.session_set_blank_click();
 
   // === Frames ===
@@ -181,15 +204,17 @@ void Widget::CanvasShape::draw(bool show_octagon) {
     Frame *frame = allocator_frame_entry(
         node->frames[CanvasFrameState_Default].entries[i]);
 
-    FrameShape(frame).draw();
+    FrameShape frame_shape = FrameShape(frame);
+    frame_shape.draw();
 
-    draw_frame_transform_begin(
-        frame,
-        &transform_configuration[CanvasTransformConfigurationType_Frame]);
+    if ((CanvasDrawFlag_FreezeSelection & flags) == 0)
+      draw_frame_transform_trigger(
+          &frame_shape,
+          &transform_configuration[CanvasTransformConfigurationType_Frame]);
   }
 
   // === Octagons ===
-  if (show_octagon)
+  if (CanvasDrawFlag_ShowOctagon & flags)
     for (i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
       Frame *frame = allocator_frame_entry(
           node->frames[CanvasFrameState_Octagon].entries[i]);
@@ -210,11 +235,15 @@ void Widget::CanvasShape::draw(bool show_octagon) {
     Frame *module = allocator_frame_entry(
         node->modules[CanvasModuleState_Default].entries[i]);
 
-    ModuleShape(module).draw();
+    FrameShape frame_shape = FrameShape(module);
+    frame_shape.draw_texture();
 
-    draw_frame_transform_begin(
-        module,
-        &transform_configuration[CanvasTransformConfigurationType_Module]);
+    if ((CanvasDrawFlag_FreezeSelection & flags) == 0) {
+      draw_frame_highlight_trigger(&frame_shape);
+      draw_frame_transform_trigger(
+          &frame_shape,
+          &transform_configuration[CanvasTransformConfigurationType_Module]);
+    }
   }
 
   // === Connectors ===
@@ -224,15 +253,34 @@ void Widget::CanvasShape::draw(bool show_octagon) {
     ConnectorShape(connector).draw();
   }
 
-  // === Transform Box ===
   if (transform_box.session_end() == TransformBoxStatus_ClearSelection)
     canvas_empty_frame_state(node, CanvasFrameState_Selected);
 
+  // === Transform Box ===
   if (transform_box.objects_count() > 0)
     transform_box.draw();
 }
 
-void Widget::canvas_shape_set_frame_shape_position(void *data, ImVec2 value) {
+void Widget::canvas_shape_get_frame_position(void *data, ImVec2 &value) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = frame_data->frame;
+
+  const float *world_pos = frame_get_world_position(frame);
+  value = ImVec2(world_pos[0], world_pos[1]);
+}
+
+void Widget::canvas_shape_get_frame_size(void *data, ImVec2 &value) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = frame_data->frame;
+
+  value = im_vec2(frame->size);
+}
+
+void Widget::canvas_shape_set_frame_position(void *data, ImVec2 value) {
 
   CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
 
@@ -243,17 +291,7 @@ void Widget::canvas_shape_set_frame_shape_position(void *data, ImVec2 value) {
   canvas_update_frame_connectors(frame_data->canvas, frame_data->frame);
 }
 
-void Widget::canvas_shape_get_frame_shape_position(void *data, ImVec2 &value) {
-
-  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
-
-  Frame *frame = frame_data->frame;
-
-  const float *world_pos = frame_get_world_position(frame);
-  value = ImVec2(world_pos[0], world_pos[1]);
-}
-
-void Widget::canvas_shape_set_frame_shape_size(void *data, ImVec2 value) {
+void Widget::canvas_shape_set_frame_size(void *data, ImVec2 value) {
 
   CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
 
@@ -262,13 +300,23 @@ void Widget::canvas_shape_set_frame_shape_size(void *data, ImVec2 value) {
   canvas_set_frame_size(frame_data->canvas, frame, (vec2){value.x, value.y});
 }
 
-void Widget::canvas_shape_get_frame_shape_size(void *data, ImVec2 &value) {
+void Widget::canvas_shape_set_module_size(void *data, ImVec2 value) {
 
   CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
 
   Frame *frame = frame_data->frame;
 
-  value = im_vec2(frame->size);
+  canvas_set_module_size(frame_data->canvas, frame, (vec2){value.x, value.y});
+}
+
+void Widget::canvas_shape_set_module_position(void *data, ImVec2 value) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = frame_data->frame;
+
+  canvas_set_module_world_position(frame_data->canvas, frame,
+                                   (vec2){value.x, value.y});
 }
 
 /**

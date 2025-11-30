@@ -12,7 +12,6 @@
 typedef enum {
   CanvasFrameState_Default,
   CanvasFrameState_Octagon,
-  CanvasFrameState_Highlighted,
   CanvasFrameState_Selected,
   CanvasFrameState_COUNT,
 } CanvasFrameState;
@@ -22,6 +21,13 @@ typedef enum {
   CanvasModuleState_Selected,
   CanvasModuleState_COUNT,
 } CanvasModuleState;
+
+typedef enum {
+  CanvasPadState_Default,
+  CanvasPadState_Selected,
+  CanvasPadState_COUNT,
+} CanvasPadState;
+
 
 typedef enum {
   CanvasStatus_Success,
@@ -61,7 +67,8 @@ void canvas_set_frame_position(Canvas *, Frame *, const vec2);
 void canvas_set_frame_size(Canvas *, Frame *, const vec2);
 void canvas_frame_wrap(Canvas *, Frame *);
 
-void canvas_set_module_position(Canvas *, Frame *, const vec2);
+void canvas_set_module_local_position(Canvas *, Frame *, const vec2);
+void canvas_set_module_world_position(Canvas *, Frame *, const vec2);
 void canvas_set_module_size(Canvas *, Frame *, const vec2);
 
 StaticListStatus canvas_register_frame_state(Canvas *, const Frame *,

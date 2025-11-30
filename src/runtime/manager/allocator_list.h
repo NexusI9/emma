@@ -17,6 +17,17 @@ typedef struct {
 
 EXTERN_C_BEGIN
 
+static inline alloc_id *allocator_id_list_find(alloc_id *entries, size_t length,
+                                               const alloc_id id) {
+
+  for (size_t i = 0; i < length; i++) {
+    if (entries[i] == id)
+      return &entries[i];
+  }
+
+  return NULL;
+}
+
 static inline StaticListStatus allocator_id_list_push(alloc_id *entries,
                                                       const size_t capacity,
                                                       size_t *length,

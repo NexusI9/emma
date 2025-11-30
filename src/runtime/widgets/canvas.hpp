@@ -8,13 +8,19 @@
 #include "runtime/widgets/grid_background.hpp"
 #include "runtime/widgets/tool_bar.hpp"
 #include "runtime/widgets/transform_box.hpp"
+#include "utils/id.h"
 
 namespace Widget {
 
-void canvas_shape_set_frame_shape_position(void *, ImVec2);
-void canvas_shape_get_frame_shape_position(void *, ImVec2 &);
-void canvas_shape_set_frame_shape_size(void *, ImVec2);
-void canvas_shape_get_frame_shape_size(void *, ImVec2 &);
+void canvas_shape_get_frame_position(void *, ImVec2 &);
+void canvas_shape_get_frame_size(void *, ImVec2 &);
+
+void canvas_shape_set_frame_position(void *, ImVec2);
+void canvas_shape_set_frame_size(void *, ImVec2);
+
+void canvas_shape_set_module_position(void *, ImVec2);
+void canvas_shape_set_module_size(void *, ImVec2);
+
 void canvas_shape_on_frame_selection(void *);
 void canvas_shape_on_module_session_end(void *);
 
@@ -48,6 +54,8 @@ typedef struct {
   // colliding with a parent to add it as a child or at the opposite, going out
   // of a parent and break the relationship.
   FrameAllocList *parent_list;
+  // The button which triggers the transformation (ImGuiMouseButton_Right...)
+  ImGuiMouseButton button;
 } CanvasTransformConfiguration;
 
 typedef enum {
@@ -56,18 +64,25 @@ typedef enum {
   CanvasTransformConfigurationType_COUNT,
 } CanvasTransformConfigurationType;
 
+typedef enum {
+  CanvasDrawFlag_None = 0,
+  CanvasDrawFlag_ShowOctagon = 1 << 0,
+  CanvasDrawFlag_FreezeSelection = 1 << 1,
+} CanvasDrawFlag;
+
 class CanvasShape {
 
 public:
   CanvasShape(Gui *, Canvas *);
 
-  void draw(bool);
+  void draw(const unsigned int);
 
 private:
   Gui *gui;
   Canvas *node;
   TransformBox transform_box;
   GridBackground grid_background;
+  ImDrawList *dl;
 
   struct {
     CanvasTransformFrameData entries[ALLOCATOR_MAX_FRAMES];
@@ -77,8 +92,9 @@ private:
   CanvasTransformConfiguration
       transform_configuration[CanvasTransformConfigurationType_COUNT] = {};
 
-  void draw_frame_transform_begin(Frame *,
-                                  const CanvasTransformConfiguration *);
+  void draw_frame_highlight_trigger(FrameShape *);
+  void draw_frame_transform_trigger(FrameShape *,
+                                    const CanvasTransformConfiguration *);
 
   void draw_frame_handle_connectors(Frame *, const int);
 }; // namespace Widget
