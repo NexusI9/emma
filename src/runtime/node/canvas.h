@@ -28,7 +28,6 @@ typedef enum {
   CanvasPadState_COUNT,
 } CanvasPadState;
 
-
 typedef enum {
   CanvasStatus_Success,
   CanvasStatus_ResourceCreationFail,
@@ -62,6 +61,7 @@ CanvasStatus canvas_add_module_to_frame(Canvas *, Frame *, const ModuleType,
 void canvas_align_octagon_to_frame(Canvas *, const Frame *);
 void canvas_align_connector_handle_group_to_frame(Canvas *, const Frame *);
 void canvas_update_frame_connectors(Canvas *, const Frame *);
+void canvas_update_connectors_handle_to_frame(Canvas *, const Frame *);
 
 void canvas_set_frame_position(Canvas *, Frame *, const vec2);
 void canvas_set_frame_size(Canvas *, Frame *, const vec2);

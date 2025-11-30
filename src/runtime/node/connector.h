@@ -6,6 +6,8 @@
 #include "utils/id.h"
 #include <cglm/cglm.h>
 
+static const int CONNECTOR_TOUCH_POINT_COUNT = 2;
+
 typedef enum {
   ConnectorStatus_Success,
   ConnectorStatus_UndefError,
@@ -16,6 +18,7 @@ typedef vec2 connector_corners[4];
 typedef struct {
   alloc_id id;
   const ConnectorHandle *h0, *h1;
+  ConnectorHandle handles[CONNECTOR_TOUCH_POINT_COUNT];
   connector_corners corners;
   float thickness;
   color color;
@@ -39,13 +42,30 @@ ConnectorStatus connector_swap_direction(Connector *);
 static inline ConnectorStatus
 connector_set_start_handle(Connector *connector,
                            const ConnectorHandle *handle) {
+
   connector->h0 = handle;
+  connector_handle_copy(connector->h0, &connector->handles[0]);
+
   return ConnectorStatus_Success;
 }
 
 static inline ConnectorStatus
 connector_set_end_handle(Connector *connector, const ConnectorHandle *handle) {
+
   connector->h1 = handle;
+  connector_handle_copy(connector->h1, &connector->handles[1]);
+
+  return ConnectorStatus_Success;
+}
+
+/**
+   Sync the start and end position with the handles, useful when the frame moves
+   and we need to update the connector start/end position.
+ */
+static inline ConnectorStatus
+connector_update_handle_position(Connector *connector) {
+  connector_handle_set_position(&connector->handles[0], connector->h0->position);
+  connector_handle_set_position(&connector->handles[1], connector->h1->position);
   return ConnectorStatus_Success;
 }
 

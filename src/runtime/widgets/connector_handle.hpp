@@ -9,11 +9,16 @@ namespace Widget {
 class ConnectorHandleShape {
 
 public:
-  ConnectorHandleShape(ConnectorHandle *node) : node(node) {}
-  void draw();
+  ConnectorHandleShape(const ConnectorHandle *node,
+                       const ConnectorHandleSide side)
+  : node(node), side(side) {}
   
+  void draw();
+  const ConnectorHandle* get_node(){ return node; }
+
 private:
-  ConnectorHandle *node;
+  const ConnectorHandle *node;
+  const ConnectorHandleSide side;
 };
 
 } // namespace Widget

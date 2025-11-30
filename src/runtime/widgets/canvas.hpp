@@ -4,6 +4,8 @@
 #include "runtime/geometry/core.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/node/canvas.h"
+#include "runtime/widgets/connector.hpp"
+#include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
 #include "runtime/widgets/tool_bar.hpp"
@@ -89,12 +91,21 @@ private:
     size_t count;
   } transform_frame_data;
 
+  ConnectorHandle *active_connector_handle = nullptr;
+
   CanvasTransformConfiguration
       transform_configuration[CanvasTransformConfigurationType_COUNT] = {};
+
+  void draw_frames(const unsigned int);
+  void draw_frames_octagons(const unsigned int);
+  void draw_frames_connector_handles(const unsigned int);
+  void draw_modules(const unsigned int);
+  void draw_connectors(const unsigned int);
 
   void draw_frame_highlight_trigger(FrameShape *);
   void draw_frame_transform_trigger(FrameShape *,
                                     const CanvasTransformConfiguration *);
+  void draw_connector_handle_transform_trigger(Connector *);
 
   void draw_frame_handle_connectors(Frame *, const int);
 }; // namespace Widget

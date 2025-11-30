@@ -143,9 +143,9 @@ static inline FrameStatus frame_set_octagon_id(Frame *node, const alloc_id id) {
 }
 
 static inline FrameStatus
-frame_set_connector_handle_id(Frame *node, const ConnectorHandleType type,
+frame_set_connector_handle_id(Frame *node, const ConnectorHandleSide side,
                               const alloc_id id) {
-  node->connector_handle_id[type] = id;
+  node->connector_handle_id[__builtin_ctz(side)] = id;
   return FrameStatus_Success;
 }
 

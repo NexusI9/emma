@@ -4,31 +4,31 @@
 
 #include "nkengine/include/gui.hpp"
 #include "runtime/node/connector_handle.h"
+#include "runtime/widgets/connector_handle.hpp"
+#include "runtime/widgets/utils.hpp"
 #include <imgui/imgui.h>
+#include <stdint.h>
 
 void Widget::ConnectorShape::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
+  vec2 vp_start, vp_end;
+  glm_vec2_copy(node->handles[0].position, vp_start);
+  glm_vec2_copy(node->handles[1].position, vp_end);
+
   dl->PathClear();
+  
+  vp2(vp_start, vp_start);
+  vp2(vp_end, vp_end);
 
-  const ConnectorHandle *h0 = connector_get_start_handle(node);
-  const ConnectorHandle *h1 = connector_get_end_handle(node);
-
-  vec2 start, end;
-  connector_handle_get_position(h0, start);
-  connector_handle_get_position(h1, end);
-
-  vp2(start, start);
-  vp2(end, end);
-
-  dl->PathLineTo(im_vec2(start));
+  dl->PathLineTo(im_vec2(vp_start));
 
   const vec2 *corners = connector_get_corners(node);
   for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++)
     dl->PathLineTo(ImVec2(vpx(corners[i][0]), vpy(corners[i][1])));
 
-  dl->PathLineTo(im_vec2(end));
+  dl->PathLineTo(im_vec2(vp_end));
 
   dl->PathStroke(im_color(node->color), 0, node->thickness);
 }

@@ -88,7 +88,8 @@ Frame *canvas_create_frame_core(Canvas *canvas,
     // === Connector Handles ===
     for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
       ConnectorHandle *handle = canvas_create_connector_handle(canvas);
-      frame_set_connector_handle_id(frame, (ConnectorHandleType)i, handle->id);
+      frame_set_connector_handle_id(frame, (ConnectorHandleSide)(1 << i),
+                                    handle->id);
     }
 
     canvas_align_connector_handle_group_to_frame(canvas, frame);
@@ -223,6 +224,10 @@ void canvas_align_octagon_to_frame(Canvas *canvas, const Frame *frame) {
   octagon_set_position(octagon, oct_position);
 }
 
+/**
+   Move the 4 connectors handles according to the frame position.
+   Used when we move a frame position.
+ */
 void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
                                                   const Frame *frame) {
 
@@ -250,22 +255,40 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
   }
 }
 
+/**
+  Use the cached connectors id of the frame to update update the connector
+  handles position accordingly. Used when we move a frame position.
+ */
+void canvas_update_connectors_handle_to_frame(Canvas *canvas,
+                                              const Frame *frame) {
+
+  for (size_t i = 0; i < frame->connectors_id.length; i++) {
+    Connector *connector =
+        allocator_connector_entry(frame->connectors_id.entries[i]);
+
+    connector_update_handle_position(connector);
+  }
+}
+
 void canvas_set_frame_position(Canvas *canvas, Frame *frame, const vec2 value) {
   frame_set_world_position(frame, value);
   canvas_align_octagon_to_frame(canvas, frame);
   canvas_align_connector_handle_group_to_frame(canvas, frame);
+  canvas_update_connectors_handle_to_frame(canvas, frame);
 }
 
 void canvas_set_frame_size(Canvas *canvas, Frame *frame, const vec2 value) {
   frame_set_size(frame, value);
   canvas_align_octagon_to_frame(canvas, frame);
   canvas_align_connector_handle_group_to_frame(canvas, frame);
+  canvas_update_connectors_handle_to_frame(canvas, frame);
 }
 
 void canvas_frame_wrap(Canvas *canvas, Frame *frame) {
   frame_wrap(frame);
   canvas_align_octagon_to_frame(canvas, frame);
   canvas_align_connector_handle_group_to_frame(canvas, frame);
+  canvas_update_connectors_handle_to_frame(canvas, frame);
 }
 
 /**

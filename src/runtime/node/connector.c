@@ -36,8 +36,8 @@ ConnectorStatus connector_compute_corners(Connector *connector) {
 
   vec2 half, p0, p1;
 
-  connector_handle_get_position(connector->h0, p0);
-  connector_handle_get_position(connector->h1, p1);
+  connector_handle_get_position(&connector->handles[0], p0);
+  connector_handle_get_position(&connector->handles[1], p1);
   vec2_avg_2(p0, p1, half);
 
   const int swap_y = p0[1] < p1[1] ? 1 : -1;

@@ -41,7 +41,7 @@ static inline float vpy(const float value) {
 }
 
 // vec2
-static inline void vp2(vec2 value, vec2 dest) {
+static inline void vp2(const vec2 value, vec2 dest) {
   dest[0] = g_viewport_manager.pan[0] + value[0] * g_viewport_manager.scale;
   dest[1] = g_viewport_manager.pan[1] + value[1] * g_viewport_manager.scale;
 }
