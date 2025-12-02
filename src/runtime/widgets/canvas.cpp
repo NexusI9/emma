@@ -13,6 +13,7 @@
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
+#include "runtime/systems/connect_system.h"
 #include "runtime/widgets/canvas.hpp"
 #include "runtime/widgets/connector.hpp"
 #include "runtime/widgets/connector_handle.hpp"
@@ -271,6 +272,7 @@ void Widget::CanvasShape::draw_modules(const unsigned int flags) {
 }
 void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
 
+  // Default State
   for (size_t i = 0; i < node->connectors.length; i++) {
     Connector *connector =
         allocator_connector_entry(node->connectors.entries[i]);
@@ -278,8 +280,12 @@ void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
     ConnectorShape connector_shape = ConnectorShape(connector);
 
     draw_connector_handle_transform_trigger(connector);
+    draw_connector_handle_transform_release(connector);
     connector_shape.draw();
   }
+
+  if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && active_connector_handle)
+    active_connector_handle = nullptr;
 }
 
 /**
@@ -299,10 +305,16 @@ void Widget::CanvasShape::draw_connector_handle_transform_trigger(
 
       ConnectorHandleShape(handle, ConnectorHandleSide_None).draw();
 
-      if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && !active_connector_handle)
+      if (ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
+          !active_connector_handle) {
         active_connector_handle = handle;
+      }
     }
   }
+}
+
+void Widget::CanvasShape::draw_connector_handle_transform_release(
+    Connector *connector) {
 
   if (active_connector_handle) {
 
@@ -311,39 +323,13 @@ void Widget::CanvasShape::draw_connector_handle_transform_trigger(
                                   (vec2){mouse.x, mouse.y});
     connector_compute_corners(connector);
 
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-
-      // check if the handle is within a frame area and handle links accordingly
-      for (size_t i = 0; i < node->frames[CanvasFrameState_Default].length;
-           i++) {
-
-        Frame *frame = allocator_frame_entry(
-            node->frames[CanvasFrameState_Default].entries[i]);
-
-        if (boundbox_contain_point(&frame->area,
-                                   active_connector_handle->position)) {
-
-          // retrieve connector direction to link it either to the right or left
-          // frame handle
-          const ConnectorDirection dir = connector_get_direction(connector);
-          const ConnectorHandle *frame_handle =
-              allocator_connector_handle_entry(frame_get_connector_handle(
-                  frame, (dir == ConnectorDirection_Right)
-                             ? ConnectorHandleSide_Right
-                             : ConnectorHandleSide_Left));
-
-          if (&connector->handles[0] == active_connector_handle) {
-            connector_set_start_handle(connector, frame_handle);
-            connector_compute_corners(connector);
-          } else if (&connector->handles[1] == active_connector_handle) {
-            connector_set_end_handle(connector, frame_handle);
-            connector_compute_corners(connector);
-          }
-        }
-      }
-
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
+        connect_system_connect_handle_to_frame(
+            active_connector_handle, connector,
+            node->frames[CanvasFrameState_Default].entries,
+            node->frames[CanvasFrameState_Default].length) ==
+            ConnectSystemStatus_Success)
       active_connector_handle = nullptr;
-    }
   }
 }
 
@@ -431,7 +417,8 @@ void Widget::canvas_shape_on_module_session_end(void *data) {
     for (size_t i = 0; i < frame_data->parent_list->length; i++) {
       Frame *parent =
           allocator_frame_entry(frame_data->parent_list->entries[i]);
-      if (frame_collide(parent, frame))
+      if (frame_collide(parent, frame)) {
         frame_add_child(parent, frame->id);
+      }
     }
 }

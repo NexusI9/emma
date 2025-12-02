@@ -24,21 +24,7 @@ typedef enum {
 
 static const float octagon_base_scale = 100.0f;
 
-CanvasStatus canvas_create(Canvas *canvas) {
-
-  size_t i;
-  for (i = 0; i < CanvasFrameState_COUNT; i++)
-    canvas->frames[i].length = 0;
-
-  for (i = 0; i < CanvasModuleState_COUNT; i++)
-    canvas->modules[i].length = 0;
-
-  canvas->octagons.length = 0;
-  canvas->connectors.length = 0;
-  canvas->connector_handles.length = 0;
-
-  return CanvasStatus_Success;
-}
+CanvasStatus canvas_create(Canvas *canvas) { return CanvasStatus_Success; }
 
 static inline void canvas_get_closest_connector_handles(const Frame *,
                                                         const Frame *,

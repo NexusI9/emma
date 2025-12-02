@@ -10,6 +10,7 @@ static const int CONNECTOR_TOUCH_POINT_COUNT = 2;
 
 typedef enum {
   ConnectorStatus_Success,
+  ConnectorStatus_HandleUnfound,
   ConnectorStatus_UndefError,
 } ConnectorStatus;
 

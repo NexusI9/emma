@@ -38,6 +38,18 @@ static inline StaticListStatus allocator_id_list_push(alloc_id *entries,
 }
 
 static inline StaticListStatus
+allocator_id_list_push_unique(alloc_id *entries, const size_t capacity,
+                              size_t *length, const alloc_id id) {
+
+  if (allocator_id_list_find(entries, *length, id) != NULL) {
+    return StaticListStatus_DuplicateEntry;
+  }
+
+  return stli_insert(entries, capacity, length, sizeof(alloc_id), (void *)&id,
+                     "Allocator List");
+}
+
+static inline StaticListStatus
 allocator_id_list_pop(alloc_id *entries, size_t *length, const alloc_id id) {
 
   return stli_remove(entries, length, sizeof(alloc_id), (void *)&id,

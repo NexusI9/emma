@@ -22,6 +22,7 @@ typedef enum {
   CanvasModuleState_COUNT,
 } CanvasModuleState;
 
+
 typedef enum {
   CanvasPadState_Default,
   CanvasPadState_Selected,
@@ -40,8 +41,9 @@ typedef struct {
 
   FrameAllocList frames[CanvasFrameState_COUNT];
   FrameAllocList modules[CanvasModuleState_COUNT];
-  FrameAllocList octagons;
   FrameAllocList connectors;
+  FrameAllocList octagons;
+
   ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES *CONNECTOR_HANDLE_COUNT)
   connector_handles;
 

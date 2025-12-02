@@ -106,6 +106,7 @@ private:
   void draw_frame_transform_trigger(FrameShape *,
                                     const CanvasTransformConfiguration *);
   void draw_connector_handle_transform_trigger(Connector *);
+  void draw_connector_handle_transform_release(Connector *);
 
   void draw_frame_handle_connectors(Frame *, const int);
 }; // namespace Widget
