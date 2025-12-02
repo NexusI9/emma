@@ -208,11 +208,11 @@ void Widget::CanvasShape::draw(const unsigned int flags) {
     draw_connectors(flags);
   }
 
-  if (transform_box.session_end() == TransformBoxStatus_ClearSelection)
-    canvas_empty_frame_state(node, CanvasFrameState_Selected);
-
   if (transform_box.objects_count() > 0)
     transform_box.draw();
+
+  if (transform_box.session_end() == TransformBoxStatus_ClearSelection)
+    canvas_empty_frame_state(node, CanvasFrameState_Selected);
 }
 
 void Widget::CanvasShape::draw_frames(const unsigned int flags) {
@@ -389,6 +389,24 @@ void Widget::canvas_shape_set_module_position(void *data, ImVec2 value) {
 
   canvas_set_module_world_position(frame_data->canvas, frame,
                                    (vec2){value.x, value.y});
+
+  // since we crop the frames children, we need to check if the module is still
+  // within the parent area when moving cause if we move the module out of the
+  // parent, it will still disapear being cropped out by the parent frame.
+  // As a result to make the user understand that the frame is being 'unlinked'
+  // from parent, we need to remove the parent from the child so it is not
+  // cropped anymore.
+  // However note that we do NOT relink back the child here cause on transform
+  // session end, we already traverse all the frames to check if the module is
+  // within one of them. Also it would by costly to check on every frame here if
+  // the child is within any frame node; that's why we only handle the unlink
+  // phase here as it is fast to target the parent (node->parent) and contribute
+  // greatly to the user experience.
+  if (frame_data->frame->parent != ID_UNDEFINED) {
+    Frame *parent = allocator_frame_entry(frame->parent);
+    if (!frame_collide(parent, frame))
+      frame_remove_child(parent, frame->id);
+  }
 }
 
 /**

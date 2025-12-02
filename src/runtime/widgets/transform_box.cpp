@@ -199,6 +199,8 @@ void Widget::TransformBox::cache_initial_attributes() {
 
 void Widget::TransformBox::transform_core(const TransformHandleType handle) {
 
+  session_set_hit();
+  
   ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
   clamp_mouse(handle, mouse);
 
@@ -288,11 +290,11 @@ void Widget::TransformBox::draw() {
     }
   }
 
-  if (active_handle >= 0 && ImGui::IsMouseDown(0))
+  if (active_handle >= 0 && ImGui::IsMouseDown(ImGuiMouseButton_Left))
     transform_core((TransformHandleType)active_handle);
 
   // end session
-  if (active_handle >= 0 && ImGui::IsMouseReleased(0)) {
+  if (active_handle >= 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
     active_handle = -1;
 
     for (size_t i = 0; i < objects_count(); i++) {
