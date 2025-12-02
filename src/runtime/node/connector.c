@@ -7,8 +7,13 @@ ConnectorStatus connector_create(Connector *connector,
                                  const ConnectorDescriptor *desc) {
 
   connector_set_color(connector, desc->color);
-  connector_set_start_handle(connector, desc->start);
-  connector_set_end_handle(connector, desc->end);
+
+  if (desc->start)
+    connector_set_start_handle(connector, desc->start);
+
+  if (desc->end)
+    connector_set_end_handle(connector, desc->end);
+
   connector_set_thickness(connector, desc->thickness);
 
   connector_compute_corners(connector);
@@ -45,7 +50,7 @@ ConnectorStatus connector_compute_corners(Connector *connector) {
   const int swap_x1 = half[0] < p1[0] ? 1 : -1;
 
   static const int max_corner_size = 20;
-  
+
   // prevent visual bug when two points are overlapping, so we slighly shift c10
   // and c11 in opposite direction so they never overlapp.
   static const float half_shift = 0.1f;

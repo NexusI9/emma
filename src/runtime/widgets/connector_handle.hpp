@@ -15,6 +15,7 @@ public:
   
   void draw();
   const ConnectorHandle* get_node(){ return node; }
+  bool hovered();
 
 private:
   const ConnectorHandle *node;

@@ -7,6 +7,8 @@
 #include <cglm/cglm.h>
 
 static const int CONNECTOR_TOUCH_POINT_COUNT = 2;
+static const color CONNECTOR_COLOR = {0.6f, 0.6f, 0.6f, 1.0f};
+static const float CONNECTOR_THICKNESS = 6.0f;
 
 typedef enum {
   ConnectorStatus_Success,
@@ -32,8 +34,8 @@ typedef struct {
 
 typedef struct {
   const ConnectorHandle *start, *end;
-  const float thickness;
-  const color color;
+  float thickness;
+  const float *color;
 } ConnectorDescriptor;
 
 typedef alloc_id connection[2];
@@ -45,9 +47,16 @@ ConnectorStatus connector_compute_corners(Connector *);
 ConnectorStatus connector_swap_direction(Connector *);
 
 // Mutators
-static inline ConnectorStatus
-connector_set_start_handle(Connector *connector,
-                           const ConnectorHandle *handle) {
+// clang-format off
+static inline ConnectorStatus connector_set_start_handle(Connector *, const ConnectorHandle *);
+static inline ConnectorStatus connector_set_end_handle(Connector *, const ConnectorHandle *);
+static inline ConnectorStatus connector_update_handle_position(Connector *);
+static inline ConnectorStatus connector_set_color(Connector *, const color);
+static inline ConnectorStatus connector_set_thickness(Connector *, const float);
+// clang-format on
+
+ConnectorStatus connector_set_start_handle(Connector *connector,
+                                           const ConnectorHandle *handle) {
 
   connector->h0 = handle;
   connector_handle_copy(connector->h0, &connector->handles[0]);
@@ -55,8 +64,8 @@ connector_set_start_handle(Connector *connector,
   return ConnectorStatus_Success;
 }
 
-static inline ConnectorStatus
-connector_set_end_handle(Connector *connector, const ConnectorHandle *handle) {
+ConnectorStatus connector_set_end_handle(Connector *connector,
+                                         const ConnectorHandle *handle) {
 
   connector->h1 = handle;
   connector_handle_copy(connector->h1, &connector->handles[1]);
@@ -68,8 +77,7 @@ connector_set_end_handle(Connector *connector, const ConnectorHandle *handle) {
    Sync the start and end position with the handles, useful when the frame moves
    and we need to update the connector start/end position.
  */
-static inline ConnectorStatus
-connector_update_handle_position(Connector *connector) {
+ConnectorStatus connector_update_handle_position(Connector *connector) {
   connector_handle_set_position(&connector->handles[0],
                                 connector->h0->position);
   connector_handle_set_position(&connector->handles[1],
@@ -77,45 +85,51 @@ connector_update_handle_position(Connector *connector) {
   return ConnectorStatus_Success;
 }
 
-static inline ConnectorStatus connector_set_color(Connector *connector,
-                                                  const color value) {
+ConnectorStatus connector_set_color(Connector *connector, const color value) {
 
   glm_vec4_copy((float *)value, connector->color);
   return ConnectorStatus_Success;
 }
 
-static inline ConnectorStatus connector_set_thickness(Connector *connector,
-                                                      const float value) {
+ConnectorStatus connector_set_thickness(Connector *connector,
+                                        const float value) {
   connector->thickness = value;
   return ConnectorStatus_Success;
 }
 
 // Accessors
-static inline const ConnectorHandle *
-connector_get_start_handle(Connector *connector) {
+
+// clang-format off
+static inline const ConnectorHandle *connector_get_start_handle(Connector *);
+static inline const ConnectorHandle *connector_get_end_handle(Connector *);
+static inline ConnectorStatus connector_get_color(Connector *, color);
+static inline float connector_get_thickness(Connector *);
+static inline const vec2 *connector_get_corners(Connector *);
+static inline ConnectorDirection connector_get_direction(Connector *);
+// clang-format on
+
+const ConnectorHandle *connector_get_start_handle(Connector *connector) {
   return connector->h0;
 }
 
-static inline const ConnectorHandle *
-connector_get_end_handle(Connector *connector) {
+const ConnectorHandle *connector_get_end_handle(Connector *connector) {
   return connector->h1;
 }
 
-static inline ConnectorStatus connector_get_color(Connector *connector,
-                                                  color dest) {
+ConnectorStatus connector_get_color(Connector *connector, color dest) {
   glm_vec4_copy(connector->color, dest);
   return ConnectorStatus_Success;
 }
 
-static inline float connector_get_thickness(Connector *connector) {
+float connector_get_thickness(Connector *connector) {
   return connector->thickness;
 }
 
-static inline const vec2 *connector_get_corners(Connector *connector) {
+const vec2 *connector_get_corners(Connector *connector) {
   return connector->corners;
 }
 
-static inline ConnectorDirection connector_get_direction(Connector *connector) {
+ConnectorDirection connector_get_direction(Connector *connector) {
   return (connector->handles[0].position[0] < connector->handles[1].position[0])
              ? ConnectorDirection_Right
              : ConnectorDirection_Left;

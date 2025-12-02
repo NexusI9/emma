@@ -15,6 +15,8 @@
 #include "runtime/widgets/canvas.hpp"
 #include <emscripten/emscripten.h>
 
+void create_pod(Canvas *canvas) { canvas_create_pod(canvas); }
+
 void create_frames(Canvas *canvas) {
   static const struct {
     vec2 position;
@@ -262,6 +264,7 @@ int main() {
   Canvas canvas;
   canvas_create(&canvas);
   create_frames(&canvas);
+  create_pod(&canvas);
 
   Heatmap heatmaps[4];
   create_heatmaps(&canvas, heatmaps);

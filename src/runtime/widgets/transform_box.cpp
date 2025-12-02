@@ -169,20 +169,6 @@ Widget::TransformBoxStatus Widget::TransformBox::session_set_hit() {
   return TransformBoxStatus_Success;
 }
 
-Widget::TransformBoxStatus Widget::TransformBox::session_end() {
-
-  TransformBoxStatus status = TransformBoxStatus_SessionAlreadyStarted;
-
-  if (session_status == TransformBoxSessionStatus_BlankClick) {
-    empty_objects();
-    status = TransformBoxStatus_ClearSelection;
-  }
-
-  session_status = TransformBoxSessionStatus_Off;
-
-  return status;
-}
-
 void Widget::TransformBox::cache_initial_attributes() {
 
   // cache initial attributes
@@ -200,7 +186,7 @@ void Widget::TransformBox::cache_initial_attributes() {
 void Widget::TransformBox::transform_core(const TransformHandleType handle) {
 
   session_set_hit();
-  
+
   ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
   clamp_mouse(handle, mouse);
 
@@ -420,4 +406,30 @@ Widget::TransformBoxStatus Widget::TransformBox::update_bound_from_selection() {
   update_bound(p0, p1);
 
   return TransformBoxStatus_Success;
+}
+
+Widget::TransformBoxStatus Widget::TransformBox::begin() {
+
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
+      ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+    session_set_blank_click();
+
+  return TransformBoxStatus_Success;
+}
+
+Widget::TransformBoxStatus Widget::TransformBox::end() {
+
+  if (objects_count() > 0)
+    draw();
+
+  TransformBoxStatus status = TransformBoxStatus_SessionAlreadyStarted;
+
+  if (session_status == TransformBoxSessionStatus_BlankClick) {
+    empty_objects();
+    status = TransformBoxStatus_ClearSelection;
+  }
+
+  session_status = TransformBoxSessionStatus_Off;
+
+  return status;
 }

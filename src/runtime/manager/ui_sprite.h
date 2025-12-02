@@ -10,6 +10,8 @@ typedef enum {
   UISprite_ToolBar_Icon_Shape,
   UISprite_ToolBar_Icon_Note,
   UISprite_ToolBar_Icon_Persona,
+  UISprite_Pod_Base,
+  UISprite_Pod_Window,
   UISprite_COUNT,
 } UISprite;
 

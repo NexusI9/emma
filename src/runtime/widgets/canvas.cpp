@@ -66,6 +66,20 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
     md_conf->parent_list = &node->frames[CanvasModuleState_Default];
     md_conf->button = ImGuiMouseButton_Left;
   }
+
+  {
+    // Pod transform config
+    CanvasTransformConfiguration *pod_conf =
+        &transform_configuration[CanvasTransformConfigurationType_Pod];
+
+    pod_conf->transform_mode = TransformBoxMode_Move;
+    pod_conf->get_position = canvas_shape_get_frame_position;
+    pod_conf->set_position = canvas_shape_set_pod_position;
+    pod_conf->get_size = canvas_shape_get_frame_size;
+    pod_conf->set_size = canvas_shape_set_pod_size;
+    pod_conf->selection_list = &node->pods[CanvasPodState_Selected];
+    pod_conf->button = ImGuiMouseButton_Left;
+  }
 }
 
 /**
@@ -114,6 +128,7 @@ void Widget::CanvasShape::draw_frame_transform_trigger(
 
     // remove object
     if (found_obj) {
+
       // mark as unselected
       allocator_id_list_pop(conf->selection_list->entries,
                             &conf->selection_list->length, frame_node->id);
@@ -181,12 +196,34 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
 
     // TODO: maybe make a dedicated draw function for side to prevent
     // branching
-    if ((__builtin_ctz(side) & i) == 0)
+    if ((side & (1 << i)) == 0)
       continue;
 
     ConnectorHandle *handle =
         allocator_connector_handle_entry(frame->connector_handle_id[i]);
-    ConnectorHandleShape(handle, (ConnectorHandleSide)(1 << i)).draw();
+
+    ConnectorHandleShape handle_shape =
+        ConnectorHandleShape(handle, (ConnectorHandleSide)(1 << i));
+
+    handle_shape.draw();
+
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && handle_shape.hovered() &&
+        !active_connector_handle) {
+
+      active_connector_handle = handle;
+
+      ConnectorDescriptor connector_desc = {};
+      connector_desc.start = handle;
+      connector_desc.thickness = CONNECTOR_THICKNESS;
+      connector_desc.color = CONNECTOR_COLOR;
+
+      Connector* new_connector = canvas_create_connector(node, &connector_desc);
+
+      if(new_connector){
+	
+      }
+      
+    }
   }
 }
 
@@ -196,23 +233,19 @@ void Widget::CanvasShape::draw(const unsigned int flags) {
 
   grid_background.draw_texture(gui->pass_encoder);
 
-  if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
-      ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-    transform_box.session_set_blank_click();
-
+  transform_box.begin();
   {
+    draw_pods(flags);
     draw_frames(flags);
     draw_frames_octagons(flags);
-    draw_frames_connector_handles(flags);
+    draw_selected_items_connector_handles(flags);
     draw_modules(flags);
     draw_connectors(flags);
   }
-
-  if (transform_box.objects_count() > 0)
-    transform_box.draw();
-
-  if (transform_box.session_end() == TransformBoxStatus_ClearSelection)
+  if (transform_box.end() == TransformBoxStatus_ClearSelection) {
     canvas_empty_frame_state(node, CanvasFrameState_Selected);
+    canvas_empty_pod_state(node, CanvasPodState_Selected);
+  }
 }
 
 void Widget::CanvasShape::draw_frames(const unsigned int flags) {
@@ -230,6 +263,26 @@ void Widget::CanvasShape::draw_frames(const unsigned int flags) {
           &transform_configuration[CanvasTransformConfigurationType_Frame]);
   }
 }
+
+void Widget::CanvasShape::draw_pods(const unsigned int flags) {
+
+  for (size_t i = 0; i < node->pods[CanvasPodState_Default].length; i++) {
+
+    Frame *frame =
+        allocator_frame_entry(node->pods[CanvasPodState_Default].entries[i]);
+
+    FrameShape frame_shape = FrameShape(frame);
+    frame_shape.draw_pod();
+
+    if ((CanvasDrawFlag_FreezeSelection & flags) == 0) {
+      draw_frame_highlight_trigger(&frame_shape);
+      draw_frame_transform_trigger(
+          &frame_shape,
+          &transform_configuration[CanvasTransformConfigurationType_Pod]);
+    }
+  }
+}
+
 void Widget::CanvasShape::draw_frames_octagons(const unsigned int flags) {
 
   if ((CanvasDrawFlag_ShowOctagon & flags) == 0)
@@ -243,14 +296,22 @@ void Widget::CanvasShape::draw_frames_octagons(const unsigned int flags) {
   }
 }
 
-void Widget::CanvasShape::draw_frames_connector_handles(
+void Widget::CanvasShape::draw_selected_items_connector_handles(
     const unsigned int flags) {
 
-  for (size_t i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
+  size_t i;
+
+  for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
     Frame *frame = allocator_frame_entry(
         node->frames[CanvasFrameState_Selected].entries[i]);
     draw_frame_handle_connectors(frame, ConnectorHandleSide_Left |
                                             ConnectorHandleSide_Right);
+  }
+
+  for (i = 0; i < node->pods[CanvasPodState_Selected].length; i++) {
+    Frame *frame =
+        allocator_frame_entry(node->pods[CanvasPodState_Selected].entries[i]);
+    draw_frame_handle_connectors(frame, ConnectorHandleSide_Right);
   }
 }
 void Widget::CanvasShape::draw_modules(const unsigned int flags) {
@@ -281,6 +342,7 @@ void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
 
     draw_connector_handle_transform_trigger(connector);
     draw_connector_handle_transform_release(connector);
+
     connector_shape.draw();
   }
 
@@ -407,6 +469,24 @@ void Widget::canvas_shape_set_module_position(void *data, ImVec2 value) {
     if (!frame_collide(parent, frame))
       frame_remove_child(parent, frame->id);
   }
+}
+
+void Widget::canvas_shape_set_pod_size(void *data, ImVec2 value) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = frame_data->frame;
+
+  canvas_set_pod_size(frame_data->canvas, frame, (vec2){value.x, value.y});
+}
+
+void Widget::canvas_shape_set_pod_position(void *data, ImVec2 value) {
+
+  CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;
+
+  Frame *frame = frame_data->frame;
+
+  canvas_set_pod_position(frame_data->canvas, frame, (vec2){value.x, value.y});
 }
 
 /**

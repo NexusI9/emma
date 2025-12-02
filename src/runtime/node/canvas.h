@@ -5,6 +5,7 @@
 #include "nkengine/include/renderer.h"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/module.h"
+#include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "utils/id.h"
@@ -22,12 +23,11 @@ typedef enum {
   CanvasModuleState_COUNT,
 } CanvasModuleState;
 
-
 typedef enum {
-  CanvasPadState_Default,
-  CanvasPadState_Selected,
-  CanvasPadState_COUNT,
-} CanvasPadState;
+  CanvasPodState_Default,
+  CanvasPodState_Selected,
+  CanvasPodState_COUNT,
+} CanvasPodState;
 
 typedef enum {
   CanvasStatus_Success,
@@ -41,6 +41,7 @@ typedef struct {
 
   FrameAllocList frames[CanvasFrameState_COUNT];
   FrameAllocList modules[CanvasModuleState_COUNT];
+  FrameAllocList pods[CanvasModuleState_COUNT];
   FrameAllocList connectors;
   FrameAllocList octagons;
 
@@ -54,8 +55,10 @@ EXTERN_C_BEGIN
 CanvasStatus canvas_create(Canvas *);
 Frame *canvas_create_frame(Canvas *);
 Frame *canvas_create_module(Canvas *, const ModuleType);
+Frame *canvas_create_pod(Canvas *);
 Octagon *canvas_create_octagon(Canvas *);
 ConnectorHandle *canvas_create_connector_handle(Canvas *);
+Connector *canvas_create_connector(Canvas *, const ConnectorDescriptor *);
 
 CanvasStatus canvas_add_module_to_frame(Canvas *, Frame *, const ModuleType,
                                         const vec2);
@@ -73,6 +76,9 @@ void canvas_set_module_local_position(Canvas *, Frame *, const vec2);
 void canvas_set_module_world_position(Canvas *, Frame *, const vec2);
 void canvas_set_module_size(Canvas *, Frame *, const vec2);
 
+void canvas_set_pod_position(Canvas *, Frame *, const vec2);
+void canvas_set_pod_size(Canvas *, Frame *, const vec2);
+
 StaticListStatus canvas_register_frame_state(Canvas *, const Frame *,
                                              const CanvasFrameState);
 
@@ -80,6 +86,8 @@ StaticListStatus canvas_unregister_frame_state(Canvas *, const Frame *,
                                                const CanvasFrameState);
 
 StaticListStatus canvas_empty_frame_state(Canvas *, const CanvasFrameState);
+StaticListStatus canvas_empty_module_state(Canvas *, const CanvasModuleState);
+StaticListStatus canvas_empty_pod_state(Canvas *, const CanvasPodState);
 
 void canvas_connect_frames(Canvas *, Frame *, Frame *);
 

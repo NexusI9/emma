@@ -16,9 +16,9 @@ typedef enum {
 typedef enum {
   ConnectorHandleSide_None = 0,
   ConnectorHandleSide_Top = 1 << 0,
-  ConnectorHandleSide_Left = 1 << 1,
+  ConnectorHandleSide_Right = 1 << 1,
   ConnectorHandleSide_Bottom = 1 << 2,
-  ConnectorHandleSide_Right = 1 << 3,
+  ConnectorHandleSide_Left = 1 << 3,
   ConnectorHandleSide_All = ~0,
 } ConnectorHandleSide;
 

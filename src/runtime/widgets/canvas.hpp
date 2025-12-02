@@ -23,6 +23,9 @@ void canvas_shape_set_frame_size(void *, ImVec2);
 void canvas_shape_set_module_position(void *, ImVec2);
 void canvas_shape_set_module_size(void *, ImVec2);
 
+void canvas_shape_set_pod_position(void *, ImVec2);
+void canvas_shape_set_pod_size(void *, ImVec2);
+
 void canvas_shape_on_frame_selection(void *);
 void canvas_shape_on_module_session_end(void *);
 
@@ -63,6 +66,7 @@ typedef struct {
 typedef enum {
   CanvasTransformConfigurationType_Frame,
   CanvasTransformConfigurationType_Module,
+  CanvasTransformConfigurationType_Pod,
   CanvasTransformConfigurationType_COUNT,
 } CanvasTransformConfigurationType;
 
@@ -98,9 +102,10 @@ private:
 
   void draw_frames(const unsigned int);
   void draw_frames_octagons(const unsigned int);
-  void draw_frames_connector_handles(const unsigned int);
   void draw_modules(const unsigned int);
   void draw_connectors(const unsigned int);
+  void draw_pods(const unsigned int);
+  void draw_selected_items_connector_handles(const unsigned int);
 
   void draw_frame_highlight_trigger(FrameShape *);
   void draw_frame_transform_trigger(FrameShape *,

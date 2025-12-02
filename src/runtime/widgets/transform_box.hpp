@@ -82,12 +82,14 @@ public:
   StaticListStatus remove_object(const void *, size_t *);
   StaticListStatus empty_objects();
 
+  TransformBoxStatus begin();
+  TransformBoxStatus end();
+
   TransformBoxStatus update_bound_from_selection();
   TransformBoxStatus update_bound(ImVec2, ImVec2);
 
   TransformBoxStatus session_set_blank_click();
   TransformBoxStatus session_set_hit();
-  TransformBoxStatus session_end();
   TransformBoxSessionStatus session_satus() { return session_status; }
 
   uint16_t objects_count() { return objects.count; }
@@ -95,7 +97,7 @@ public:
   unsigned int mode = TransformBoxMode_All;
   ImGuiMouseButton button;
   void draw();
-  
+
   static constexpr color primary_color = {87.0f / 255.0f, 154.0f / 255.0f,
                                           212.0f / 255.0f, 1.0f};
   static constexpr float area_padding = 20.0f;
@@ -123,6 +125,8 @@ private:
   void transform_core(const TransformHandleType);
   void cache_initial_attributes();
   void clamp_mouse(const TransformHandleType, ImVec2 &);
+
+
 };
 
 } // namespace Widget

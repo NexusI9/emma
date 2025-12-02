@@ -3,6 +3,7 @@
 #include "runtime/geometry/vector.h"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/module.h"
+#include "runtime/manager/ui_sprite.h"
 #include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
@@ -43,7 +44,7 @@ Frame *canvas_create_frame_core(Canvas *canvas,
                                 size_t *list_length,
                                 const CanvasFrameCreateFlags flags) {
 
-  if (canvas->frames[CanvasFrameState_Default].length == capacity)
+  if (*list_entries == capacity)
     return NULL;
 
   Frame *frame = new_frame();
@@ -129,6 +130,49 @@ Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
       allocator_frame_capacity(),
       &canvas->modules[CanvasModuleState_Default].length,
       CanvasFrameCreateFlags_CreateConnectorHandle);
+}
+
+Frame *canvas_create_pod(Canvas *canvas) {
+
+  const TextureAtlasRegion *pod_region = ui_sprite(UISprite_Pod_Base);
+  static const FrameBoundboxDescriptor boundbox_descriptor = {
+      .update_callback = boundbox_update,
+      .padding = 0.0f,
+      .count = 1,
+  };
+
+  FrameDescriptor pod_desc = {
+      .uv0 = {pod_region->uv0[0], pod_region->uv0[1]},
+      .uv1 = {pod_region->uv1[0], pod_region->uv1[1]},
+      .size = {pod_region->size[0], pod_region->size[0]},
+      .label = pod_region->label,
+      .boundbox = &boundbox_descriptor,
+  };
+
+  Frame *pod = canvas_create_frame_core(
+      canvas, &pod_desc, canvas->pods[CanvasPodState_Default].entries,
+      allocator_frame_capacity(), &canvas->pods[CanvasPodState_Default].length,
+      CanvasFrameCreateFlags_CreateConnectorHandle);
+
+  Frame *pod_window = new_frame();
+
+  if (pod_window) {
+
+    const TextureAtlasRegion *window_region = ui_sprite(UISprite_Pod_Window);
+
+    frame_create(pod_window,
+                 &(FrameDescriptor){
+                     .uv0 = {window_region->uv0[0], window_region->uv0[1]},
+                     .uv1 = {window_region->uv1[0], window_region->uv1[1]},
+                     .size = {window_region->size[0], window_region->size[1]},
+                     .label = window_region->label,
+                     .boundbox = &boundbox_descriptor,
+                 });
+
+    frame_add_child(pod, pod_window->id);
+  }
+
+  return pod;
 }
 
 Octagon *canvas_create_octagon(Canvas *canvas) {
@@ -219,10 +263,10 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
 
   static const int gap = 40;
   static const vec2 gaps[] = {
-      {0.0f, -1.0f * gap}, // top
-      {1.0f * gap, 0.0f},  // right
-      {0.0f, 1.0f * gap},  // bottom
-      {-1.0f * gap, 0.0f}, // left
+      [ConnectorHandleSide_Top] = {0.0f, -1.0f * gap},
+      [ConnectorHandleSide_Right] = {1.0f * gap, 0.0f},
+      [ConnectorHandleSide_Bottom] = {0.0f, 1.0f * gap},
+      [ConnectorHandleSide_Left] = {-1.0f * gap, 0.0f},
   };
 
   BoundboxFrame edges;
@@ -235,7 +279,7 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
 
     vec2 pos;
     vec2_avg_2(edges[i].p0, edges[i].p1, pos);
-    glm_vec2_add(pos, (float *)gaps[i], pos);
+    glm_vec2_add(pos, (float *)gaps[(1 << i)], pos);
 
     connector_handle_set_position(handle, pos);
   }
@@ -302,6 +346,19 @@ void canvas_set_module_size(Canvas *canvas, Frame *frame, const vec2 value) {
   canvas_align_connector_handle_group_to_frame(canvas, frame);
 }
 
+void canvas_set_pod_position(Canvas *canvas, Frame *frame, const vec2 value) {
+  frame_set_world_position(frame, value);
+  frame_update_world_position(frame);
+  canvas_align_connector_handle_group_to_frame(canvas, frame);
+  canvas_update_connectors_handle_to_frame(canvas, frame);
+}
+
+void canvas_set_pod_size(Canvas *canvas, Frame *frame, const vec2 value) {
+  frame_set_size(frame, value);
+  canvas_align_connector_handle_group_to_frame(canvas, frame);
+  canvas_update_connectors_handle_to_frame(canvas, frame);
+}
+
 StaticListStatus canvas_register_frame_state(Canvas *canvas, const Frame *frame,
                                              const CanvasFrameState state) {
 
@@ -323,6 +380,19 @@ StaticListStatus canvas_empty_frame_state(Canvas *canvas,
   return stli_empty(canvas->frames[state].entries,
                     &canvas->frames[state].length, sizeof(alloc_id),
                     "Canvas Frame State list");
+}
+
+StaticListStatus canvas_empty_module_state(Canvas *canvas,
+                                           const CanvasModuleState state) {
+  return stli_empty(canvas->modules[state].entries,
+                    &canvas->modules[state].length, sizeof(alloc_id),
+                    "Canvas Module State list");
+}
+
+StaticListStatus canvas_empty_pod_state(Canvas *canvas,
+                                        const CanvasPodState state) {
+  return stli_empty(canvas->pods[state].entries, &canvas->pods[state].length,
+                    sizeof(alloc_id), "Canvas Pod State list");
 }
 
 void canvas_get_closest_connector_handles(const Frame *frame_a,
@@ -385,8 +455,8 @@ void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
 
   // create connector
   ConnectorDescriptor cn_desc = {
-      .color = {0.6f, 0.6f, 0.6f, 1.0f},
-      .thickness = 6.0f,
+      .color = CONNECTOR_COLOR,
+      .thickness = CONNECTOR_THICKNESS,
       .start = closest_handle_a,
       .end = closest_handle_b,
   };
@@ -398,6 +468,25 @@ void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
 
   frame_register_connector(frame_a, connector->id);
   frame_register_connector(frame_b, connector->id);
+}
+
+Connector *canvas_create_connector(Canvas *canvas,
+                                   const ConnectorDescriptor *desc) {
+
+  Connector *connector = new_connector();
+
+  if (!connector)
+    return NULL;
+
+  connector_create(connector, desc);
+
+  if (allocator_id_list_push(canvas->pods[CanvasPodState_Default].entries,
+                             allocator_connector_capacity(),
+                             &canvas->pods[CanvasPodState_Default].length,
+                             connector->id) != StaticListStatus_Success)
+    return NULL;
+
+  return connector;
 }
 
 void canvas_disconnect_frames(Canvas *canvas, const Frame *frame_a,

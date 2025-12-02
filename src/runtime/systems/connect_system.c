@@ -65,8 +65,8 @@ connect_system_connect_handle_to_frame(ConnectorHandle *handle,
       if (target_frame_valid) {
         ConnectorHandleSide side =
             connector_opposite_handle->position[0] < frame->end_point[0]
-                ? ConnectorHandleSide_Right
-                : ConnectorHandleSide_Left;
+                ? ConnectorHandleSide_Left
+                : ConnectorHandleSide_Right;
 
         frame_target_handle = allocator_connector_handle_entry(
             frame_get_connector_handle(frame, side));

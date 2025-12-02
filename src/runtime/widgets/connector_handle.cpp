@@ -10,11 +10,19 @@ void Widget::ConnectorHandleShape::draw() {
 
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
-  vec2 vpos, start, end;
-  vp2(node->position, vpos);
-  glm_vec2_sub(vpos, (vec2){node->scale, node->scale}, start);
-  glm_vec2_add(vpos, (vec2){node->scale, node->scale}, end);
+  vec2 vstart, vend;
+  vp2(node->start, vstart);
+  vp2(node->end, vend);
 
-  draw_list->AddRectFilled(im_vec2(start), im_vec2(end), im_color(node->color));
+  draw_list->AddRectFilled(im_vec2(vstart), im_vec2(vend),
+                           im_color(node->color));
+}
 
+bool Widget::ConnectorHandleShape::hovered() {
+
+  vec2 vstart, vend;
+  vp2(node->start, vstart);
+  vp2(node->end, vend);
+
+  return ImGui::IsMouseHoveringRect(im_vec2(vstart), im_vec2(vend));
 }

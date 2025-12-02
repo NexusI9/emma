@@ -14,6 +14,7 @@ public:
   void draw();
   void draw_fill(ImColor, const float);
   void draw_texture();
+  void draw_pod();
 
   Frame *get_node() { return node; }
   bool area_hovered();

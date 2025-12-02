@@ -6,6 +6,7 @@
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/frame.h"
+#include "runtime/widgets/connector_handle.hpp"
 
 void Widget::FrameShape::draw() {
 
@@ -75,3 +76,24 @@ void Widget::FrameShape::draw_texture() {
   if (node->parent != ID_UNDEFINED)
     ImGui::PopClipRect();
 }
+
+void Widget::FrameShape::draw_pod() {
+
+  ImDrawList *dl = ImGui::GetWindowDrawList();
+
+  ImVec2 p0 =
+      ImVec2(vpx(node->world_position[0]), vpy(node->world_position[1]));
+  ImVec2 p1 = ImVec2(vpx(node->world_position[0] + node->size[0]),
+                     vpy(node->world_position[1] + node->size[1]));
+
+  dl->AddImage(
+      (ImTextureRef)texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
+      p0, p1, im_vec2(node->uv0), im_vec2(node->uv1));
+
+  for (size_t i = 0; i < node->children.length; i++) {
+    Frame *child = allocator_frame_entry(node->children.entries[i]);
+    FrameShape(child).draw_pod();
+  }
+}
+
+
