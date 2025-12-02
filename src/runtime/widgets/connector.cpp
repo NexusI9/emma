@@ -18,7 +18,7 @@ void Widget::ConnectorShape::draw() {
   glm_vec2_copy(node->handles[1].position, vp_end);
 
   dl->PathClear();
-  
+
   vp2(vp_start, vp_start);
   vp2(vp_end, vp_end);
 
@@ -31,4 +31,18 @@ void Widget::ConnectorShape::draw() {
   dl->PathLineTo(im_vec2(vp_end));
 
   dl->PathStroke(im_color(node->color), 0, node->thickness);
+
+  // draw arrow
+  int dir =
+      node->handles[0].position[0] < node->handles[1].position[0] ? 1 : -1;
+
+  dl->AddLine(im_vec2(vp_end),
+              ImVec2(vp_end[0] - gui_scale(gui, arrow_dist) * dir,
+                     vp_end[1] - gui_scale(gui, arrow_dist)),
+              im_color(node->color), node->thickness);
+
+  dl->AddLine(im_vec2(vp_end),
+              ImVec2(vp_end[0] - gui_scale(gui, arrow_dist) * dir,
+                     vp_end[1] + gui_scale(gui, arrow_dist)),
+              im_color(node->color), node->thickness);
 }

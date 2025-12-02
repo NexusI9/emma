@@ -64,8 +64,8 @@ void Widget::FrameShape::draw_texture() {
   if (node->parent != ID_UNDEFINED) {
     Frame *parent = allocator_frame_entry(node->parent);
     ImGui::PushClipRect(
-        ImVec2(vpx(parent->world_position[0]), vpx(parent->world_position[1])),
-        ImVec2(vpx(parent->end_point[0]), vpx(parent->end_point[1])), false);
+        ImVec2(vpx(parent->world_position[0]), vpy(parent->world_position[1])),
+        ImVec2(vpx(parent->end_point[0]), vpy(parent->end_point[1])), false);
   }
 
   dl->AddImage((ImTextureRef)texture_atlas_layer_view(&g_atlas,

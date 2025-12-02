@@ -277,7 +277,7 @@ void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
     Connector *connector =
         allocator_connector_entry(node->connectors.entries[i]);
 
-    ConnectorShape connector_shape = ConnectorShape(connector);
+    ConnectorShape connector_shape = ConnectorShape(gui, connector);
 
     draw_connector_handle_transform_trigger(connector);
     draw_connector_handle_transform_release(connector);
