@@ -15,7 +15,12 @@
 #include "runtime/widgets/canvas.hpp"
 #include <emscripten/emscripten.h>
 
-void create_pod(Canvas *canvas) { canvas_create_pod(canvas); }
+void create_pod(Canvas *canvas) {
+  Frame *pod = canvas_create_pod(canvas);
+  canvas_set_pod_position(canvas, pod, (vec2){300.0f, 600.0f});
+  canvas_connect_frames(canvas, pod,
+                        allocator_frame_entry(canvas->frames->entries[0]));
+}
 
 void create_frames(Canvas *canvas) {
   static const struct {
@@ -39,7 +44,7 @@ void create_frames(Canvas *canvas) {
 
   } cframes[] = {
       {
-          .position = {300.0f, 400.0f},
+          .position = {900.0f, 400.0f},
           .octagon_data = {{1, 0.5}, {6, 0.6}, {2, 0.9}},
           .modules =
               {
@@ -52,7 +57,7 @@ void create_frames(Canvas *canvas) {
               },
       },
       {
-          .position = {1200.0f, 400.0f},
+          .position = {1800.0f, 400.0f},
           .octagon_data = {{7, 0.8}, {0, 0.1}, {5, 0.35}},
           .modules =
               {
@@ -64,7 +69,7 @@ void create_frames(Canvas *canvas) {
               },
       },
       {
-          .position = {2100.0f, 400.0f},
+          .position = {2700.0f, 400.0f},
           .octagon_data = {{3, 0.9}, {4, 0.6}, {5, 0.7}},
           .modules =
               {

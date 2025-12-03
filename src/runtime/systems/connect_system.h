@@ -3,6 +3,7 @@
 
 #include "runtime/node/canvas.h"
 #include "runtime/node/connector.h"
+#include "runtime/node/connector_handle.h"
 #include "utils/id.h"
 
 typedef enum {
@@ -15,7 +16,9 @@ typedef enum {
 EXTERN_C_BEGIN
 
 ConnectSystemStatus
-connect_system_connect_handle_to_frame(ConnectorHandle*, Connector *, alloc_id *, const size_t);
+connect_system_connect_handle_to_frame(ConnectorHandle *, Connector *,
+                                       alloc_id *, const size_t,
+                                       const unsigned int);
 
 EXTERN_C_END
 

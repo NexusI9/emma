@@ -8,6 +8,7 @@
 #include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
+#include "runtime/node/persona.h"
 #include "utils/id.h"
 
 typedef enum {
@@ -45,7 +46,7 @@ typedef struct {
   FrameAllocList connectors;
   FrameAllocList octagons;
 
-  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES *CONNECTOR_HANDLE_COUNT)
+  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES *FRAME_CONNECTOR_HANDLE_COUNT)
   connector_handles;
 
 } Canvas;
@@ -78,6 +79,7 @@ void canvas_set_module_size(Canvas *, Frame *, const vec2);
 
 void canvas_set_pod_position(Canvas *, Frame *, const vec2);
 void canvas_set_pod_size(Canvas *, Frame *, const vec2);
+void canvas_add_pod_persona(Canvas *, Frame *, const PersonaType);
 
 StaticListStatus canvas_register_frame_state(Canvas *, const Frame *,
                                              const CanvasFrameState);

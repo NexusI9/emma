@@ -73,7 +73,7 @@ Frame *canvas_create_frame_core(Canvas *canvas,
 
   if (flags & CanvasFrameCreateFlags_CreateConnectorHandle) {
     // === Connector Handles ===
-    for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
+    for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
       ConnectorHandle *handle = canvas_create_connector_handle(canvas);
       frame_set_connector_handle_id(frame, (ConnectorHandleSide)(1 << i),
                                     handle->id);
@@ -272,7 +272,7 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
   BoundboxFrame edges;
   boundbox_edges_from_points(frame->local_position, frame->end_point, edges);
 
-  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
+  for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
 
     ConnectorHandle *handle =
         allocator_connector_handle_entry(frame->connector_handle_id[i]);
@@ -395,6 +395,14 @@ StaticListStatus canvas_empty_pod_state(Canvas *canvas,
                     sizeof(alloc_id), "Canvas Pod State list");
 }
 
+void canvas_add_pod_persona(Canvas * canvas, Frame * pod, const PersonaType type){
+
+
+  
+  
+  
+}
+
 void canvas_get_closest_connector_handles(const Frame *frame_a,
                                           const Frame *frame_b,
                                           ConnectorHandle **closest_handle_a,
@@ -402,7 +410,7 @@ void canvas_get_closest_connector_handles(const Frame *frame_a,
                                           const int side) {
 
   float closest_distance = FLT_MAX;
-  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
+  for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
 
     // skipping unwanted sides
     if ((__builtin_ctz(side) & i) == 0)
@@ -411,7 +419,7 @@ void canvas_get_closest_connector_handles(const Frame *frame_a,
     ConnectorHandle *handle_a =
         allocator_connector_handle_entry(frame_a->connector_handle_id[i]);
 
-    for (uint8_t j = 0; j < CONNECTOR_HANDLE_COUNT; j++) {
+    for (uint8_t j = 0; j < FRAME_CONNECTOR_HANDLE_COUNT; j++) {
 
       // skipping unwanted sides
       if ((__builtin_ctz(side) & j) == 0)
@@ -480,9 +488,9 @@ Connector *canvas_create_connector(Canvas *canvas,
 
   connector_create(connector, desc);
 
-  if (allocator_id_list_push(canvas->pods[CanvasPodState_Default].entries,
+  if (allocator_id_list_push(canvas->connectors.entries,
                              allocator_connector_capacity(),
-                             &canvas->pods[CanvasPodState_Default].length,
+                             &canvas->connectors.length,
                              connector->id) != StaticListStatus_Success)
     return NULL;
 
@@ -492,6 +500,10 @@ Connector *canvas_create_connector(Canvas *canvas,
 void canvas_disconnect_frames(Canvas *canvas, const Frame *frame_a,
                               const Frame *frame_b) {}
 
+/**
+   Recompute the frame's registered connectors corners. Useful when we transform
+   a frame.
+ */
 void canvas_update_frame_connectors(Canvas *canvas, const Frame *frame) {
 
   for (size_t i = 0; i < frame->connectors_id.length; i++) {

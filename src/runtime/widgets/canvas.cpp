@@ -192,7 +192,7 @@ void Widget::CanvasShape::draw_frame_highlight_trigger(FrameShape *frame) {
 void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
                                                        const int side) {
 
-  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
+  for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
 
     // TODO: maybe make a dedicated draw function for side to prevent
     // branching
@@ -210,19 +210,17 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && handle_shape.hovered() &&
         !active_connector_handle) {
 
-      active_connector_handle = handle;
-
       ConnectorDescriptor connector_desc = {};
       connector_desc.start = handle;
       connector_desc.thickness = CONNECTOR_THICKNESS;
       connector_desc.color = CONNECTOR_COLOR;
 
-      Connector* new_connector = canvas_create_connector(node, &connector_desc);
+      Connector *new_connector = canvas_create_connector(node, &connector_desc);
 
-      if(new_connector){
-	
+      if (new_connector) {
+        frame_register_connector(frame, new_connector->id);
+        active_connector_handle = &new_connector->handles[1];
       }
-      
     }
   }
 }
@@ -344,6 +342,9 @@ void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
     draw_connector_handle_transform_release(connector);
 
     connector_shape.draw();
+
+    // DEBUG
+    // printf("drawing connector: %llu\n", connector->id);
   }
 
   if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && active_connector_handle)
@@ -375,6 +376,10 @@ void Widget::CanvasShape::draw_connector_handle_transform_trigger(
   }
 }
 
+/**
+   On Connector handle release we check if the handle is within a frame or pod
+   bound and connect it to the closest valid frame/pod handle.
+ */
 void Widget::CanvasShape::draw_connector_handle_transform_release(
     Connector *connector) {
 
@@ -385,13 +390,29 @@ void Widget::CanvasShape::draw_connector_handle_transform_release(
                                   (vec2){mouse.x, mouse.y});
     connector_compute_corners(connector);
 
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
-        connect_system_connect_handle_to_frame(
-            active_connector_handle, connector,
-            node->frames[CanvasFrameState_Default].entries,
-            node->frames[CanvasFrameState_Default].length) ==
-            ConnectSystemStatus_Success)
-      active_connector_handle = nullptr;
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+
+      struct {
+        FrameAllocList *list;
+        const unsigned int sides;
+      } frames[] = {
+          {node->frames, ConnectorHandleSide_Left | ConnectorHandleSide_Right},
+          {node->pods, ConnectorHandleSide_Right},
+      };
+
+      static const uint8_t release_frames_count =
+          sizeof(frames) / sizeof(frames[0]);
+
+      for (uint8_t i = 0; i < release_frames_count; i++) {
+        if (connect_system_connect_handle_to_frame(
+                active_connector_handle, connector, frames[i].list->entries,
+                frames[i].list->length,
+                frames[i].sides) == ConnectSystemStatus_Success) {
+          active_connector_handle = nullptr;
+          break;
+        }
+      }
+    }
   }
 }
 
@@ -487,6 +508,7 @@ void Widget::canvas_shape_set_pod_position(void *data, ImVec2 value) {
   Frame *frame = frame_data->frame;
 
   canvas_set_pod_position(frame_data->canvas, frame, (vec2){value.x, value.y});
+  canvas_update_frame_connectors(frame_data->canvas, frame_data->frame);
 }
 
 /**

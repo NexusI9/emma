@@ -3,6 +3,7 @@
 #include "runtime/node/connector.h"
 
 #include "nkengine/include/gui.hpp"
+#include "runtime/node/frame.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/utils.hpp"
@@ -25,7 +26,7 @@ void Widget::ConnectorShape::draw() {
   dl->PathLineTo(im_vec2(vp_start));
 
   const vec2 *corners = connector_get_corners(node);
-  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++)
+  for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++)
     dl->PathLineTo(ImVec2(vpx(corners[i][0]), vpy(corners[i][1])));
 
   dl->PathLineTo(im_vec2(vp_end));

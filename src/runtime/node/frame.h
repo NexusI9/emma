@@ -11,6 +11,7 @@
 
 #define FRAME_MAX_CONNECTORS 64
 #define FRAME_MAX_CHILDREN 64
+static const int FRAME_CONNECTOR_HANDLE_COUNT = 4;
 
 static const float FRAME_BOUNDBOX_THICKNESS = 40.0f;
 
@@ -31,7 +32,7 @@ typedef struct {
 typedef struct {
 
   alloc_id id, octagon_id, factor_id;
-  alloc_id connector_handle_id[CONNECTOR_HANDLE_COUNT];
+  alloc_id connector_handle_id[FRAME_CONNECTOR_HANDLE_COUNT];
   ALLOCATOR_ID_LIST(FRAME_MAX_CONNECTORS) connectors_id;
 
   const char *label;

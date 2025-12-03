@@ -6,8 +6,6 @@
 #include "utils/id.h"
 #include <cglm/cglm.h>
 
-static const int CONNECTOR_HANDLE_COUNT = 4;
-
 typedef enum {
   ConnectorHandleStatus_Success,
   ConnectorHandleStatus_UndefError,
