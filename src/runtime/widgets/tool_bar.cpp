@@ -4,13 +4,13 @@
 #include "webgpu/webgpu.h"
 
 Widget::ToolBarShape::ToolBarShape(WGPUTextureView view)
-    : bg_sprite(view, ui_sprite(UISprite_ToolBar)),
+    : bg_sprite(view, ui_sprite(UISprite_Toolbar)),
       tools{
-          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Frame)),
-          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Module)),
-          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Persona)),
-          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Note)),
-          ToolButtonShape(view, ui_sprite(UISprite_ToolBar_Icon_Shape)),
+          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Frame)),
+          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Module)),
+          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Persona)),
+          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Note)),
+          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Shape)),
       } {
 
   const float scale = context_dpi();

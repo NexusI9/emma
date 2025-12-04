@@ -2,6 +2,7 @@
 #define _FRAME_H_
 
 #include "../geometry/boundbox.h"
+#include "nkengine/include/texture.h"
 #include "nkengine/include/utils.h"
 #include "runtime/geometry/core.h"
 #include "runtime/manager/allocator_list.h"
@@ -28,6 +29,12 @@ typedef struct {
   frame_boundbox_updater update_callback;
   float padding;
 } FrameBoundboxDescriptor;
+
+static const FrameBoundboxDescriptor FRAME_BOUNDBOX_TYPE_DEFAULT = {
+    .update_callback = boundbox_update,
+    .padding = 0.0f,
+    .count = 1,
+};
 
 typedef struct {
 
@@ -71,6 +78,8 @@ typedef struct {
 EXTERN_C_BEGIN
 
 FrameStatus frame_create(Frame *, const FrameDescriptor *);
+FrameStatus frame_create_from_sprite(Frame *, const TextureAtlasRegion *,
+                                     const FrameBoundboxDescriptor *);
 
 // Accessors
 // clang-format off
@@ -181,10 +190,10 @@ FrameStatus frame_set_connector_handle_id(Frame *node,
 }
 
 StaticListStatus frame_register_connector(Frame *node, const alloc_id id) {
-  
+
   return allocator_id_list_push_unique(node->connectors_id.entries,
-                                FRAME_MAX_CONNECTORS,
-                                &node->connectors_id.length, id);
+                                       FRAME_MAX_CONNECTORS,
+                                       &node->connectors_id.length, id);
 }
 
 StaticListStatus frame_unregister_connector(Frame *node, const alloc_id id) {

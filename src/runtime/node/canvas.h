@@ -79,7 +79,7 @@ void canvas_set_module_size(Canvas *, Frame *, const vec2);
 
 void canvas_set_pod_position(Canvas *, Frame *, const vec2);
 void canvas_set_pod_size(Canvas *, Frame *, const vec2);
-void canvas_add_pod_persona(Canvas *, Frame *, const PersonaType);
+CanvasStatus canvas_add_pod_persona(Canvas *, Frame *, const PersonaType);
 
 StaticListStatus canvas_register_frame_state(Canvas *, const Frame *,
                                              const CanvasFrameState);

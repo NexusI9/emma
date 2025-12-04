@@ -8,6 +8,7 @@
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
+#include "runtime/node/persona.h"
 #include "utils/id.h"
 #include <string.h>
 
@@ -135,18 +136,13 @@ Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
 Frame *canvas_create_pod(Canvas *canvas) {
 
   const TextureAtlasRegion *pod_region = ui_sprite(UISprite_Pod_Base);
-  static const FrameBoundboxDescriptor boundbox_descriptor = {
-      .update_callback = boundbox_update,
-      .padding = 0.0f,
-      .count = 1,
-  };
 
   FrameDescriptor pod_desc = {
       .uv0 = {pod_region->uv0[0], pod_region->uv0[1]},
       .uv1 = {pod_region->uv1[0], pod_region->uv1[1]},
       .size = {pod_region->size[0], pod_region->size[0]},
       .label = pod_region->label,
-      .boundbox = &boundbox_descriptor,
+      .boundbox = &FRAME_BOUNDBOX_TYPE_DEFAULT,
   };
 
   Frame *pod = canvas_create_frame_core(
@@ -166,7 +162,7 @@ Frame *canvas_create_pod(Canvas *canvas) {
                      .uv1 = {window_region->uv1[0], window_region->uv1[1]},
                      .size = {window_region->size[0], window_region->size[1]},
                      .label = window_region->label,
-                     .boundbox = &boundbox_descriptor,
+                     .boundbox = &FRAME_BOUNDBOX_TYPE_DEFAULT,
                  });
 
     frame_add_child(pod, pod_window->id);
@@ -263,10 +259,12 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
 
   static const int gap = 40;
   static const vec2 gaps[] = {
-      [ConnectorHandleSide_Top] = {0.0f, -1.0f * gap},
-      [ConnectorHandleSide_Right] = {1.0f * gap, 0.0f},
-      [ConnectorHandleSide_Bottom] = {0.0f, 1.0f * gap},
-      [ConnectorHandleSide_Left] = {-1.0f * gap, 0.0f},
+      // clang-format off
+      [ ConnectorHandleSide_Top    ] = {  0.0f        , -1.0f * gap  },
+      [ ConnectorHandleSide_Right  ] = {  1.0f * gap  ,        0.0f  },
+      [ ConnectorHandleSide_Bottom ] = {  0.0f        ,  1.0f * gap  },
+      [ ConnectorHandleSide_Left   ] = { -1.0f * gap  ,        0.0f  },
+      // clang-format on
   };
 
   BoundboxFrame edges;
@@ -395,12 +393,47 @@ StaticListStatus canvas_empty_pod_state(Canvas *canvas,
                     sizeof(alloc_id), "Canvas Pod State list");
 }
 
-void canvas_add_pod_persona(Canvas * canvas, Frame * pod, const PersonaType type){
+CanvasStatus canvas_add_pod_persona(Canvas *canvas, Frame *pod,
+                                    const PersonaType type) {
 
+  Frame *persona_frame = new_frame();
 
-  
-  
-  
+  if (!persona_frame) // ERRHANDLE
+    return CanvasStatus_ResourceCreationFail;
+
+  const alloc_id window_id = pod->children.entries[pod->children.length - 1];
+  const TextureAtlasRegion *sprite = persona_get_sprite(type);
+
+  vec2 position;
+  float size, rot;
+
+  persona_create_rand_coordinate(
+      pod->world_position, pod->end_point, PERSONA_PADDING,
+      (vec2){PERSONA_BASE_SIZE * PERSONA_MIN_RADIUS,
+             PERSONA_BASE_SIZE * PERSONA_MAX_RADIUS},
+      (vec2){PERSONA_MIN_ANGLE, PERSONA_MAX_RADIUS}, position, &size, &rot);
+
+  frame_create(persona_frame, &(FrameDescriptor){
+                                  .uv0 = {sprite->uv0[0], sprite->uv0[1]},
+                                  .uv1 = {sprite->uv1[0], sprite->uv1[1]},
+                                  .label = sprite->label,
+                                  .boundbox = &FRAME_BOUNDBOX_TYPE_DEFAULT,
+                                  .position = {position[0], position[1]},
+                                  .size = {size, size},
+                              });
+
+  if (frame_add_child(pod, persona_frame->id) !=
+      StaticListStatus_Success) // ERRHANDLE
+    return CanvasStatus_ResourceCreationFail;
+
+  /*
+  For the pod, the last child is always the window, so we move it at the end of
+  the children array
+   */
+  pod->children.entries[pod->children.length - 2] = persona_frame->id;
+  pod->children.entries[pod->children.length - 1] = window_id;
+
+  return CanvasStatus_Success;
 }
 
 void canvas_get_closest_connector_handles(const Frame *frame_a,

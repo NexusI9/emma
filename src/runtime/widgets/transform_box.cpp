@@ -257,24 +257,22 @@ void Widget::TransformBox::draw() {
   }
 
   // Handle Behaviour (Scale)
-  for (uint8_t i = 0; i < transform_box_handles_count; i++) {
+  if (TransformBoxMode_Scale & mode)
+    for (uint8_t i = 0; i < transform_box_handles_count; i++) {
 
-    if (TransformBoxMode_All != mode)
-      if (((TransformBoxMode_Move & mode) && i != TransformHandleType_MM) ||
-          ((TransformBoxMode_Scale & mode) && i == TransformHandleType_MM) ||
-          (TransformBoxMode_None & mode))
+      if (i == TransformHandleType_MM)
         continue;
 
-    TransformHandleShape handle = TransformHandleShape(&handles[i]);
-    handle.draw();
+      TransformHandleShape handle = TransformHandleShape(&handles[i]);
+      handle.draw();
 
-    if (active_handle == -1 &&
-        ImGui::IsMouseHoveringRect(handle.get_p0(), handle.get_p1()) &&
-        ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-      active_handle = i;
-      cache_initial_attributes();
+      if (active_handle == -1 &&
+          ImGui::IsMouseHoveringRect(handle.get_p0(), handle.get_p1()) &&
+          ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+        active_handle = i;
+        cache_initial_attributes();
+      }
     }
-  }
 
   if (active_handle >= 0 && ImGui::IsMouseDown(ImGuiMouseButton_Left))
     transform_core((TransformHandleType)active_handle);
