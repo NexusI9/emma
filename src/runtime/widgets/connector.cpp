@@ -3,8 +3,8 @@
 #include "runtime/node/connector.h"
 
 #include "nkengine/include/gui.hpp"
-#include "runtime/node/frame.h"
 #include "runtime/node/connector_handle.h"
+#include "runtime/node/frame.h"
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/utils.hpp"
 #include <imgui/imgui.h>
@@ -46,4 +46,20 @@ void Widget::ConnectorShape::draw() {
               ImVec2(vp_end[0] - gui_scale(gui, arrow_dist) * dir,
                      vp_end[1] + gui_scale(gui, arrow_dist)),
               im_color(node->color), node->thickness);
+}
+
+bool Widget::ConnectorShape::clickbox_hovered() {
+  for (uint8_t i = 0; i < CONNECTOR_CLICKBOX_COUNT; i++)
+    if (ImGui::IsMouseHoveringRect(ImVec2(vpx(node->clickboxes[i].p0[0]),
+                                          vpy(node->clickboxes[i].p0[1])),
+                                   ImVec2(vpx(node->clickboxes[i].p1[0]),
+                                          vpy(node->clickboxes[i].p1[1]))))
+      return true;
+
+  return false;
+}
+
+void Widget::ConnectorShape::draw_handles() {
+  for (uint8_t i = 0; i < CONNECTOR_TOUCH_POINT_COUNT; i++)
+    ConnectorHandleShape(&node->handles[i], ConnectorHandleSide_None).draw();
 }

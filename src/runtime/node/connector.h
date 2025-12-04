@@ -8,10 +8,11 @@
 #include <cglm/cglm.h>
 
 static const uint8_t CONNECTOR_TOUCH_POINT_COUNT = 2;
-static const uint8_t CONNECTOR_HITBOX_COUNT = 5;
+static const uint8_t CONNECTOR_CLICKBOX_COUNT = 5;
+static const uint8_t CONNECTOR_CLICKBOX_THICKNESS = 20;
+
 static const color CONNECTOR_COLOR = {0.6f, 0.6f, 0.6f, 1.0f};
 static const float CONNECTOR_THICKNESS = 6.0f;
-
 
 typedef enum {
   ConnectorStatus_Success,
@@ -30,7 +31,7 @@ typedef struct {
   alloc_id id;
   const ConnectorHandle *h0, *h1;
   ConnectorHandle handles[CONNECTOR_TOUCH_POINT_COUNT];
-  RectCoordinate hitboxes[CONNECTOR_HITBOX_COUNT];
+  RectCoordinate clickboxes[CONNECTOR_CLICKBOX_COUNT];
   connector_corners corners;
   float thickness;
   color color;
@@ -47,8 +48,9 @@ typedef alloc_id connection[2];
 EXTERN_C_BEGIN
 
 ConnectorStatus connector_create(Connector *, const ConnectorDescriptor *);
-ConnectorStatus connector_compute_corners(Connector *);
 ConnectorStatus connector_swap_direction(Connector *);
+ConnectorStatus connector_update_corners(Connector *);
+ConnectorStatus connector_update_clickboxes(Connector *, const float);
 
 // Mutators
 // clang-format off

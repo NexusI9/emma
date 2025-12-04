@@ -83,20 +83,207 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
 }
 
 /**
+    ▗▄▄▄ ▗▄▄▖  ▗▄▖ ▗▖ ▗▖
+    ▐▌  █▐▌ ▐▌▐▌ ▐▌▐▌ ▐▌
+    ▐▌  █▐▛▀▚▖▐▛▀▜▌▐▌ ▐▌
+    ▐▙▄▄▀▐▌ ▐▌▐▌ ▐▌▐▙█▟▌
+
+ */
+
+void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
+                                                       const int side) {
+
+  for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
+
+    // TODO: maybe make a dedicated draw function for side to prevent
+    // branching
+    if ((side & (1 << i)) == 0)
+      continue;
+
+    ConnectorHandle *handle =
+        allocator_connector_handle_entry(frame->connector_handle_id[i]);
+
+    ConnectorHandleShape handle_shape =
+        ConnectorHandleShape(handle, (ConnectorHandleSide)(1 << i));
+
+    handle_shape.draw();
+
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && handle_shape.hovered() &&
+        !active_connector_handle) {
+
+      ConnectorDescriptor connector_desc = {};
+      connector_desc.start = handle;
+      connector_desc.thickness = CONNECTOR_THICKNESS;
+      connector_desc.color = CONNECTOR_COLOR;
+
+      Connector *new_connector = canvas_create_connector(node, &connector_desc);
+
+      if (new_connector) {
+        frame_register_connector(frame, new_connector->id);
+        active_connector_handle = &new_connector->handles[1];
+      }
+    }
+  }
+}
+
+void Widget::CanvasShape::draw(const unsigned int flags) {
+
+  dl = ImGui::GetWindowDrawList();
+
+  grid_background.draw_texture(gui->pass_encoder);
+
+  transform_box.begin();
+  {
+    draw_pods(flags);
+    draw_frames(flags);
+    draw_frames_octagons(flags);
+    draw_selected_items_connector_handles(flags);
+    draw_modules(flags);
+    draw_connectors(flags);
+  }
+  if (transform_box.end() == TransformBoxStatus_ClearSelection) {
+    canvas_empty_frame_state(node, CanvasFrameState_Selected);
+    canvas_empty_pod_state(node, CanvasPodState_Selected);
+  }
+}
+
+void Widget::CanvasShape::draw_frames(const unsigned int flags) {
+
+  for (size_t i = 0; i < node->frames[CanvasFrameState_Default].length; i++) {
+    Frame *frame = allocator_frame_entry(
+        node->frames[CanvasFrameState_Default].entries[i]);
+
+    FrameShape frame_shape = FrameShape(frame);
+    frame_shape.draw();
+
+    if ((CanvasDrawFlag_FreezeSelection & flags) == 0)
+      frame_transform_listen(
+          &frame_shape,
+          &transform_configuration[CanvasTransformConfigurationType_Frame]);
+  }
+}
+
+void Widget::CanvasShape::draw_pods(const unsigned int flags) {
+
+  for (size_t i = 0; i < node->pods[CanvasPodState_Default].length; i++) {
+
+    Frame *frame =
+        allocator_frame_entry(node->pods[CanvasPodState_Default].entries[i]);
+
+    FrameShape frame_shape = FrameShape(frame);
+    frame_shape.draw_pod();
+
+    if ((CanvasDrawFlag_FreezeSelection & flags) == 0) {
+      frame_highlight_listen(&frame_shape);
+      frame_transform_listen(
+          &frame_shape,
+          &transform_configuration[CanvasTransformConfigurationType_Pod]);
+    }
+  }
+}
+
+void Widget::CanvasShape::draw_frames_octagons(const unsigned int flags) {
+
+  if ((CanvasDrawFlag_ShowOctagon & flags) == 0)
+    return;
+
+  for (size_t i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
+    Frame *frame = allocator_frame_entry(
+        node->frames[CanvasFrameState_Octagon].entries[i]);
+
+    OctagonShape(allocator_octagon_entry(frame->octagon_id)).draw();
+  }
+}
+
+void Widget::CanvasShape::draw_selected_items_connector_handles(
+    const unsigned int flags) {
+
+  size_t i;
+  for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
+    Frame *frame = allocator_frame_entry(
+        node->frames[CanvasFrameState_Selected].entries[i]);
+    draw_frame_handle_connectors(frame, ConnectorHandleSide_Left |
+                                            ConnectorHandleSide_Right);
+  }
+
+  for (i = 0; i < node->pods[CanvasPodState_Selected].length; i++) {
+    Frame *frame =
+        allocator_frame_entry(node->pods[CanvasPodState_Selected].entries[i]);
+    draw_frame_handle_connectors(frame, ConnectorHandleSide_Right);
+  }
+
+  for (i = 0; i < node->connectors[CanvasConnectorState_Selected].length; i++) {
+    Connector *connector = allocator_connector_entry(
+        node->pods[CanvasConnectorState_Selected].entries[i]);
+    ConnectorShape(gui, connector).draw_handles();
+  }
+}
+void Widget::CanvasShape::draw_modules(const unsigned int flags) {
+
+  for (size_t i = 0; i < node->modules[CanvasModuleState_Default].length; i++) {
+    Frame *module = allocator_frame_entry(
+        node->modules[CanvasModuleState_Default].entries[i]);
+
+    FrameShape frame_shape = FrameShape(module);
+    frame_shape.draw_texture();
+
+    if ((CanvasDrawFlag_FreezeSelection & flags) == 0) {
+      frame_highlight_listen(&frame_shape);
+      frame_transform_listen(
+          &frame_shape,
+          &transform_configuration[CanvasTransformConfigurationType_Module]);
+    }
+  }
+}
+void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
+
+  // Default State
+  for (size_t i = 0; i < node->connectors->length; i++) {
+    Connector *connector =
+        allocator_connector_entry(node->connectors->entries[i]);
+
+    ConnectorShape connector_shape = ConnectorShape(gui, connector);
+
+    if ((CanvasDrawFlag_FreezeSelection & flags) == 0) {
+      connector_highlight_listen(&connector_shape);
+      connector_handle_transform_listen(connector);
+      connector_handle_transform_end(connector);
+    }
+
+    connector_shape.draw();
+  }
+
+  if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && active_connector_handle)
+    active_connector_handle = nullptr;
+}
+
+/*
+
+
+    ▗▖   ▗▄▄▄▖ ▗▄▄▖▗▄▄▄▖▗▄▄▄▖▗▖  ▗▖▗▄▄▄▖▗▄▄▖  ▗▄▄▖
+    ▐▌     █  ▐▌     █  ▐▌   ▐▛▚▖▐▌▐▌   ▐▌ ▐▌▐▌
+    ▐▌     █   ▝▀▚▖  █  ▐▛▀▀▘▐▌ ▝▜▌▐▛▀▀▘▐▛▀▚▖ ▝▀▚▖
+    ▐▙▄▄▖▗▄█▄▖▗▄▄▞▘  █  ▐▙▄▄▖▐▌  ▐▌▐▙▄▄▖▐▌ ▐▌▗▄▄▞▘
+
+
+
+ */
+
+/**
    Handle the boundbox interaction along with the transformation for frames
    and modules.
  */
-void Widget::CanvasShape::draw_frame_transform_trigger(
+void Widget::CanvasShape::frame_transform_listen(
     FrameShape *frame, const CanvasTransformConfiguration *conf) {
 
   Frame *frame_node = frame->get_node();
 
   // no matter the button, if a click happened and hit a frame *area*, we update
   // the transform session status to "Has Hit"
-  if ((ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
-       ImGui::IsMouseClicked(ImGuiMouseButton_Left)) &&
-      frame->boundbox_hovered())
-    transform_box.session_set_hit();
+  selection_hit(&transform_box.selection,
+                (ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
+                 ImGui::IsMouseClicked(ImGuiMouseButton_Left)) &&
+                    frame->boundbox_hovered());
 
   // but we only add to selection if the button actually matches the
   // configuration button and hit the
@@ -175,7 +362,7 @@ void Widget::CanvasShape::draw_frame_transform_trigger(
   }
 }
 
-void Widget::CanvasShape::draw_frame_highlight_trigger(FrameShape *frame) {
+void Widget::CanvasShape::frame_highlight_listen(FrameShape *frame) {
 
   if (frame->boundbox_hovered()) {
 
@@ -189,171 +376,12 @@ void Widget::CanvasShape::draw_frame_highlight_trigger(FrameShape *frame) {
   }
 }
 
-void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
-                                                       const int side) {
-
-  for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
-
-    // TODO: maybe make a dedicated draw function for side to prevent
-    // branching
-    if ((side & (1 << i)) == 0)
-      continue;
-
-    ConnectorHandle *handle =
-        allocator_connector_handle_entry(frame->connector_handle_id[i]);
-
-    ConnectorHandleShape handle_shape =
-        ConnectorHandleShape(handle, (ConnectorHandleSide)(1 << i));
-
-    handle_shape.draw();
-
-    if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && handle_shape.hovered() &&
-        !active_connector_handle) {
-
-      ConnectorDescriptor connector_desc = {};
-      connector_desc.start = handle;
-      connector_desc.thickness = CONNECTOR_THICKNESS;
-      connector_desc.color = CONNECTOR_COLOR;
-
-      Connector *new_connector = canvas_create_connector(node, &connector_desc);
-
-      if (new_connector) {
-        frame_register_connector(frame, new_connector->id);
-        active_connector_handle = &new_connector->handles[1];
-      }
-    }
-  }
-}
-
-void Widget::CanvasShape::draw(const unsigned int flags) {
-
-  dl = ImGui::GetWindowDrawList();
-
-  grid_background.draw_texture(gui->pass_encoder);
-
-  transform_box.begin();
-  {
-    draw_pods(flags);
-    draw_frames(flags);
-    draw_frames_octagons(flags);
-    draw_selected_items_connector_handles(flags);
-    draw_modules(flags);
-    draw_connectors(flags);
-  }
-  if (transform_box.end() == TransformBoxStatus_ClearSelection) {
-    canvas_empty_frame_state(node, CanvasFrameState_Selected);
-    canvas_empty_pod_state(node, CanvasPodState_Selected);
-  }
-}
-
-void Widget::CanvasShape::draw_frames(const unsigned int flags) {
-
-  for (size_t i = 0; i < node->frames[CanvasFrameState_Default].length; i++) {
-    Frame *frame = allocator_frame_entry(
-        node->frames[CanvasFrameState_Default].entries[i]);
-
-    FrameShape frame_shape = FrameShape(frame);
-    frame_shape.draw();
-
-    if ((CanvasDrawFlag_FreezeSelection & flags) == 0)
-      draw_frame_transform_trigger(
-          &frame_shape,
-          &transform_configuration[CanvasTransformConfigurationType_Frame]);
-  }
-}
-
-void Widget::CanvasShape::draw_pods(const unsigned int flags) {
-
-  for (size_t i = 0; i < node->pods[CanvasPodState_Default].length; i++) {
-
-    Frame *frame =
-        allocator_frame_entry(node->pods[CanvasPodState_Default].entries[i]);
-
-    FrameShape frame_shape = FrameShape(frame);
-    frame_shape.draw_pod();
-
-    if ((CanvasDrawFlag_FreezeSelection & flags) == 0) {
-      draw_frame_highlight_trigger(&frame_shape);
-      draw_frame_transform_trigger(
-          &frame_shape,
-          &transform_configuration[CanvasTransformConfigurationType_Pod]);
-    }
-  }
-}
-
-void Widget::CanvasShape::draw_frames_octagons(const unsigned int flags) {
-
-  if ((CanvasDrawFlag_ShowOctagon & flags) == 0)
-    return;
-
-  for (size_t i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
-    Frame *frame = allocator_frame_entry(
-        node->frames[CanvasFrameState_Octagon].entries[i]);
-
-    OctagonShape(allocator_octagon_entry(frame->octagon_id)).draw();
-  }
-}
-
-void Widget::CanvasShape::draw_selected_items_connector_handles(
-    const unsigned int flags) {
-
-  size_t i;
-
-  for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
-    Frame *frame = allocator_frame_entry(
-        node->frames[CanvasFrameState_Selected].entries[i]);
-    draw_frame_handle_connectors(frame, ConnectorHandleSide_Left |
-                                            ConnectorHandleSide_Right);
-  }
-
-  for (i = 0; i < node->pods[CanvasPodState_Selected].length; i++) {
-    Frame *frame =
-        allocator_frame_entry(node->pods[CanvasPodState_Selected].entries[i]);
-    draw_frame_handle_connectors(frame, ConnectorHandleSide_Right);
-  }
-}
-void Widget::CanvasShape::draw_modules(const unsigned int flags) {
-
-  for (size_t i = 0; i < node->modules[CanvasModuleState_Default].length; i++) {
-    Frame *module = allocator_frame_entry(
-        node->modules[CanvasModuleState_Default].entries[i]);
-
-    FrameShape frame_shape = FrameShape(module);
-    frame_shape.draw_texture();
-
-    if ((CanvasDrawFlag_FreezeSelection & flags) == 0) {
-      draw_frame_highlight_trigger(&frame_shape);
-      draw_frame_transform_trigger(
-          &frame_shape,
-          &transform_configuration[CanvasTransformConfigurationType_Module]);
-    }
-  }
-}
-void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
-
-  // Default State
-  for (size_t i = 0; i < node->connectors->length; i++) {
-    Connector *connector =
-        allocator_connector_entry(node->connectors->entries[i]);
-
-    ConnectorShape connector_shape = ConnectorShape(gui, connector);
-
-    draw_connector_handle_transform_trigger(connector);
-    draw_connector_handle_transform_release(connector);
-
-    connector_shape.draw();
-  }
-
-  if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && active_connector_handle)
-    active_connector_handle = nullptr;
-}
-
 /**
    Detect when we hover one of the connectors touch points/ handles and move it
    with the mouse on click by updating the touch point position coordinate which
    will then affect the draw called upon.
  */
-void Widget::CanvasShape::draw_connector_handle_transform_trigger(
+void Widget::CanvasShape::connector_handle_transform_listen(
     Connector *connector) {
 
   for (uint8_t i = 0; i < CONNECTOR_TOUCH_POINT_COUNT; i++) {
@@ -377,15 +405,14 @@ void Widget::CanvasShape::draw_connector_handle_transform_trigger(
    On Connector handle release we check if the handle is within a frame or pod
    bound and connect it to the closest valid frame/pod handle.
  */
-void Widget::CanvasShape::draw_connector_handle_transform_release(
-    Connector *connector) {
+void Widget::CanvasShape::connector_handle_transform_end(Connector *connector) {
 
   if (active_connector_handle) {
 
     ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
     connector_handle_set_position(active_connector_handle,
                                   (vec2){mouse.x, mouse.y});
-    connector_compute_corners(connector);
+    connector_update_corners(connector);
 
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
 
@@ -412,6 +439,58 @@ void Widget::CanvasShape::draw_connector_handle_transform_release(
     }
   }
 }
+
+void Widget::CanvasShape::connector_highlight_listen(
+    ConnectorShape *connector) {
+
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+
+    active_connector = NULL;
+
+    if (connector->clickbox_hovered()) {
+      active_connector = connector->get_node();
+      allocator_id_list_push(
+          node->connectors[CanvasConnectorState_Selected].entries,
+          allocator_connector_capacity(),
+          &node->connectors[CanvasConnectorState_Selected].length,
+          active_connector->id);
+    }
+  }
+}
+
+void Widget::CanvasShape::connector_highlight_begin() {
+
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+    active_connector = NULL;
+}
+
+/*
+  If didn't catch any connector (active_connector == NULL). Empty the selector
+  list.
+ */
+void Widget::CanvasShape::connector_highlight_end() {
+
+  if (!active_connector &&
+      node->connectors[CanvasConnectorState_Selected].length)
+    stli_empty(node->connectors[CanvasConnectorState_Selected].entries,
+               &node->connectors[CanvasConnectorState_Selected].length,
+               sizeof(alloc_id), "Canvas Selected Connectors List");
+}
+
+/*
+
+    ▗▄▄▄▖▗▄▄▖  ▗▄▖ ▗▖  ▗▖ ▗▄▄▖▗▄▄▄▖ ▗▄▖ ▗▄▄▖ ▗▖  ▗▖
+      █  ▐▌ ▐▌▐▌ ▐▌▐▛▚▖▐▌▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▛▚▞▜▌
+      █  ▐▛▀▚▖▐▛▀▜▌▐▌ ▝▜▌ ▝▀▚▖▐▛▀▀▘▐▌ ▐▌▐▛▀▚▖▐▌  ▐▌
+      █  ▐▌ ▐▌▐▌ ▐▌▐▌  ▐▌▗▄▄▞▘▐▌   ▝▚▄▞▘▐▌ ▐▌▐▌  ▐▌
+
+       ▗▄▄▖ ▗▄▖ ▗▖   ▗▖   ▗▄▄▖  ▗▄▖  ▗▄▄▖▗▖ ▗▖ ▗▄▄▖
+      ▐▌   ▐▌ ▐▌▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌▗▞▘▐▌
+      ▐▌   ▐▛▀▜▌▐▌   ▐▌   ▐▛▀▚▖▐▛▀▜▌▐▌   ▐▛▚▖  ▝▀▚▖
+      ▝▚▄▄▖▐▌ ▐▌▐▙▄▄▖▐▙▄▄▖▐▙▄▞▘▐▌ ▐▌▝▚▄▄▖▐▌ ▐▌▗▄▄▞▘
+
+
+ */
 
 void Widget::canvas_shape_get_frame_position(void *data, ImVec2 &value) {
 

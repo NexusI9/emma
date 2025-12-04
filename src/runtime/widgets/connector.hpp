@@ -12,6 +12,8 @@ class ConnectorShape {
 public:
   ConnectorShape(Gui *gui, Connector *node) : gui(gui), node(node) {}
   void draw();
+  void draw_handles();
+  bool clickbox_hovered();
   Connector *get_node() { return node; }
 
 private:

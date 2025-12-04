@@ -2,6 +2,7 @@
 #define _WIDGET_TRANSFORM_BOX_H_
 
 #include "nkengine/include/gui.h"
+#include "runtime/node/selection.h"
 #include "runtime/node/transform_handle.h"
 #include "runtime/widgets/transform_handle.hpp"
 #include <cglm/cglm.h>
@@ -88,9 +89,7 @@ public:
   TransformBoxStatus update_bound_from_selection();
   TransformBoxStatus update_bound(ImVec2, ImVec2);
 
-  TransformBoxStatus session_set_blank_click();
-  TransformBoxStatus session_set_hit();
-  TransformBoxSessionStatus session_satus() { return session_status; }
+  Selection selection;
 
   uint16_t objects_count() { return objects.count; }
 
@@ -117,7 +116,6 @@ private:
 
   // flags
   int active_handle = -1;
-  TransformBoxSessionStatus session_status = TransformBoxSessionStatus_Off;
 
   // utils
   void handle_transform(const TransformHandleType, const ImVec2, const ImVec2,
@@ -125,8 +123,6 @@ private:
   void transform_core(const TransformHandleType);
   void cache_initial_attributes();
   void clamp_mouse(const TransformHandleType, ImVec2 &);
-
-
 };
 
 } // namespace Widget

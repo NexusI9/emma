@@ -46,6 +46,8 @@ void boundbox_edges_from_points(const vec2, const vec2, BoundboxFrame);
 
 void boundbox_frame_update(BoundboxFrame, const vec2, const vec2, const float);
 
+void boundbox_from_points(RectCoordinate *, const vec2, const vec2, const float);
+
 void boundbox_update(RectCoordinate *, const vec2, const vec2, const float);
 
 static inline void boundbox_top_from_points(const vec2 p0, const vec2 p1,

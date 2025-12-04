@@ -4,6 +4,7 @@
 #include "runtime/geometry/core.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/node/canvas.h"
+#include "runtime/node/connector.h"
 #include "runtime/widgets/connector.hpp"
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
@@ -95,8 +96,6 @@ private:
     size_t count;
   } transform_frame_data;
 
-  ConnectorHandle *active_connector_handle = nullptr;
-
   CanvasTransformConfiguration
       transform_configuration[CanvasTransformConfigurationType_COUNT] = {};
 
@@ -106,14 +105,22 @@ private:
   void draw_connectors(const unsigned int);
   void draw_pods(const unsigned int);
   void draw_selected_items_connector_handles(const unsigned int);
-
-  void draw_frame_highlight_trigger(FrameShape *);
-  void draw_frame_transform_trigger(FrameShape *,
-                                    const CanvasTransformConfiguration *);
-  void draw_connector_handle_transform_trigger(Connector *);
-  void draw_connector_handle_transform_release(Connector *);
-
   void draw_frame_handle_connectors(Frame *, const int);
+
+  
+  void frame_highlight_listen(FrameShape *);
+  void frame_transform_listen(FrameShape *,
+                                    const CanvasTransformConfiguration *);
+
+
+  ConnectorHandle *active_connector_handle = nullptr;
+  Connector *active_connector = nullptr;
+  void connector_highlight_begin();
+  void connector_highlight_listen(ConnectorShape *);
+  void connector_highlight_end();
+
+  void connector_handle_transform_listen(Connector *);
+  void connector_handle_transform_end(Connector *);
 };
 
 } // namespace Widget

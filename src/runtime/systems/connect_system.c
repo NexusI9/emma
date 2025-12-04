@@ -67,7 +67,8 @@ ConnectSystemStatus connect_system_connect_handle_to_frame(
         // need to register so the frame sync the
         // connector on transform
         frame_register_connector(frame, connector->id);
-        connector_compute_corners(connector);
+        connector_update_corners(connector);
+        connector_update_clickboxes(connector, CONNECTOR_CLICKBOX_THICKNESS);
 
         return ConnectSystemStatus_Success;
       }

@@ -2,6 +2,7 @@
 #include "nkengine/include/gui.hpp"
 #include "runtime/manager/unit.h"
 #include "runtime/manager/viewport.h"
+#include "runtime/node/selection.h"
 #include "runtime/node/transform_handle.h"
 #include "runtime/widgets/transform_handle.hpp"
 #include "runtime/widgets/utils.hpp"
@@ -24,6 +25,8 @@ Widget::TransformBox::TransformBox(Gui *gui) {
     };
     transform_handle_create(&handles[i], &desc);
   }
+
+  selection_init(&selection);
 }
 
 Widget::TransformBoxStatus
@@ -150,25 +153,6 @@ void Widget::TransformBox::clamp_mouse(const TransformHandleType handle,
   }
 }
 
-/**
-   Only update the  session status if the state is OFF, meaning we do change the
-   state if this one has be marked as successful (hit).
- */
-Widget::TransformBoxStatus Widget::TransformBox::session_set_blank_click() {
-
-  if (session_status == TransformBoxSessionStatus_Off)
-    session_status = TransformBoxSessionStatus_BlankClick;
-
-  return TransformBoxStatus_Success;
-}
-
-Widget::TransformBoxStatus Widget::TransformBox::session_set_hit() {
-
-  session_status = TransformBoxSessionStatus_Hit;
-
-  return TransformBoxStatus_Success;
-}
-
 void Widget::TransformBox::cache_initial_attributes() {
 
   // cache initial attributes
@@ -185,7 +169,7 @@ void Widget::TransformBox::cache_initial_attributes() {
 
 void Widget::TransformBox::transform_core(const TransformHandleType handle) {
 
-  session_set_hit();
+  selection_hit(&selection, true);
 
   ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
   clamp_mouse(handle, mouse);
@@ -408,9 +392,8 @@ Widget::TransformBoxStatus Widget::TransformBox::update_bound_from_selection() {
 
 Widget::TransformBoxStatus Widget::TransformBox::begin() {
 
-  if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
-      ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-    session_set_blank_click();
+  selection_begin(&selection, ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
+                                  ImGui::IsMouseClicked(ImGuiMouseButton_Left));
 
   return TransformBoxStatus_Success;
 }
@@ -422,12 +405,12 @@ Widget::TransformBoxStatus Widget::TransformBox::end() {
 
   TransformBoxStatus status = TransformBoxStatus_SessionAlreadyStarted;
 
-  if (session_status == TransformBoxSessionStatus_BlankClick) {
+  if (selection_status(&selection) == SelectionStatus_Blank) {
     empty_objects();
     status = TransformBoxStatus_ClearSelection;
   }
 
-  session_status = TransformBoxSessionStatus_Off;
+  selection_end(&selection);
 
   return status;
 }

@@ -543,7 +543,8 @@ void canvas_update_frame_connectors(Canvas *canvas, const Frame *frame) {
     Connector *connector =
         allocator_connector_entry(frame->connectors_id.entries[i]);
 
-    connector_compute_corners(connector);
+    connector_update_corners(connector);
+    connector_update_clickboxes(connector, CONNECTOR_CLICKBOX_THICKNESS);
   }
 }
 

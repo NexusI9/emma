@@ -62,35 +62,47 @@ void boundbox_frame_update(BoundboxFrame box, const vec2 start, const vec2 end,
   box[3].p1[1] = max_y;
 }
 
+void boundbox_from_points(RectCoordinate *box, const vec2 start, const vec2 end,
+                          const float thickness) {
+
+  float half = thickness * 0.5f;
+
+  float min_x = fminf(start[0], end[0]) - half;
+  float max_x = fmaxf(start[0], end[0]) + half;
+
+  float min_y = fminf(start[1], end[1]) - half;
+  float max_y = fmaxf(start[1], end[1]) + half;
+
+  glm_vec2_copy((vec2){min_x, min_y}, box->p0);
+  glm_vec2_copy((vec2){max_x, max_y}, box->p1);
+}
 
 bool boundbox_collide(const RectCoordinate *a, const RectCoordinate *b) {
 
-    // Extract coordinates
-    float ax0 = a->p0[0];
-    float ay0 = a->p0[1];
-    float ax1 = a->p1[0];
-    float ay1 = a->p1[1];
+  // Extract coordinates
+  float ax0 = a->p0[0];
+  float ay0 = a->p0[1];
+  float ax1 = a->p1[0];
+  float ay1 = a->p1[1];
 
-    float bx0 = b->p0[0];
-    float by0 = b->p0[1];
-    float bx1 = b->p1[0];
-    float by1 = b->p1[1];
+  float bx0 = b->p0[0];
+  float by0 = b->p0[1];
+  float bx1 = b->p1[0];
+  float by1 = b->p1[1];
 
-    // AABB overlap test (no separation axis)
-    bool separated =
-        ax1 < bx0 ||  // a is left of b
-        ax0 > bx1 ||  // a is right of b
-        ay1 < by0 ||  // a is above b
-        ay0 > by1;    // a is below b
+  // AABB overlap test (no separation axis)
+  bool separated = ax1 < bx0 || // a is left of b
+                   ax0 > bx1 || // a is right of b
+                   ay1 < by0 || // a is above b
+                   ay0 > by1;   // a is below b
 
-    return !separated;
+  return !separated;
 }
-
 
 /**
    Note: Only works if p0 is min and p1 is max
  */
 bool boundbox_contain_point(const RectCoordinate *r, const vec2 p) {
-    return (p[0] >= r->p0[0] && p[0] <= r->p1[0] &&
-            p[1] >= r->p0[1] && p[1] <= r->p1[1]);
+  return (p[0] >= r->p0[0] && p[0] <= r->p1[0] && p[1] >= r->p0[1] &&
+          p[1] <= r->p1[1]);
 }
