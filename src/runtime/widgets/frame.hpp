@@ -17,8 +17,8 @@ public:
   void draw_pod();
 
   Frame *get_node() { return node; }
-  bool area_hovered();
   bool boundbox_hovered();
+  bool clickbox_hovered();
 
 private:
   Frame *node;

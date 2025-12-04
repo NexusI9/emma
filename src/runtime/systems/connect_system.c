@@ -22,7 +22,7 @@ ConnectSystemStatus connect_system_connect_handle_to_frame(
 
     Frame *frame = allocator_frame_entry(frames[i]);
 
-    if (boundbox_contain_point(&frame->area, handle->position)) {
+    if (boundbox_contain_point(&frame->boundbox, handle->position)) {
 
       // Define which connector handle is active and
       // which callback to call to update its handle.

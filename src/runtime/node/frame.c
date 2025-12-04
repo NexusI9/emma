@@ -8,9 +8,9 @@
 FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
 
   node->label = desc->label;
-  node->boundbox.update_callback = desc->boundbox->update_callback;
-  node->boundbox.padding = desc->boundbox->padding;
-  node->boundbox.count = desc->boundbox->count;
+  node->clickbox.update_callback = desc->clickbox->update_callback;
+  node->clickbox.padding = desc->clickbox->padding;
+  node->clickbox.count = desc->clickbox->count;
   node->children.length = 0;
 
   frame_set_size(node, desc->size);
@@ -88,18 +88,18 @@ FrameStatus frame_set_world_position(Frame *node, const vec2 value) {
 
   glm_vec2_copy((float *)value, node->world_position);
   glm_vec2_add(node->world_position, node->size, node->end_point);
-  node->boundbox.update_callback(node->boundbox.entries,
+  node->clickbox.update_callback(node->clickbox.entries,
                                  frame_get_world_position(node),
-                                 node->end_point, node->boundbox.padding);
-  frame_update_area(node);
+                                 node->end_point, node->clickbox.padding);
+  frame_update_boundbox(node);
 
   for (size_t i = 0; i < node->children.length; i++) {
     Frame *child = allocator_frame_entry(node->children.entries[i]);
     frame_update_world_position(child);
-    child->boundbox.update_callback(child->boundbox.entries,
+    child->clickbox.update_callback(child->clickbox.entries,
                                     frame_get_world_position(child),
-                                    child->end_point, child->boundbox.padding);
-    frame_update_area(child);
+                                    child->end_point, child->clickbox.padding);
+    frame_update_boundbox(child);
   }
 
   return FrameStatus_Success;

@@ -95,7 +95,7 @@ void Widget::CanvasShape::draw_frame_transform_trigger(
   // the transform session status to "Has Hit"
   if ((ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
        ImGui::IsMouseClicked(ImGuiMouseButton_Left)) &&
-      frame->area_hovered())
+      frame->boundbox_hovered())
     transform_box.session_set_hit();
 
   // but we only add to selection if the button actually matches the
@@ -177,7 +177,7 @@ void Widget::CanvasShape::draw_frame_transform_trigger(
 
 void Widget::CanvasShape::draw_frame_highlight_trigger(FrameShape *frame) {
 
-  if (frame->area_hovered()) {
+  if (frame->boundbox_hovered()) {
 
     Frame *frame_node = frame->get_node();
     dl->AddRect(
@@ -332,9 +332,9 @@ void Widget::CanvasShape::draw_modules(const unsigned int flags) {
 void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
 
   // Default State
-  for (size_t i = 0; i < node->connectors.length; i++) {
+  for (size_t i = 0; i < node->connectors->length; i++) {
     Connector *connector =
-        allocator_connector_entry(node->connectors.entries[i]);
+        allocator_connector_entry(node->connectors->entries[i]);
 
     ConnectorShape connector_shape = ConnectorShape(gui, connector);
 
@@ -342,9 +342,6 @@ void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
     draw_connector_handle_transform_release(connector);
 
     connector_shape.draw();
-
-    // DEBUG
-    // printf("drawing connector: %llu\n", connector->id);
   }
 
   if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && active_connector_handle)

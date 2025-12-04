@@ -14,9 +14,9 @@
 #define FRAME_MAX_CHILDREN 64
 static const int FRAME_CONNECTOR_HANDLE_COUNT = 4;
 
-static const float FRAME_BOUNDBOX_THICKNESS = 40.0f;
+static const float FRAME_CLICKBOX_THICKNESS = 40.0f;
 
-typedef void (*frame_boundbox_updater)(RectCoordinate *, const vec2, const vec2,
+typedef void (*frame_clickbox_updater)(RectCoordinate *, const vec2, const vec2,
                                        const float);
 
 typedef enum {
@@ -26,11 +26,11 @@ typedef enum {
 
 typedef struct {
   size_t count;
-  frame_boundbox_updater update_callback;
+  frame_clickbox_updater update_callback;
   float padding;
-} FrameBoundboxDescriptor;
+} FrameClickboxDescriptor;
 
-static const FrameBoundboxDescriptor FRAME_BOUNDBOX_TYPE_DEFAULT = {
+static const FrameClickboxDescriptor FRAME_CLICKBOX_TYPE_DEFAULT = {
     .update_callback = boundbox_update,
     .padding = 0.0f,
     .count = 1,
@@ -47,16 +47,14 @@ typedef struct {
   vec2 size;
   vec2 end_point; // pos + size, usefull to get full area for mouse interaction
 
-  // interactive boundboxes used for click
   struct {
     RectCoordinate entries[BOUNDBOX_FRAME_RECT_COUNT];
     size_t count;
-    frame_boundbox_updater update_callback;
+    frame_clickbox_updater update_callback;
     float padding;
-  } boundbox;
+  } clickbox;
 
-  // more generic boundbox covering the whole frame area
-  RectCoordinate area;
+  RectCoordinate boundbox;
 
   color background;
   vec2 uv0, uv1;
@@ -72,14 +70,14 @@ typedef struct {
   const vec2 size;
   const color background;
   const vec2 uv0, uv1;
-  const FrameBoundboxDescriptor *boundbox;
+  const FrameClickboxDescriptor *clickbox;
 } FrameDescriptor;
 
 EXTERN_C_BEGIN
 
 FrameStatus frame_create(Frame *, const FrameDescriptor *);
 FrameStatus frame_create_from_sprite(Frame *, const TextureAtlasRegion *,
-                                     const FrameBoundboxDescriptor *);
+                                     const FrameClickboxDescriptor *);
 
 // Accessors
 // clang-format off
@@ -120,7 +118,7 @@ FrameStatus frame_set_world_position(Frame *node, const vec2 value);
 StaticListStatus frame_add_child(Frame *node, const alloc_id id);
 StaticListStatus frame_remove_child(Frame *node, const alloc_id id);
 
-static inline void frame_update_area(Frame *);
+static inline void frame_update_boundbox(Frame *);
 static inline FrameStatus frame_set_size(Frame *, const vec2);
 static inline FrameStatus frame_set_local_position(Frame *, const vec2);
 static inline FrameStatus frame_set_background(Frame *, const color);
@@ -133,9 +131,9 @@ static inline StaticListStatus frame_unregister_connector(Frame *, const alloc_i
 static inline bool frame_collide(const Frame *, const Frame *);
 // clang-format on
 
-void frame_update_area(Frame *node) {
-  glm_vec2_copy(node->world_position, node->area.p0);
-  glm_vec2_copy(node->end_point, node->area.p1);
+void frame_update_boundbox(Frame *node) {
+  glm_vec2_copy(node->world_position, node->boundbox.p0);
+  glm_vec2_copy(node->end_point, node->boundbox.p1);
 }
 
 FrameStatus frame_set_size(Frame *node, const vec2 value) {
@@ -144,20 +142,20 @@ FrameStatus frame_set_size(Frame *node, const vec2 value) {
 
   glm_vec2_add(node->world_position, node->size, node->end_point);
 
-  node->boundbox.update_callback(node->boundbox.entries,
+  node->clickbox.update_callback(node->clickbox.entries,
                                  frame_get_world_position(node),
-                                 node->end_point, node->boundbox.padding);
-  frame_update_area(node);
+                                 node->end_point, node->clickbox.padding);
+  frame_update_boundbox(node);
   return FrameStatus_Success;
 }
 
 FrameStatus frame_set_local_position(Frame *node, const vec2 value) {
   glm_vec2_copy((float *)value, node->local_position);
   frame_update_world_position(node);
-  node->boundbox.update_callback(node->boundbox.entries,
+  node->clickbox.update_callback(node->clickbox.entries,
                                  frame_get_world_position(node),
-                                 node->end_point, node->boundbox.padding);
-  frame_update_area(node);
+                                 node->end_point, node->clickbox.padding);
+  frame_update_boundbox(node);
   return FrameStatus_Success;
 }
 
@@ -204,7 +202,7 @@ StaticListStatus frame_unregister_connector(Frame *node, const alloc_id id) {
 
 bool frame_collide(const Frame *frame_a, const Frame *frame_b) {
 
-  return boundbox_collide(&frame_a->area, &frame_b->area);
+  return boundbox_collide(&frame_a->boundbox, &frame_b->boundbox);
 }
 
 EXTERN_C_END

@@ -94,10 +94,10 @@ Frame *canvas_create_frame(Canvas *canvas) {
       // TODO: replace the boundbox descriptor by a discriminator
       // "SelectionType" to automatically setup the right boundbox configuration
       // within the frame constructor ?
-      .boundbox =
-          &(FrameBoundboxDescriptor){
+      .clickbox =
+          &(FrameClickboxDescriptor){
               .update_callback = boundbox_frame_update,
-              .padding = FRAME_BOUNDBOX_THICKNESS,
+              .padding = FRAME_CLICKBOX_THICKNESS,
               .count = BOUNDBOX_FRAME_RECT_COUNT,
           },
   };
@@ -118,10 +118,10 @@ Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
       .uv1 = {module_desc->uv1[0], module_desc->uv1[1]},
       .size = {module_desc->size[0], module_desc->size[1]},
       .label = module_desc->label,
-      .boundbox =
-          &(FrameBoundboxDescriptor){
+      .clickbox =
+          &(FrameClickboxDescriptor){
               .update_callback = boundbox_update,
-              .padding = -FRAME_BOUNDBOX_THICKNESS / 2.0f,
+              .padding = -FRAME_CLICKBOX_THICKNESS / 2.0f,
               .count = 1,
           },
   };
@@ -142,7 +142,7 @@ Frame *canvas_create_pod(Canvas *canvas) {
       .uv1 = {pod_region->uv1[0], pod_region->uv1[1]},
       .size = {pod_region->size[0], pod_region->size[0]},
       .label = pod_region->label,
-      .boundbox = &FRAME_BOUNDBOX_TYPE_DEFAULT,
+      .clickbox = &FRAME_CLICKBOX_TYPE_DEFAULT,
   };
 
   Frame *pod = canvas_create_frame_core(
@@ -162,7 +162,7 @@ Frame *canvas_create_pod(Canvas *canvas) {
                      .uv1 = {window_region->uv1[0], window_region->uv1[1]},
                      .size = {window_region->size[0], window_region->size[1]},
                      .label = window_region->label,
-                     .boundbox = &FRAME_BOUNDBOX_TYPE_DEFAULT,
+                     .clickbox = &FRAME_CLICKBOX_TYPE_DEFAULT,
                  });
 
     frame_add_child(pod, pod_window->id);
@@ -417,7 +417,7 @@ CanvasStatus canvas_add_pod_persona(Canvas *canvas, Frame *pod,
                                   .uv0 = {sprite->uv0[0], sprite->uv0[1]},
                                   .uv1 = {sprite->uv1[0], sprite->uv1[1]},
                                   .label = sprite->label,
-                                  .boundbox = &FRAME_BOUNDBOX_TYPE_DEFAULT,
+                                  .clickbox = &FRAME_CLICKBOX_TYPE_DEFAULT,
                                   .position = {position[0], position[1]},
                                   .size = {size, size},
                               });
@@ -503,9 +503,9 @@ void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
   };
   connector_create(connector, &cn_desc);
 
-  allocator_id_list_push(canvas->connectors.entries,
+  allocator_id_list_push(canvas->connectors->entries,
                          allocator_connector_capacity(),
-                         &canvas->connectors.length, connector->id);
+                         &canvas->connectors->length, connector->id);
 
   frame_register_connector(frame_a, connector->id);
   frame_register_connector(frame_b, connector->id);
@@ -521,9 +521,9 @@ Connector *canvas_create_connector(Canvas *canvas,
 
   connector_create(connector, desc);
 
-  if (allocator_id_list_push(canvas->connectors.entries,
+  if (allocator_id_list_push(canvas->connectors->entries,
                              allocator_connector_capacity(),
-                             &canvas->connectors.length,
+                             &canvas->connectors->length,
                              connector->id) != StaticListStatus_Success)
     return NULL;
 

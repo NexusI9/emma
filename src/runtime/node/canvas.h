@@ -31,6 +31,12 @@ typedef enum {
 } CanvasPodState;
 
 typedef enum {
+  CanvasConnectorState_Default,
+  CanvasConnectorState_Selected,
+  CanvasConnectorState_COUNT,
+} CanvasConnectorState;
+
+typedef enum {
   CanvasStatus_Success,
   CanvasStatus_ResourceCreationFail,
   CanvasStatus_UndefError,
@@ -42,8 +48,8 @@ typedef struct {
 
   FrameAllocList frames[CanvasFrameState_COUNT];
   FrameAllocList modules[CanvasModuleState_COUNT];
-  FrameAllocList pods[CanvasModuleState_COUNT];
-  FrameAllocList connectors;
+  FrameAllocList pods[CanvasPodState_COUNT];
+  FrameAllocList connectors[CanvasConnectorState_COUNT];
   FrameAllocList octagons;
 
   ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES *FRAME_CONNECTOR_HANDLE_COUNT)

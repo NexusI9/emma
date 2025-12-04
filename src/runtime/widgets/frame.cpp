@@ -22,19 +22,19 @@ void Widget::FrameShape::draw() {
   dl->AddRectFilled(p0, p1, im_color(node->background), 0.0f);
 }
 
-bool Widget::FrameShape::boundbox_hovered() {
-  for (uint8_t i = 0; i < node->boundbox.count; i++)
+bool Widget::FrameShape::clickbox_hovered() {
+  for (uint8_t i = 0; i < node->clickbox.count; i++)
     if (ImGui::IsMouseHoveringRect(
-            ImVec2(vpx(node->boundbox.entries[i].p0[0]),
-                   vpy(node->boundbox.entries[i].p0[1])),
-            ImVec2(vpx(node->boundbox.entries[i].p1[0]),
-                   vpy(node->boundbox.entries[i].p1[1]))))
+            ImVec2(vpx(node->clickbox.entries[i].p0[0]),
+                   vpy(node->clickbox.entries[i].p0[1])),
+            ImVec2(vpx(node->clickbox.entries[i].p1[0]),
+                   vpy(node->clickbox.entries[i].p1[1]))))
       return true;
 
   return false;
 }
 
-bool Widget::FrameShape::area_hovered() {
+bool Widget::FrameShape::boundbox_hovered() {
   return ImGui::IsMouseHoveringRect(
       ImVec2(vpx(node->world_position[0]), vpy(node->world_position[1])),
       ImVec2(vpx(node->end_point[0]), vpy(node->end_point[1])));

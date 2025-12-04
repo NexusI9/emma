@@ -2,13 +2,16 @@
 #define _CONNECTOR_H_
 
 #include "nkengine/include/utils.h"
+#include "runtime/geometry/core.h"
 #include "runtime/node/connector_handle.h"
 #include "utils/id.h"
 #include <cglm/cglm.h>
 
-static const int CONNECTOR_TOUCH_POINT_COUNT = 2;
+static const uint8_t CONNECTOR_TOUCH_POINT_COUNT = 2;
+static const uint8_t CONNECTOR_HITBOX_COUNT = 5;
 static const color CONNECTOR_COLOR = {0.6f, 0.6f, 0.6f, 1.0f};
 static const float CONNECTOR_THICKNESS = 6.0f;
+
 
 typedef enum {
   ConnectorStatus_Success,
@@ -27,6 +30,7 @@ typedef struct {
   alloc_id id;
   const ConnectorHandle *h0, *h1;
   ConnectorHandle handles[CONNECTOR_TOUCH_POINT_COUNT];
+  RectCoordinate hitboxes[CONNECTOR_HITBOX_COUNT];
   connector_corners corners;
   float thickness;
   color color;

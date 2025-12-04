@@ -114,7 +114,7 @@ private:
   void draw_connector_handle_transform_release(Connector *);
 
   void draw_frame_handle_connectors(Frame *, const int);
-}; // namespace Widget
+};
 
 } // namespace Widget
 
