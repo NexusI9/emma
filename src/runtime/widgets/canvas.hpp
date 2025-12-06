@@ -89,7 +89,6 @@ typedef enum {
   CanvasSelectionFlag_None = 0,
   CanvasSelectionFlag_ConnectorHandle = 1 << 0,
   CanvasSelectionFlag_NewConnectorHandle = 1 << 1,
-  CanvasSelectionFlag_TransformHandle = 1 << 2,
 } CanvasSelectionFlag;
 
 class CanvasShape {

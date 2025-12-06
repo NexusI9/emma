@@ -611,8 +611,8 @@ CanvasStatus canvas_destroy_frame(Canvas *canvas, Frame *frame) {
 
   // unregister it from other state list
   for (uint8_t i = 1; i < CanvasFrameState_COUNT; i++)
-    stli_remove(canvas->frames[i].entries, &canvas->frames[i].length,
-                sizeof(alloc_id), &frame->id, "Frame State List");
+    allocator_id_list_pop(canvas->frames[i].entries, &canvas->frames[i].length,
+                          frame->id);
 
   // For frames, we destroy all the inner modules as well
   for (size_t i = 0; i < frame->children.length; i++) {
@@ -628,10 +628,16 @@ CanvasStatus canvas_destroy_frame(Canvas *canvas, Frame *frame) {
 
 CanvasStatus canvas_destroy_module(Canvas *canvas, Frame *frame) {
 
+  // DEBUG
+  printf("selected length: %lu\n",
+         canvas->modules[CanvasModuleState_Selected].length);
+  printf("frame: %p | %llu\n", frame, frame->id);
+
   // unregister it from other state list
-  for (uint8_t i = 1; i < CanvasModuleState_COUNT; i++)
-    stli_remove(canvas->modules[i].entries, &canvas->modules[i].length,
-                sizeof(alloc_id), &frame->id, "Module State List");
+  for (uint8_t i = 1; i < CanvasModuleState_COUNT; i++) {
+    allocator_id_list_pop(canvas->modules[i].entries,
+                          &canvas->modules[i].length, frame->id);
+  }
 
   canvas_destroy_frame_core(canvas, frame, canvas->modules);
 
@@ -643,8 +649,8 @@ CanvasStatus canvas_destroy_pod(Canvas *canvas, Frame *frame) {
 
   // unregister it from other state list
   for (uint8_t i = 1; i < CanvasPodState_COUNT; i++)
-    stli_remove(canvas->pods[i].entries, &canvas->pods[i].length,
-                sizeof(alloc_id), &frame->id, "Pod State List");
+    allocator_id_list_pop(canvas->pods[i].entries, &canvas->pods[i].length,
+                          frame->id);
 
   canvas_destroy_frame_core(canvas, frame, canvas->pods);
   // eventual additional removal to take care of

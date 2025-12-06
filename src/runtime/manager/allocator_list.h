@@ -56,6 +56,12 @@ allocator_id_list_pop(alloc_id *entries, size_t *length, const alloc_id id) {
                      "Allocator List");
 }
 
+static inline StaticListStatus allocator_id_list_empty(alloc_id *entries,
+                                                       size_t *length) {
+
+  return stli_empty(entries, length, sizeof(alloc_id), "Allocator List");
+}
+
 EXTERN_C_END
 
 #endif

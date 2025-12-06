@@ -116,6 +116,7 @@ void Widget::CanvasShape::draw(const unsigned int flags) {
   }
   if (transform_box.end() == TransformBoxStatus_ClearSelection) {
     canvas_empty_frame_state(node, CanvasFrameState_Selected);
+    canvas_empty_module_state(node, CanvasModuleState_Selected);
     canvas_empty_pod_state(node, CanvasPodState_Selected);
   }
 
@@ -347,7 +348,7 @@ void Widget::CanvasShape::frame_transform_listen(
     TransformBoxObject *found_obj =
         transform_box.find_object(object.handle, NULL);
 
-    // remove object
+    // remove object TODO DEBUG: NEVER CALLS THIS CONDITION
     if (found_obj) {
 
       // mark as unselected
@@ -381,7 +382,8 @@ void Widget::CanvasShape::frame_transform_listen(
       // empty and different from the current one, we empty the selection.
       if (input_key(INPUT_KEY_SHIFT) == false) {
         transform_box.empty_objects();
-        canvas_empty_frame_state(node, CanvasFrameState_Selected);
+        allocator_id_list_empty(conf->selection_list->entries,
+                                &conf->selection_list->length);
       }
 
       // mark as selected
