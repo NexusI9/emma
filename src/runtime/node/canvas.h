@@ -39,6 +39,7 @@ typedef enum {
 typedef enum {
   CanvasStatus_Success,
   CanvasStatus_ResourceCreationFail,
+  CanvasStatus_NothingSelected,
   CanvasStatus_UndefError,
 } CanvasStatus;
 
@@ -106,6 +107,8 @@ CanvasStatus canvas_destroy_module(Canvas *, Frame *);
 CanvasStatus canvas_destroy_pod(Canvas *, Frame *);
 CanvasStatus canvas_destroy_connector(Canvas *, Connector *);
 CanvasStatus canvas_destroy_octagon(Canvas *, Octagon *);
+
+CanvasStatus canvas_destroy_all_selected_frames(Canvas *);
 
 EXTERN_C_END
 #endif

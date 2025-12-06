@@ -144,7 +144,7 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
     if (gui_selection_hit(&selection_connector,
                           ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
                               handle_shape.hovered() &&
-                              !active_connector_handle)) {
+                              CanvasSelectionFlag_None == selection_state)) {
 
       ConnectorDescriptor connector_desc = {};
       connector_desc.start = handle;
@@ -159,12 +159,13 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
         connector_handle_copy(new_connector->handles[0],
                               new_connector->handles[1]);
 
-        active_new_connector_handle = new_connector->handles[1];
+        active_connector_handle = new_connector->handles[1];
 
         ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
-
-        connector_handle_set_position(active_new_connector_handle,
+        connector_handle_set_position(active_connector_handle,
                                       (vec2){mouse.x, mouse.y});
+
+        flag_enable(CanvasSelectionFlag_NewConnectorHandle, &selection_state);
       }
     }
   }
@@ -226,6 +227,7 @@ void Widget::CanvasShape::draw_selected_items_connector_handles(
   for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
     Frame *frame = allocator_frame_entry(
         node->frames[CanvasFrameState_Selected].entries[i]);
+
     draw_frame_handle_connectors(frame, ConnectorHandleSide_Left |
                                             ConnectorHandleSide_Right);
   }
@@ -282,8 +284,11 @@ void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
 
   connector_highlight_end();
 
-  if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && active_connector_handle)
+  if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
+      (CanvasSelectionFlag_ConnectorHandle & selection_state)) {
     active_connector_handle = nullptr;
+    flag_disable(CanvasSelectionFlag_ConnectorHandle, &selection_state);
+  }
 }
 
 /*
@@ -425,9 +430,10 @@ void Widget::CanvasShape::connector_handle_transform_listen(
 
       if (gui_selection_hit(&selection_connector,
                             ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
-                                !active_connector_handle &&
-                                !active_new_connector_handle))
+                                CanvasSelectionFlag_None == selection_state)) {
         active_connector_handle = handle;
+        flag_enable(CanvasSelectionFlag_ConnectorHandle, &selection_state);
+      }
     }
   }
 }
@@ -454,14 +460,11 @@ void Widget::CanvasShape::connector_handle_transform_listen(
  */
 void Widget::CanvasShape::connector_handle_transform_end(Connector *connector) {
 
-  if (active_connector_handle || active_new_connector_handle) {
-
-    ConnectorHandle *active = active_connector_handle
-                                  ? active_connector_handle
-                                  : active_new_connector_handle;
+  if (active_connector_handle) {
 
     ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
-    connector_handle_set_position(active, (vec2){mouse.x, mouse.y});
+    connector_handle_set_position(active_connector_handle,
+                                  (vec2){mouse.x, mouse.y});
     connector_update_corners(connector);
 
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
@@ -479,11 +482,13 @@ void Widget::CanvasShape::connector_handle_transform_end(Connector *connector) {
 
       for (uint8_t i = 0; i < release_frames_count; i++) {
         if (connect_system_connect_handle_to_frame(
-                active, connector, frames[i].list->entries,
+                active_connector_handle, connector, frames[i].list->entries,
                 frames[i].list->length,
                 frames[i].sides) == ConnectSystemStatus_Success) {
           active_connector_handle = nullptr;
-          active_new_connector_handle = nullptr;
+          flag_disable(CanvasSelectionFlag_ConnectorHandle, &selection_state);
+          flag_disable(CanvasSelectionFlag_NewConnectorHandle,
+                       &selection_state);
           break;
         }
       }
@@ -509,10 +514,8 @@ void Widget::CanvasShape::connector_highlight_listen(
 
 void Widget::CanvasShape::connector_highlight_begin() {
 
-  if (gui_selection_begin(&selection_connector,
-                          ImGui::IsMouseClicked(ImGuiMouseButton_Left))) {
-    active_connector_handle = nullptr;
-  }
+  gui_selection_begin(&selection_connector,
+                      ImGui::IsMouseClicked(ImGuiMouseButton_Left));
 }
 
 /*
@@ -537,6 +540,9 @@ void Widget::CanvasShape::destroy_listen() {
       canvas_destroy_connector(node, active_connector);
       active_connector = nullptr;
     }
+
+    if (canvas_destroy_all_selected_frames(node) == CanvasStatus_Success)
+      transform_box.empty_objects();
   }
 }
 

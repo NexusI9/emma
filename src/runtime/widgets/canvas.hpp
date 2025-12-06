@@ -85,6 +85,13 @@ typedef enum {
   CanvasDrawFlag_FreezeSelection = 1 << 1,
 } CanvasDrawFlag;
 
+typedef enum {
+  CanvasSelectionFlag_None = 0,
+  CanvasSelectionFlag_ConnectorHandle = 1 << 0,
+  CanvasSelectionFlag_NewConnectorHandle = 1 << 1,
+  CanvasSelectionFlag_TransformHandle = 1 << 2,
+} CanvasSelectionFlag;
+
 class CanvasShape {
 
 public:
@@ -100,16 +107,12 @@ private:
   ImDrawList *dl;
 
   // Interactions
-  
-  // Active handle from the existing connectors.
   ConnectorHandle *active_connector_handle = nullptr;
-  // Active handle from a new connector created from a frame handle.
-  ConnectorHandle *active_new_connector_handle = nullptr;
-  
   Connector *active_connector = nullptr;
 
   GuiHighlight highlight;
   GuiSelection selection_connector;
+  unsigned int selection_state = CanvasSelectionFlag_None;
 
   // Cache
   struct {

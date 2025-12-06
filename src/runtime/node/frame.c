@@ -155,16 +155,17 @@ FrameStatus frame_destroy(Frame *frame) {
   for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
     ConnectorHandle *handle =
         allocator_connector_handle_entry(frame->connector_handle_id[i]);
-    connector_handle_destroy(handle);
+    if (handle)
+      connector_handle_destroy(handle);
   }
-
-  // remove it from the registry/ allocator
-  destroy_frame(frame->id);
-
+  
   for (size_t i = 0; i < frame->children.length; i++) {
     Frame *child = allocator_frame_entry(frame->children.entries[i]);
     child->parent = ID_UNDEFINED;
   }
+
+  // remove it from the registry/ allocator
+  destroy_frame(frame->id);
 
   return FrameStatus_Success;
 }

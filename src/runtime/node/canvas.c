@@ -582,15 +582,12 @@ CanvasStatus canvas_destroy_frame_core(Canvas *canvas, Frame *frame,
   // remove it from the target canvas list (frame, pod, module...)
   allocator_id_list_pop(list->entries, &list->length, frame->id);
 
-  // Unlink all connectors
-  for (size_t i = 0; i < canvas->connectors->length; i++) {
+  // Unlink all frames connectors
+  for (size_t i = 0; i < frame->connectors_id.length; i++) {
     Connector *connector =
-        allocator_connector_entry(canvas->connectors->entries[i]);
+        allocator_connector_entry(frame->connectors_id.entries[i]);
     canvas_destroy_connector(canvas, connector);
   }
-
-  if (frame->octagon_id != ID_UNDEFINED)
-    destroy_octagon(frame->octagon_id);
 
   frame_destroy(frame);
 
@@ -612,10 +609,17 @@ CanvasStatus canvas_destroy_octagon(Canvas *canvas, Octagon *octagon) {
 
 CanvasStatus canvas_destroy_frame(Canvas *canvas, Frame *frame) {
 
+  // unregister it from other state list
+  for (uint8_t i = 1; i < CanvasFrameState_COUNT; i++)
+    stli_remove(canvas->frames[i].entries, &canvas->frames[i].length,
+                sizeof(alloc_id), &frame->id, "Frame State List");
+
+  // For frames, we destroy all the inner modules as well
   for (size_t i = 0; i < frame->children.length; i++) {
     Frame *child = allocator_frame_entry(frame->children.entries[i]);
-    canvas_destroy_frame(canvas, child);
+    canvas_destroy_module(canvas, child);
   }
+  frame->children.length = 0;
 
   canvas_destroy_frame_core(canvas, frame, canvas->frames);
 
@@ -623,32 +627,47 @@ CanvasStatus canvas_destroy_frame(Canvas *canvas, Frame *frame) {
 }
 
 CanvasStatus canvas_destroy_module(Canvas *canvas, Frame *frame) {
-  canvas_destroy_frame(canvas, frame);
+
+  // unregister it from other state list
+  for (uint8_t i = 1; i < CanvasModuleState_COUNT; i++)
+    stli_remove(canvas->modules[i].entries, &canvas->modules[i].length,
+                sizeof(alloc_id), &frame->id, "Module State List");
+
+  canvas_destroy_frame_core(canvas, frame, canvas->modules);
+
   // eventual additional removal to take care of
   return CanvasStatus_Success;
 }
 
 CanvasStatus canvas_destroy_pod(Canvas *canvas, Frame *frame) {
-  canvas_destroy_frame(canvas, frame);
+
+  // unregister it from other state list
+  for (uint8_t i = 1; i < CanvasPodState_COUNT; i++)
+    stli_remove(canvas->pods[i].entries, &canvas->pods[i].length,
+                sizeof(alloc_id), &frame->id, "Pod State List");
+
+  canvas_destroy_frame_core(canvas, frame, canvas->pods);
   // eventual additional removal to take care of
   return CanvasStatus_Success;
 }
 
 CanvasStatus canvas_destroy_connector(Canvas *canvas, Connector *connector) {
 
-  // remove it from each frame that registered this connector
-  for (size_t i = 0; i < canvas->frames->length; i++) {
-    Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
-    for (size_t j = 0; j < frame->connectors_id.length; j++)
-      if (frame->connectors_id.entries[j] == connector->id)
-        frame_unregister_connector(frame, connector->id);
-  }
+  FrameAllocList *frame_type[] = {canvas->frames, canvas->pods};
 
-  for (size_t i = 0; i < canvas->pods->length; i++) {
-    Frame *pod = allocator_frame_entry(canvas->pods->entries[i]);
-    for (size_t j = 0; j < pod->connectors_id.length; j++)
-      if (pod->connectors_id.entries[j] == connector->id)
-        frame_unregister_connector(pod, connector->id);
+  static const uint8_t select_count =
+      sizeof(frame_type) / sizeof(frame_type[0]);
+
+  // remove it from each frame that registered this connector
+  for (uint8_t i = 0; i < select_count; i++) {
+
+    for (size_t j = 0; j < frame_type[i]->length; j++) {
+      Frame *frame = allocator_frame_entry(frame_type[i]->entries[j]);
+
+      for (size_t k = 0; k < frame->connectors_id.length; k++)
+        if (frame->connectors_id.entries[k] == connector->id)
+          frame_unregister_connector(frame, connector->id);
+    }
   }
 
   // make sure to remove it from the state lists
@@ -659,4 +678,46 @@ CanvasStatus canvas_destroy_connector(Canvas *canvas, Connector *connector) {
   connector_destroy(connector);
 
   return CanvasStatus_Success;
+}
+
+CanvasStatus canvas_destroy_all_selected_frames(Canvas *canvas) {
+
+  CanvasStatus status = CanvasStatus_NothingSelected;
+
+  struct {
+    alloc_id *entries;
+    size_t *count;
+    CanvasStatus (*destroyer)(Canvas *, Frame *);
+  } select_type[] = {
+
+      {
+          canvas->frames[CanvasFrameState_Selected].entries,
+          &canvas->frames[CanvasFrameState_Selected].length,
+          canvas_destroy_frame,
+      },
+      {
+          canvas->modules[CanvasModuleState_Selected].entries,
+          &canvas->modules[CanvasModuleState_Selected].length,
+          canvas_destroy_module,
+      },
+      {
+          canvas->pods[CanvasPodState_Selected].entries,
+          &canvas->pods[CanvasPodState_Selected].length,
+          canvas_destroy_pod,
+      }
+
+  };
+
+  static const uint8_t select_count =
+      sizeof(select_type) / sizeof(select_type[0]);
+
+  for (uint8_t i = 0; i < select_count; i++) {
+    for (size_t j = 0; j < *select_type[i].count; j++) {
+      Frame *frame = allocator_frame_entry(select_type[i].entries[j]);
+      select_type[i].destroyer(canvas, frame);
+      status = CanvasStatus_Success;
+    }
+  }
+
+  return status;
 }

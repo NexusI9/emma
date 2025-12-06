@@ -135,7 +135,8 @@ const vec2 *connector_get_corners(Connector *connector) {
 }
 
 ConnectorDirection connector_get_direction(Connector *connector) {
-  return (connector->handles[0]->position[0] < connector->handles[1]->position[0])
+  return (connector->handles[0]->position[0] <
+          connector->handles[1]->position[0])
              ? ConnectorDirection_Right
              : ConnectorDirection_Left;
 }
