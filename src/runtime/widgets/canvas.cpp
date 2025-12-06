@@ -432,12 +432,22 @@ void Widget::CanvasShape::connector_handle_transform_listen(
   }
 }
 
-/**
+/*
    In this function we check if a handle either from an existing connector or a
    newly created one is active and transform it according to the mouse position.
 
-   Note that we need to use 2 distinct flags for existing and newly created
-   connectors handle.
+   Note that we need to use 2 distinct flags for 'existing' and 'newly created'
+   connectors handle. Respectively: active_connector_handle and
+   active_new_connector_handle.
+
+   The reason to this is that when we create a new connector from a frame
+   handle, the end handle overlap with the start handle since the mouse hovered
+   the start to trigger the new connector.
+
+   However when we check if the mouse is over an existing connector handle, it
+   checks them in ored from 0 -> 1 (start END end). And since the mouse is
+   hovering the start AND end the loop order makes that it triggers the start
+   handle first instead of the end handle.
 
    On Connector handle release we check if the handle is within a frame or pod
    bound and connect it to the closest valid frame/pod handle.
@@ -502,7 +512,6 @@ void Widget::CanvasShape::connector_highlight_begin() {
   if (gui_selection_begin(&selection_connector,
                           ImGui::IsMouseClicked(ImGuiMouseButton_Left))) {
     active_connector_handle = nullptr;
-    // active_new_connector_handle = nullptr;
   }
 }
 
@@ -603,17 +612,23 @@ void Widget::canvas_shape_set_module_position(void *data, ImVec2 value) {
   canvas_set_module_world_position(frame_data->canvas, frame,
                                    (vec2){value.x, value.y});
 
-  // since we crop the frames children, we need to check if the module is
-  // still within the parent area when moving cause if we move the module out
-  // of the parent, it will still disapear being cropped out by the parent
-  // frame. As a result to make the user understand that the frame is being
-  // 'unlinked' from parent, we need to remove the parent from the child so it
-  // is not cropped anymore. However note that we do NOT relink back the child
-  // here cause on transform session end, we already traverse all the frames
-  // to check if the module is within one of them. Also it would by costly to
-  // check on every frame here if the child is within any frame node; that's
-  // why we only handle the unlink phase here as it is fast to target the
-  // parent (node->parent) and contribute greatly to the user experience.
+  /*
+    Since we crop the frames children, we need to check if the module is
+   still within the parent area when moving cause if we move the module out
+   of the parent, it will still disapear being cropped out by the parent
+   frame.
+
+    As a result to make the user understand that the frame is being
+   'unlinked' from parent, we need to remove the parent from the child so it
+   is not cropped anymore. However note that we do NOT relink back the child
+   here cause on transform session end, we already traverse all the frames
+   to check if the module is within one of them.
+
+   Also it would by costly to check on every frame here if the child is within
+   any frame node; that's why we only handle the unlink phase here as it is fast
+   to target the parent (node->parent) and contribute greatly to the user
+   experience.
+   */
   if (frame_data->frame->parent != ID_UNDEFINED) {
     Frame *parent = allocator_frame_entry(frame->parent);
     if (!frame_collide(parent, frame))

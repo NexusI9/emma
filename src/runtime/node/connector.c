@@ -14,7 +14,7 @@ ConnectorStatus connector_create(Connector *connector,
 
   connector->handles[0] = new_connector_handle();
   connector->handles[1] = new_connector_handle();
-  
+
   if (desc->start)
     connector_set_start_handle(connector, desc->start);
 
@@ -119,11 +119,8 @@ ConnectorStatus connector_swap_direction(Connector *connector) {
 
 ConnectorStatus connector_destroy(Connector *connector) {
 
-  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
-
-    printf("handle: %p\n", &connector->handles[i]);
+  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++)
     connector_handle_destroy(connector->handles[i]);
-  }
 
   destroy_connector(connector->id);
 

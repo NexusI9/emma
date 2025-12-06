@@ -100,8 +100,11 @@ private:
   ImDrawList *dl;
 
   // Interactions
-  ConnectorHandle *active_connector_handle = nullptr,
-                  *active_new_connector_handle = nullptr;
+  
+  // Active handle from the existing connectors.
+  ConnectorHandle *active_connector_handle = nullptr;
+  // Active handle from a new connector created from a frame handle.
+  ConnectorHandle *active_new_connector_handle = nullptr;
   
   Connector *active_connector = nullptr;
 

@@ -2,6 +2,7 @@
 #include "runtime/geometry/boundbox.h"
 #include "runtime/geometry/vector.h"
 #include "runtime/manager/allocator.h"
+#include "runtime/manager/allocator_list.h"
 #include "runtime/manager/module.h"
 #include "runtime/manager/ui_sprite.h"
 #include "runtime/node/connector.h"
@@ -634,13 +635,26 @@ CanvasStatus canvas_destroy_pod(Canvas *canvas, Frame *frame) {
 }
 
 CanvasStatus canvas_destroy_connector(Canvas *canvas, Connector *connector) {
-  
+
+  // remove it from each frame that registered this connector
   for (size_t i = 0; i < canvas->frames->length; i++) {
     Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
     for (size_t j = 0; j < frame->connectors_id.length; j++)
       if (frame->connectors_id.entries[j] == connector->id)
         frame_unregister_connector(frame, connector->id);
   }
+
+  for (size_t i = 0; i < canvas->pods->length; i++) {
+    Frame *pod = allocator_frame_entry(canvas->pods->entries[i]);
+    for (size_t j = 0; j < pod->connectors_id.length; j++)
+      if (pod->connectors_id.entries[j] == connector->id)
+        frame_unregister_connector(pod, connector->id);
+  }
+
+  // make sure to remove it from the state lists
+  for (uint8_t i = 0; i < CanvasConnectorState_COUNT; i++)
+    allocator_id_list_pop(canvas->connectors[i].entries,
+                          &canvas->connectors[i].length, connector->id);
 
   connector_destroy(connector);
 

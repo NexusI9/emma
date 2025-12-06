@@ -15,9 +15,6 @@ connector_handle_create(ConnectorHandle *handle,
 
 ConnectorHandleStatus connector_handle_destroy(ConnectorHandle *handle) {
 
-  // DEBUG
-  printf("inner handle: %p | %llu\n", handle, handle->id);
-
   destroy_connector_handle(handle->id);
 
   return ConnectorHandleStatus_Success;
