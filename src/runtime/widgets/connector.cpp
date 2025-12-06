@@ -15,8 +15,8 @@ void Widget::ConnectorShape::draw() {
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
   vec2 vp_start, vp_end;
-  glm_vec2_copy(node->handles[0].position, vp_start);
-  glm_vec2_copy(node->handles[1].position, vp_end);
+  glm_vec2_copy(node->handles[0]->position, vp_start);
+  glm_vec2_copy(node->handles[1]->position, vp_end);
 
   dl->PathClear();
 
@@ -35,7 +35,7 @@ void Widget::ConnectorShape::draw() {
 
   // draw arrow
   int dir =
-      node->handles[0].position[0] < node->handles[1].position[0] ? 1 : -1;
+      node->handles[0]->position[0] < node->handles[1]->position[0] ? 1 : -1;
 
   dl->AddLine(im_vec2(vp_end),
               ImVec2(vp_end[0] - gui_scale(gui, arrow_dist) * dir,
@@ -60,6 +60,6 @@ bool Widget::ConnectorShape::clickbox_hovered() {
 }
 
 void Widget::ConnectorShape::draw_handles() {
-  for (uint8_t i = 0; i < CONNECTOR_TOUCH_POINT_COUNT; i++)
-    ConnectorHandleShape(&node->handles[i], ConnectorHandleSide_None).draw();
+  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++)
+    ConnectorHandleShape(node->handles[i], ConnectorHandleSide_None).draw();
 }

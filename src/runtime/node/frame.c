@@ -1,6 +1,8 @@
 #include "frame.h"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
+#include "runtime/node/connector_handle.h"
+#include "runtime/node/octagon.h"
 #include "utils/id.h"
 #include <math.h>
 #include <stddef.h>
@@ -18,6 +20,9 @@ FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
   frame_set_background(node, desc->background);
   frame_set_uvs(node, desc->uv0, desc->uv1);
   frame_set_parent(node, ID_UNDEFINED);
+
+  node->factor_id = ID_UNDEFINED;
+  node->octagon_id = ID_UNDEFINED;
 
   return FrameStatus_Success;
 }
@@ -127,6 +132,39 @@ FrameStatus frame_wrap(Frame *node) {
   frame_set_local_position(node, children_start);
   glm_vec2_sub(children_end, node->world_position, children_end);
   frame_set_size(node, children_end);
+
+  return FrameStatus_Success;
+}
+
+FrameStatus frame_destroy(Frame *frame) {
+
+  frame->parent = ID_UNDEFINED;
+
+  if (frame->factor_id != ID_UNDEFINED) {
+    frame->factor_id = ID_UNDEFINED;
+  }
+
+  if (frame->octagon_id != ID_UNDEFINED) {
+    destroy_octagon(frame->octagon_id);
+    frame->octagon_id = ID_UNDEFINED;
+  }
+
+  frame->connectors_id.length = 0;
+
+  // Remove the connectors handle
+  for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
+    ConnectorHandle *handle =
+        allocator_connector_handle_entry(frame->connector_handle_id[i]);
+    connector_handle_destroy(handle);
+  }
+
+  // remove it from the registry/ allocator
+  destroy_frame(frame->id);
+
+  for (size_t i = 0; i < frame->children.length; i++) {
+    Frame *child = allocator_frame_entry(frame->children.entries[i]);
+    child->parent = ID_UNDEFINED;
+  }
 
   return FrameStatus_Success;
 }

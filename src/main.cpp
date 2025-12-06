@@ -20,8 +20,8 @@ void create_pod(Canvas *canvas) {
   Frame *pod = canvas_create_pod(canvas);
   canvas_set_pod_position(canvas, pod, (vec2){300.0f, 600.0f});
 
-  canvas_connect_frames(canvas, pod,
-                        allocator_frame_entry(canvas->frames->entries[0]));
+  //canvas_connect_frames(canvas, pod,
+  //                      allocator_frame_entry(canvas->frames->entries[0]));
 
   canvas_add_pod_persona(canvas, pod, PersonaType_Artisan);
   canvas_add_pod_persona(canvas, pod, PersonaType_Operator);

@@ -101,5 +101,11 @@ void canvas_connect_frames(Canvas *, Frame *, Frame *);
 
 void canvas_disconnect_frames(Canvas *, const Frame *, const Frame *);
 
+CanvasStatus canvas_destroy_frame(Canvas *, Frame *);
+CanvasStatus canvas_destroy_module(Canvas *, Frame *);
+CanvasStatus canvas_destroy_pod(Canvas *, Frame *);
+CanvasStatus canvas_destroy_connector(Canvas *, Connector *);
+CanvasStatus canvas_destroy_octagon(Canvas *, Octagon *);
+
 EXTERN_C_END
 #endif

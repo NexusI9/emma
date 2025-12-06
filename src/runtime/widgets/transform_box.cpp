@@ -2,7 +2,6 @@
 #include "nkengine/include/gui.hpp"
 #include "runtime/manager/unit.h"
 #include "runtime/manager/viewport.h"
-#include "runtime/node/selection.h"
 #include "runtime/node/transform_handle.h"
 #include "runtime/widgets/transform_handle.hpp"
 #include "runtime/widgets/utils.hpp"
@@ -26,7 +25,7 @@ Widget::TransformBox::TransformBox(Gui *gui) {
     transform_handle_create(&handles[i], &desc);
   }
 
-  selection_init(&selection);
+  gui_selection_init(&selection);
 }
 
 Widget::TransformBoxStatus
@@ -92,7 +91,7 @@ StaticListStatus Widget::TransformBox::remove_object(const void *target,
     return StaticListStatus_UnfoundEntry;
 
   return stli_remove_at_index(objects.entries, &objects.count,
-                              sizeof(TransformBoxObject), found_index);
+                              sizeof(TransformBoxObject), found_index, NULL);
 }
 
 StaticListStatus Widget::TransformBox::empty_objects() {
@@ -169,7 +168,7 @@ void Widget::TransformBox::cache_initial_attributes() {
 
 void Widget::TransformBox::transform_core(const TransformHandleType handle) {
 
-  selection_hit(&selection, true);
+  gui_selection_hit(&selection, true);
 
   ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
   clamp_mouse(handle, mouse);
@@ -392,7 +391,7 @@ Widget::TransformBoxStatus Widget::TransformBox::update_bound_from_selection() {
 
 Widget::TransformBoxStatus Widget::TransformBox::begin() {
 
-  selection_begin(&selection, ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
+  gui_selection_begin(&selection, ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
                                   ImGui::IsMouseClicked(ImGuiMouseButton_Left));
 
   return TransformBoxStatus_Success;
@@ -405,7 +404,7 @@ Widget::TransformBoxStatus Widget::TransformBox::end() {
 
   TransformBoxStatus status = TransformBoxStatus_SessionAlreadyStarted;
 
-  if (selection_status(&selection) == SelectionStatus_Blank) {
+  if (selection_status(&selection) == GuiSelectionStatus_Blank) {
     empty_objects();
     status = TransformBoxStatus_ClearSelection;
   }

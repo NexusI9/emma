@@ -2,7 +2,6 @@
 #define _WIDGET_TRANSFORM_BOX_H_
 
 #include "nkengine/include/gui.h"
-#include "runtime/node/selection.h"
 #include "runtime/node/transform_handle.h"
 #include "runtime/widgets/transform_handle.hpp"
 #include <cglm/cglm.h>
@@ -88,8 +87,8 @@ public:
 
   TransformBoxStatus update_bound_from_selection();
   TransformBoxStatus update_bound(ImVec2, ImVec2);
-
-  Selection selection;
+ 
+  GuiSelection selection;
 
   uint16_t objects_count() { return objects.count; }
 

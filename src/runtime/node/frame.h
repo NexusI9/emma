@@ -38,14 +38,19 @@ static const FrameClickboxDescriptor FRAME_CLICKBOX_TYPE_DEFAULT = {
 
 typedef struct {
 
-  alloc_id id, octagon_id, factor_id;
-  alloc_id connector_handle_id[FRAME_CONNECTOR_HANDLE_COUNT];
-  ALLOCATOR_ID_LIST(FRAME_MAX_CONNECTORS) connectors_id;
-
   const char *label;
+
+  alloc_id id, octagon_id, factor_id, parent;
+  alloc_id connector_handle_id[FRAME_CONNECTOR_HANDLE_COUNT];
+
+  ALLOCATOR_ID_LIST(FRAME_MAX_CONNECTORS) connectors_id;
+  ALLOCATOR_ID_LIST(FRAME_MAX_CHILDREN) children;
+
   vec2 local_position, world_position;
   vec2 size;
   vec2 end_point; // pos + size, usefull to get full area for mouse interaction
+  vec2 uv0, uv1;
+  color background;
 
   struct {
     RectCoordinate entries[BOUNDBOX_FRAME_RECT_COUNT];
@@ -55,12 +60,6 @@ typedef struct {
   } clickbox;
 
   RectCoordinate boundbox;
-
-  color background;
-  vec2 uv0, uv1;
-
-  alloc_id parent;
-  ALLOCATOR_ID_LIST(FRAME_MAX_CHILDREN) children;
 
 } Frame;
 
@@ -76,6 +75,7 @@ typedef struct {
 EXTERN_C_BEGIN
 
 FrameStatus frame_create(Frame *, const FrameDescriptor *);
+FrameStatus frame_destroy(Frame *);
 FrameStatus frame_create_from_sprite(Frame *, const TextureAtlasRegion *,
                                      const FrameClickboxDescriptor *);
 

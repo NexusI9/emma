@@ -60,6 +60,8 @@ EXTERN_C_BEGIN
 ConnectorHandleStatus
 connector_handle_create(ConnectorHandle *, const ConnectorHandleDescriptor *);
 
+ConnectorHandleStatus connector_handle_destroy(ConnectorHandle *);
+
 static inline ConnectorHandleStatus
 connector_handle_update_points(ConnectorHandle *handle) {
 

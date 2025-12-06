@@ -34,6 +34,9 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
   this->gui = gui;
   this->node = canvas;
 
+  gui_selection_init(&selection_connector);
+  gui_highlight_init(&highlight);
+
   transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
 
   {
@@ -83,12 +86,42 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
 }
 
 /**
+   Sync the nodes from the canvas
+ */
+void sync_nodes() {}
+
+/**
     ▗▄▄▄ ▗▄▄▖  ▗▄▖ ▗▖ ▗▖
     ▐▌  █▐▌ ▐▌▐▌ ▐▌▐▌ ▐▌
     ▐▌  █▐▛▀▚▖▐▛▀▜▌▐▌ ▐▌
     ▐▙▄▄▀▐▌ ▐▌▐▌ ▐▌▐▙█▟▌
 
  */
+
+void Widget::CanvasShape::draw(const unsigned int flags) {
+
+  dl = ImGui::GetWindowDrawList();
+
+  grid_background.draw_texture(gui->pass_encoder);
+
+  // Main Canvas Entities
+  transform_box.begin();
+  {
+    draw_pods(flags);
+    draw_frames(flags);
+    draw_frames_octagons(flags);
+    draw_selected_items_connector_handles(flags);
+    draw_modules(flags);
+    draw_connectors(flags);
+  }
+  if (transform_box.end() == TransformBoxStatus_ClearSelection) {
+    canvas_empty_frame_state(node, CanvasFrameState_Selected);
+    canvas_empty_pod_state(node, CanvasPodState_Selected);
+  }
+
+  // Listeners
+  { destroy_listen(); }
+}
 
 void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
                                                        const int side) {
@@ -108,8 +141,10 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
 
     handle_shape.draw();
 
-    if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && handle_shape.hovered() &&
-        !active_connector_handle) {
+    if (gui_selection_hit(&selection_connector,
+                          ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
+                              handle_shape.hovered() &&
+                              !active_connector_handle)) {
 
       ConnectorDescriptor connector_desc = {};
       connector_desc.start = handle;
@@ -120,30 +155,18 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
 
       if (new_connector) {
         frame_register_connector(frame, new_connector->id);
-        active_connector_handle = &new_connector->handles[1];
+
+        connector_handle_copy(new_connector->handles[0],
+                              new_connector->handles[1]);
+
+        active_new_connector_handle = new_connector->handles[1];
+
+        ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
+
+        connector_handle_set_position(active_new_connector_handle,
+                                      (vec2){mouse.x, mouse.y});
       }
     }
-  }
-}
-
-void Widget::CanvasShape::draw(const unsigned int flags) {
-
-  dl = ImGui::GetWindowDrawList();
-
-  grid_background.draw_texture(gui->pass_encoder);
-
-  transform_box.begin();
-  {
-    draw_pods(flags);
-    draw_frames(flags);
-    draw_frames_octagons(flags);
-    draw_selected_items_connector_handles(flags);
-    draw_modules(flags);
-    draw_connectors(flags);
-  }
-  if (transform_box.end() == TransformBoxStatus_ClearSelection) {
-    canvas_empty_frame_state(node, CanvasFrameState_Selected);
-    canvas_empty_pod_state(node, CanvasPodState_Selected);
   }
 }
 
@@ -199,6 +222,7 @@ void Widget::CanvasShape::draw_selected_items_connector_handles(
     const unsigned int flags) {
 
   size_t i;
+
   for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
     Frame *frame = allocator_frame_entry(
         node->frames[CanvasFrameState_Selected].entries[i]);
@@ -214,7 +238,8 @@ void Widget::CanvasShape::draw_selected_items_connector_handles(
 
   for (i = 0; i < node->connectors[CanvasConnectorState_Selected].length; i++) {
     Connector *connector = allocator_connector_entry(
-        node->pods[CanvasConnectorState_Selected].entries[i]);
+        node->connectors[CanvasConnectorState_Selected].entries[i]);
+
     ConnectorShape(gui, connector).draw_handles();
   }
 }
@@ -237,6 +262,8 @@ void Widget::CanvasShape::draw_modules(const unsigned int flags) {
 }
 void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
 
+  connector_highlight_begin();
+
   // Default State
   for (size_t i = 0; i < node->connectors->length; i++) {
     Connector *connector =
@@ -252,6 +279,8 @@ void Widget::CanvasShape::draw_connectors(const unsigned int flags) {
 
     connector_shape.draw();
   }
+
+  connector_highlight_end();
 
   if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && active_connector_handle)
     active_connector_handle = nullptr;
@@ -280,10 +309,10 @@ void Widget::CanvasShape::frame_transform_listen(
 
   // no matter the button, if a click happened and hit a frame *area*, we update
   // the transform session status to "Has Hit"
-  selection_hit(&transform_box.selection,
-                (ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
-                 ImGui::IsMouseClicked(ImGuiMouseButton_Left)) &&
-                    frame->boundbox_hovered());
+  gui_selection_hit(&transform_box.selection,
+                    (ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
+                     ImGui::IsMouseClicked(ImGuiMouseButton_Left)) &&
+                        frame->boundbox_hovered());
 
   // but we only add to selection if the button actually matches the
   // configuration button and hit the
@@ -327,7 +356,7 @@ void Widget::CanvasShape::frame_transform_listen(
         if (transform_frame_data.entries[i].frame == frame_node)
           stli_remove_at_index(transform_frame_data.entries,
                                &transform_frame_data.count,
-                               sizeof(CanvasTransformFrameData), i);
+                               sizeof(CanvasTransformFrameData), i, NULL);
 
       // add object
     } else {
@@ -345,7 +374,7 @@ void Widget::CanvasShape::frame_transform_listen(
 
       // if not CAP input or if the configuration's Transform Mode is
       // empty and different from the current one, we empty the selection.
-      if (input_key(INPUT_KEY_CAP) == false) {
+      if (input_key(INPUT_KEY_SHIFT) == false) {
         transform_box.empty_objects();
         canvas_empty_frame_state(node, CanvasFrameState_Selected);
       }
@@ -384,34 +413,45 @@ void Widget::CanvasShape::frame_highlight_listen(FrameShape *frame) {
 void Widget::CanvasShape::connector_handle_transform_listen(
     Connector *connector) {
 
-  for (uint8_t i = 0; i < CONNECTOR_TOUCH_POINT_COUNT; i++) {
-    ConnectorHandle *handle = &connector->handles[i];
+  for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
 
-    if (ImGui::IsMouseHoveringRect(
-            ImVec2(vpx(handle->start[0]), vpy(handle->start[1])),
-            ImVec2(vpx(handle->end[0]), vpy(handle->end[1])))) {
+    ConnectorHandle *handle = connector->handles[i];
+    ConnectorHandleShape handle_shape =
+        ConnectorHandleShape(handle, ConnectorHandleSide_None);
 
-      ConnectorHandleShape(handle, ConnectorHandleSide_None).draw();
+    if (handle_shape.hovered()) {
 
-      if (ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
-          !active_connector_handle) {
+      handle_shape.draw();
+
+      if (gui_selection_hit(&selection_connector,
+                            ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
+                                !active_connector_handle &&
+                                !active_new_connector_handle))
         active_connector_handle = handle;
-      }
     }
   }
 }
 
 /**
+   In this function we check if a handle either from an existing connector or a
+   newly created one is active and transform it according to the mouse position.
+
+   Note that we need to use 2 distinct flags for existing and newly created
+   connectors handle.
+
    On Connector handle release we check if the handle is within a frame or pod
    bound and connect it to the closest valid frame/pod handle.
  */
 void Widget::CanvasShape::connector_handle_transform_end(Connector *connector) {
 
-  if (active_connector_handle) {
+  if (active_connector_handle || active_new_connector_handle) {
+
+    ConnectorHandle *active = active_connector_handle
+                                  ? active_connector_handle
+                                  : active_new_connector_handle;
 
     ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
-    connector_handle_set_position(active_connector_handle,
-                                  (vec2){mouse.x, mouse.y});
+    connector_handle_set_position(active, (vec2){mouse.x, mouse.y});
     connector_update_corners(connector);
 
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
@@ -429,10 +469,11 @@ void Widget::CanvasShape::connector_handle_transform_end(Connector *connector) {
 
       for (uint8_t i = 0; i < release_frames_count; i++) {
         if (connect_system_connect_handle_to_frame(
-                active_connector_handle, connector, frames[i].list->entries,
+                active, connector, frames[i].list->entries,
                 frames[i].list->length,
                 frames[i].sides) == ConnectSystemStatus_Success) {
           active_connector_handle = nullptr;
+          active_new_connector_handle = nullptr;
           break;
         }
       }
@@ -443,25 +484,26 @@ void Widget::CanvasShape::connector_handle_transform_end(Connector *connector) {
 void Widget::CanvasShape::connector_highlight_listen(
     ConnectorShape *connector) {
 
-  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+  if (gui_selection_hit(&selection_connector,
+                        ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+                            connector->clickbox_hovered())) {
+    active_connector = connector->get_node();
 
-    active_connector = NULL;
-
-    if (connector->clickbox_hovered()) {
-      active_connector = connector->get_node();
-      allocator_id_list_push(
-          node->connectors[CanvasConnectorState_Selected].entries,
-          allocator_connector_capacity(),
-          &node->connectors[CanvasConnectorState_Selected].length,
-          active_connector->id);
-    }
+    allocator_id_list_push(
+        node->connectors[CanvasConnectorState_Selected].entries,
+        allocator_connector_capacity(),
+        &node->connectors[CanvasConnectorState_Selected].length,
+        active_connector->id);
   }
 }
 
 void Widget::CanvasShape::connector_highlight_begin() {
 
-  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-    active_connector = NULL;
+  if (gui_selection_begin(&selection_connector,
+                          ImGui::IsMouseClicked(ImGuiMouseButton_Left))) {
+    active_connector_handle = nullptr;
+    // active_new_connector_handle = nullptr;
+  }
 }
 
 /*
@@ -470,11 +512,23 @@ void Widget::CanvasShape::connector_highlight_begin() {
  */
 void Widget::CanvasShape::connector_highlight_end() {
 
-  if (!active_connector &&
-      node->connectors[CanvasConnectorState_Selected].length)
+  if (selection_status(&selection_connector) == GuiSelectionStatus_Blank)
     stli_empty(node->connectors[CanvasConnectorState_Selected].entries,
                &node->connectors[CanvasConnectorState_Selected].length,
                sizeof(alloc_id), "Canvas Selected Connectors List");
+
+  selection_end(&selection_connector);
+}
+
+void Widget::CanvasShape::destroy_listen() {
+
+  if (input_key(INPUT_KEY_BACKSPACE)) {
+
+    if (active_connector) {
+      canvas_destroy_connector(node, active_connector);
+      active_connector = nullptr;
+    }
+  }
 }
 
 /*
@@ -549,18 +603,17 @@ void Widget::canvas_shape_set_module_position(void *data, ImVec2 value) {
   canvas_set_module_world_position(frame_data->canvas, frame,
                                    (vec2){value.x, value.y});
 
-  // since we crop the frames children, we need to check if the module is still
-  // within the parent area when moving cause if we move the module out of the
-  // parent, it will still disapear being cropped out by the parent frame.
-  // As a result to make the user understand that the frame is being 'unlinked'
-  // from parent, we need to remove the parent from the child so it is not
-  // cropped anymore.
-  // However note that we do NOT relink back the child here cause on transform
-  // session end, we already traverse all the frames to check if the module is
-  // within one of them. Also it would by costly to check on every frame here if
-  // the child is within any frame node; that's why we only handle the unlink
-  // phase here as it is fast to target the parent (node->parent) and contribute
-  // greatly to the user experience.
+  // since we crop the frames children, we need to check if the module is
+  // still within the parent area when moving cause if we move the module out
+  // of the parent, it will still disapear being cropped out by the parent
+  // frame. As a result to make the user understand that the frame is being
+  // 'unlinked' from parent, we need to remove the parent from the child so it
+  // is not cropped anymore. However note that we do NOT relink back the child
+  // here cause on transform session end, we already traverse all the frames
+  // to check if the module is within one of them. Also it would by costly to
+  // check on every frame here if the child is within any frame node; that's
+  // why we only handle the unlink phase here as it is fast to target the
+  // parent (node->parent) and contribute greatly to the user experience.
   if (frame_data->frame->parent != ID_UNDEFINED) {
     Frame *parent = allocator_frame_entry(frame->parent);
     if (!frame_collide(parent, frame))
@@ -592,7 +645,6 @@ void Widget::canvas_shape_set_pod_position(void *data, ImVec2 value) {
    parent bound to break the relationship. And and vice versa, i.e. if a child
    is included in a parent bound then add it as child.
  */
-
 void Widget::canvas_shape_on_module_session_end(void *data) {
 
   CanvasTransformFrameData *frame_data = (CanvasTransformFrameData *)data;

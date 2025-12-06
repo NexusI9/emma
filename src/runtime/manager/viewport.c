@@ -9,7 +9,7 @@ void viewport_update(ViewportManager *vp) {
   float wheel_y = (fabs(input_wheel_y()) < threshold ? 0.0f : input_wheel_y());
 
   // update pan
-  if (!input_key(INPUT_KEY_CMD)) {
+  if (!input_key(INPUT_KEY_LEFTWINDOW)) {
 
     const float pan_x =
         (fabs(input_wheel_x()) < threshold ? 0.0f : input_wheel_x());

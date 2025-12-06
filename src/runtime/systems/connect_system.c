@@ -34,14 +34,14 @@ ConnectSystemStatus connect_system_connect_handle_to_frame(
       const ConnectorHandle *connector_opposite_src_handle = NULL; // h0 || h1
       const ConnectorHandle *frame_target_handle = NULL; // h0 || h1 || new
 
-      if (&connector->handles[0] == handle) {
-        connector_opposite_handle = &connector->handles[1];
+      if (connector->handles[0] == handle) {
+        connector_opposite_handle = connector->handles[1];
         connector_src_handle = connector->h0;
         connector_opposite_src_handle = connector->h1;
         frame_target_handle = connector->h0;
         update_handle_callback = connector_set_start_handle;
-      } else if (&connector->handles[1] == handle) {
-        connector_opposite_handle = &connector->handles[0];
+      } else if (connector->handles[1] == handle) {
+        connector_opposite_handle = connector->handles[0];
         connector_src_handle = connector->h1;
         connector_opposite_src_handle = connector->h0;
         frame_target_handle = connector->h1;

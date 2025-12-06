@@ -37,6 +37,23 @@ ALLOCATOR_LIST(_)
 ALLOCATOR_LIST(_);
 #undef _
 
+// Destructor
+#define _(Type, Label, Capacity)                                               \
+  AllocatorStatus destroy_##Label(const alloc_id id) {                         \
+                                                                               \
+    Type *entry = allocator_##Label##_entry(id);                               \
+                                                                               \
+    if (entry->id != ID_UNDEFINED) {                                           \
+      entry->id = ID_UNDEFINED;                                                \
+      allocator_list_##Label.length--;                                         \
+    }                                                                          \
+                                                                               \
+    return AllocatorStatus_Succes;                                             \
+  }
+
+ALLOCATOR_LIST(_);
+#undef _
+
 // Accessor
 #define _(Type, Label, Capacity)                                               \
   Type *allocator_##Label##_entry(const alloc_id id) {                         \

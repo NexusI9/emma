@@ -3,10 +3,10 @@
 
 #include "nkengine/include/list.h"
 #include "runtime/node/connector.h"
+#include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "runtime/node/transform_handle.h"
-#include "runtime/node/connector_handle.h"
 #include "utils/id.h"
 
 #define ALLOCATOR_MAX_FRAMES 1024
@@ -29,6 +29,7 @@ EXTERN_C_BEGIN
 #define _(Type, Label, Capacity) \
   Type* new_##Label();\
   Type* allocator_##Label##_entry(const alloc_id); \
+  AllocatorStatus destroy_##Label(const alloc_id);\
   static inline size_t allocator_##Label##_capacity(){ return Capacity; }
 
 ALLOCATOR_LIST(_);

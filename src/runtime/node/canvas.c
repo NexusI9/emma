@@ -10,6 +10,7 @@
 #include "runtime/node/octagon.h"
 #include "runtime/node/persona.h"
 #include "utils/id.h"
+#include <stdint.h>
 #include <string.h>
 
 static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
@@ -24,7 +25,10 @@ typedef enum {
   CanvasFrameCreateFlags_All = ~0,
 } CanvasFrameCreateFlags;
 
-static const float octagon_base_scale = 100.0f;
+static const float OCTAGON_BASE_SCALE = 100.0f;
+
+static inline CanvasStatus
+canvas_destroy_frame_core(Canvas *canvas, Frame *frame, FrameAllocList *);
 
 CanvasStatus canvas_create(Canvas *canvas) { return CanvasStatus_Success; }
 
@@ -196,7 +200,7 @@ Octagon *canvas_create_octagon(Canvas *canvas) {
               context_width() / 2.0f * (float)context_dpi(),
               context_height() / 2.0f * (float)context_dpi(),
           },
-      .scale = octagon_base_scale,
+      .scale = OCTAGON_BASE_SCALE,
   };
 
   octagon_create(oct, &oct_desc);
@@ -244,7 +248,7 @@ void canvas_align_octagon_to_frame(Canvas *canvas, const Frame *frame) {
   vec2 oct_position;
   vec2_avg_2(frame_position, top_edge, oct_position);
 
-  glm_vec2_sub(oct_position, (vec2){0, octagon_base_scale + gap}, oct_position);
+  glm_vec2_sub(oct_position, (vec2){0, OCTAGON_BASE_SCALE + gap}, oct_position);
 
   Octagon *octagon = allocator_octagon_entry(frame->octagon_id);
   octagon_set_position(octagon, oct_position);
@@ -562,6 +566,83 @@ CanvasStatus canvas_add_module_to_frame(Canvas *canvas, Frame *frame,
     return CanvasStatus_ResourceCreationFail;
 
   canvas_set_module_local_position(canvas, module, position);
+
+  return CanvasStatus_Success;
+}
+
+/**
+   Note that we only handle the frame destruction at N = 1 level, we don't take
+   care of destroying the children in this "core" function since the children
+   may be modules or other "subtypes" of frames.
+ */
+CanvasStatus canvas_destroy_frame_core(Canvas *canvas, Frame *frame,
+                                       FrameAllocList *list) {
+
+  // remove it from the target canvas list (frame, pod, module...)
+  allocator_id_list_pop(list->entries, &list->length, frame->id);
+
+  // Unlink all connectors
+  for (size_t i = 0; i < canvas->connectors->length; i++) {
+    Connector *connector =
+        allocator_connector_entry(canvas->connectors->entries[i]);
+    canvas_destroy_connector(canvas, connector);
+  }
+
+  if (frame->octagon_id != ID_UNDEFINED)
+    destroy_octagon(frame->octagon_id);
+
+  frame_destroy(frame);
+
+  return CanvasStatus_Success;
+}
+
+CanvasStatus canvas_destroy_octagon(Canvas *canvas, Octagon *octagon) {
+
+  for (size_t i = 0; i < canvas->frames->length; i++) {
+    Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
+    if (frame->octagon_id == octagon->id)
+      frame->octagon_id = ID_UNDEFINED;
+  }
+
+  destroy_octagon(octagon->id);
+
+  return CanvasStatus_Success;
+}
+
+CanvasStatus canvas_destroy_frame(Canvas *canvas, Frame *frame) {
+
+  for (size_t i = 0; i < frame->children.length; i++) {
+    Frame *child = allocator_frame_entry(frame->children.entries[i]);
+    canvas_destroy_frame(canvas, child);
+  }
+
+  canvas_destroy_frame_core(canvas, frame, canvas->frames);
+
+  return CanvasStatus_Success;
+}
+
+CanvasStatus canvas_destroy_module(Canvas *canvas, Frame *frame) {
+  canvas_destroy_frame(canvas, frame);
+  // eventual additional removal to take care of
+  return CanvasStatus_Success;
+}
+
+CanvasStatus canvas_destroy_pod(Canvas *canvas, Frame *frame) {
+  canvas_destroy_frame(canvas, frame);
+  // eventual additional removal to take care of
+  return CanvasStatus_Success;
+}
+
+CanvasStatus canvas_destroy_connector(Canvas *canvas, Connector *connector) {
+  
+  for (size_t i = 0; i < canvas->frames->length; i++) {
+    Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
+    for (size_t j = 0; j < frame->connectors_id.length; j++)
+      if (frame->connectors_id.entries[j] == connector->id)
+        frame_unregister_connector(frame, connector->id);
+  }
+
+  connector_destroy(connector);
 
   return CanvasStatus_Success;
 }

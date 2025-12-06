@@ -2,6 +2,7 @@
 #define _WIDGET_CANVAS_HPP_
 
 #include "runtime/geometry/core.h"
+#include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/connector.h"
@@ -72,6 +73,13 @@ typedef enum {
 } CanvasTransformConfigurationType;
 
 typedef enum {
+  CanvasHighlightConfigurationType_Frame,
+  CanvasHighlightConfigurationType_Module_N_Pod,
+  CanvasHighlightConfigurationType_Connector,
+  CanvasHighlightConfigurationType_COUNT,
+} CanvasHighlightConfigurationType;
+
+typedef enum {
   CanvasDrawFlag_None = 0,
   CanvasDrawFlag_ShowOctagon = 1 << 0,
   CanvasDrawFlag_FreezeSelection = 1 << 1,
@@ -91,6 +99,16 @@ private:
   GridBackground grid_background;
   ImDrawList *dl;
 
+  // Interactions
+  ConnectorHandle *active_connector_handle = nullptr,
+                  *active_new_connector_handle = nullptr;
+  
+  Connector *active_connector = nullptr;
+
+  GuiHighlight highlight;
+  GuiSelection selection_connector;
+
+  // Cache
   struct {
     CanvasTransformFrameData entries[ALLOCATOR_MAX_FRAMES];
     size_t count;
@@ -99,6 +117,9 @@ private:
   CanvasTransformConfiguration
       transform_configuration[CanvasTransformConfigurationType_COUNT] = {};
 
+  void sync_nodes();
+
+  // Draw
   void draw_frames(const unsigned int);
   void draw_frames_octagons(const unsigned int);
   void draw_modules(const unsigned int);
@@ -107,20 +128,19 @@ private:
   void draw_selected_items_connector_handles(const unsigned int);
   void draw_frame_handle_connectors(Frame *, const int);
 
-  
+  // Listeners
   void frame_highlight_listen(FrameShape *);
   void frame_transform_listen(FrameShape *,
-                                    const CanvasTransformConfiguration *);
+                              const CanvasTransformConfiguration *);
 
-
-  ConnectorHandle *active_connector_handle = nullptr;
-  Connector *active_connector = nullptr;
   void connector_highlight_begin();
   void connector_highlight_listen(ConnectorShape *);
   void connector_highlight_end();
 
   void connector_handle_transform_listen(Connector *);
   void connector_handle_transform_end(Connector *);
+
+  void destroy_listen();
 };
 
 } // namespace Widget

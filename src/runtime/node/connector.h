@@ -7,7 +7,7 @@
 #include "utils/id.h"
 #include <cglm/cglm.h>
 
-static const uint8_t CONNECTOR_TOUCH_POINT_COUNT = 2;
+static const uint8_t CONNECTOR_HANDLE_COUNT = 2;
 static const uint8_t CONNECTOR_CLICKBOX_COUNT = 5;
 static const uint8_t CONNECTOR_CLICKBOX_THICKNESS = 20;
 
@@ -30,7 +30,7 @@ typedef vec2 connector_corners[4];
 typedef struct {
   alloc_id id;
   const ConnectorHandle *h0, *h1;
-  ConnectorHandle handles[CONNECTOR_TOUCH_POINT_COUNT];
+  ConnectorHandle *handles[CONNECTOR_HANDLE_COUNT];
   RectCoordinate clickboxes[CONNECTOR_CLICKBOX_COUNT];
   connector_corners corners;
   float thickness;
@@ -48,6 +48,7 @@ typedef alloc_id connection[2];
 EXTERN_C_BEGIN
 
 ConnectorStatus connector_create(Connector *, const ConnectorDescriptor *);
+ConnectorStatus connector_destroy(Connector *);
 ConnectorStatus connector_swap_direction(Connector *);
 ConnectorStatus connector_update_corners(Connector *);
 ConnectorStatus connector_update_clickboxes(Connector *, const float);
@@ -65,7 +66,7 @@ ConnectorStatus connector_set_start_handle(Connector *connector,
                                            const ConnectorHandle *handle) {
 
   connector->h0 = handle;
-  connector_handle_copy(connector->h0, &connector->handles[0]);
+  connector_handle_copy(connector->h0, connector->handles[0]);
 
   return ConnectorStatus_Success;
 }
@@ -74,7 +75,7 @@ ConnectorStatus connector_set_end_handle(Connector *connector,
                                          const ConnectorHandle *handle) {
 
   connector->h1 = handle;
-  connector_handle_copy(connector->h1, &connector->handles[1]);
+  connector_handle_copy(connector->h1, connector->handles[1]);
 
   return ConnectorStatus_Success;
 }
@@ -84,10 +85,8 @@ ConnectorStatus connector_set_end_handle(Connector *connector,
    and we need to update the connector start/end position.
  */
 ConnectorStatus connector_update_handle_position(Connector *connector) {
-  connector_handle_set_position(&connector->handles[0],
-                                connector->h0->position);
-  connector_handle_set_position(&connector->handles[1],
-                                connector->h1->position);
+  connector_handle_set_position(connector->handles[0], connector->h0->position);
+  connector_handle_set_position(connector->handles[1], connector->h1->position);
   return ConnectorStatus_Success;
 }
 
@@ -136,7 +135,7 @@ const vec2 *connector_get_corners(Connector *connector) {
 }
 
 ConnectorDirection connector_get_direction(Connector *connector) {
-  return (connector->handles[0].position[0] < connector->handles[1].position[0])
+  return (connector->handles[0]->position[0] < connector->handles[1]->position[0])
              ? ConnectorDirection_Right
              : ConnectorDirection_Left;
 }
