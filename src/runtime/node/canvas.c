@@ -95,7 +95,7 @@ Frame *canvas_create_frame(Canvas *canvas) {
   FrameDescriptor frame_desc = {
       .background = {1.0f, 1.0f, 1.0f, 1.0f},
       .position = {200, 200},
-      .size = {360, 700},
+      .size = {FRAME_MIN_SIZE, FRAME_MIN_SIZE},
       // TODO: replace the boundbox descriptor by a discriminator
       // "SelectionType" to automatically setup the right boundbox configuration
       // within the frame constructor ?

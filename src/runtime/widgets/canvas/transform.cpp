@@ -1,7 +1,8 @@
 #include "transform.hpp"
 #include "nkengine/include/gui.hpp"
 #include "runtime/widgets/canvas/core.hpp"
-#include "runtime/widgets/transform_box.hpp"
+#include "runtime/widgets/transform/object_manager.hpp"
+#include "runtime/widgets/transform/transform_box.hpp"
 #include "runtime/widgets/utils.hpp"
 
 Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
@@ -13,7 +14,7 @@ Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
     // Frame transform config
     Configuration *fm_conf = &transform_configuration[ConfigurationType_Frame];
 
-    fm_conf->transform_mode = TransformBox::Mode_All;
+    fm_conf->transform_mode = Transform::Box::Mode_All;
     fm_conf->get_position = canvas_shape_get_frame_position;
     fm_conf->set_position = canvas_shape_set_frame_position;
     fm_conf->get_size = canvas_shape_get_frame_size;
@@ -27,7 +28,7 @@ Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
     // Module transform config
     Configuration *md_conf = &transform_configuration[ConfigurationType_Module];
 
-    md_conf->transform_mode = TransformBox::Mode_Move;
+    md_conf->transform_mode = Transform::Box::Mode_Move;
     md_conf->get_position = canvas_shape_get_frame_position;
     md_conf->get_size = canvas_shape_get_frame_size;
     md_conf->set_position = canvas_shape_set_module_position;
@@ -42,7 +43,7 @@ Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
     // Pod transform config
     Configuration *pod_conf = &transform_configuration[ConfigurationType_Pod];
 
-    pod_conf->transform_mode = TransformBox::Mode_Move;
+    pod_conf->transform_mode = Transform::Box::Mode_Move;
     pod_conf->get_position = canvas_shape_get_frame_position;
     pod_conf->set_position = canvas_shape_set_pod_position;
     pod_conf->get_size = canvas_shape_get_frame_size;
@@ -88,7 +89,7 @@ void Widget::CanvasTransform::listen_frame(FrameShape *frame,
                     "Canvas Transform Frame Data") != StaticListStatus_Success)
       return;
 
-    TransformBox::ObjectDescriptor object = {
+    Transform::ObjectManager::ObjectDescriptor object = {
         .handle = &transform_frame_data.entries[transform_frame_data.count - 1],
         .get_position = conf->get_position,
         .set_position = conf->set_position,
@@ -97,7 +98,7 @@ void Widget::CanvasTransform::listen_frame(FrameShape *frame,
         .session_end = conf->session_end,
     };
 
-    TransformBox::Object *found_obj =
+    Transform::ObjectManager::Object *found_obj =
         transform_box.find_object(object.handle, NULL);
 
     // remove object TODO DEBUG: NEVER CALLS THIS CONDITION
@@ -133,7 +134,7 @@ void Widget::CanvasTransform::listen_frame(FrameShape *frame,
       // if not CAP input or if the configuration's Transform Mode is
       // empty and different from the current one, we empty the selection.
       if (input_key(INPUT_KEY_SHIFT) == false) {
-        transform_box.empty_objects();
+        transform_box.empty();
         allocator_id_list_empty(conf->selection_list->entries,
                                 &conf->selection_list->length);
       }

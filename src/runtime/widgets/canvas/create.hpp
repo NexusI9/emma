@@ -1,6 +1,7 @@
 #ifndef _WIDGET_CANVAS_CREATE_H_
 #define _WIDGET_CANVAS_CREATE_H_
 
+#include "runtime/manager/ui_sprite.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/widgets/canvas/core.hpp"
@@ -29,7 +30,10 @@ public:
     Mode_COUNT,
   } Mode;
 
-  CanvasCreate(Gui *gui, Canvas *node) : CanvasModule(gui, node) {}
+  CanvasCreate(Gui *gui, Canvas *node) : CanvasModule(gui, node) {
+    glm_vec2_copy((float *)ui_sprite(UISprite_Pod_Base)->size, pod_half_size);
+    glm_vec2_scale(pod_half_size, 0.5f, pod_half_size);
+  }
   void update_mode(const Mode mode) { this->mode = mode; }
   void listen();
   void freeze() { flag_enable(State_Freeze, &state); };
@@ -38,9 +42,14 @@ public:
 private:
   Mode mode = Mode_Frame;
   unsigned int state = State_None;
-  bool active = false;
+  vec2 pod_half_size;
+  Frame *new_frame = nullptr;
 
-  void frame();
+  void get_mouse_position(vec2);
+
+  void frame_create();
+  void frame_resize();
+  void frame_release();
   void module();
   void pod();
   void shape();

@@ -19,7 +19,7 @@
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
 #include "runtime/widgets/octagon.hpp"
-#include "runtime/widgets/transform_box.hpp"
+#include "runtime/widgets/transform/transform_box.hpp"
 #include "runtime/widgets/utils.hpp"
 #include "utils/id.h"
 #include <cstdlib>
@@ -59,7 +59,7 @@ void Widget::CanvasShape::draw() {
   if (module.destroy.listen()) {
     module.destroy.active_connector(&module.selection.active_connector);
     if (module.destroy.selected_frames() == CanvasStatus_Success)
-      module.transform.transform_box.empty_objects();
+      module.transform.transform_box.empty();
   }
 }
 
@@ -80,7 +80,12 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
         ConnectorHandleShape(handle, (ConnectorHandleSide)(1 << i));
 
     handle_shape.draw();
-    module.selection.listen_new_connector_handle(frame, handle, &handle_shape);
+
+    // disable new connector creation if dragging transform box
+    if ((Transform::Box::State_Dragging &
+         module.transform.transform_box.get_state()) == 0)
+      module.selection.listen_new_connector_handle(frame, handle,
+                                                   &handle_shape);
   }
 }
 
@@ -136,9 +141,15 @@ void Widget::CanvasShape::draw_connectors() {
     ConnectorShape connector_shape = ConnectorShape(gui, connector);
 
     module.selection.listen_connector_selection(&connector_shape);
-    module.selection.listen_connector_handle_selection(connector);
-    module.transform.listen_active_connector_handle(
-        module.selection.active_connector_handle, connector);
+
+    // disable new handle transform if dragging transform box
+    if ((Transform::Box::State_Dragging &
+         module.transform.transform_box.get_state()) == 0) {
+      module.selection.listen_connector_handle_selection(connector);
+      module.transform.listen_active_connector_handle(
+          module.selection.active_connector_handle, connector);
+    }
+
     module.selection.listen_active_connector_handle_release(connector);
 
     connector_shape.draw();

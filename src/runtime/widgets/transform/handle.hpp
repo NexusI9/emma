@@ -5,19 +5,20 @@
 #include <imgui/imgui.h>
 
 namespace Widget {
-
-class TransformHandleShape {
+namespace Transform {
+class HandleShape {
 
 public:
-  TransformHandleShape(TransformHandle *handle) : node(handle) {}
+  HandleShape(TransformHandle *handle) : node(handle) {}
   void draw();
   ImVec2 get_p0();
   ImVec2 get_p1();
-  
+
 private:
   TransformHandle *node;
 };
 
+} // namespace Transform
 } // namespace Widget
 
 #endif

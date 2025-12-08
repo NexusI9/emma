@@ -4,7 +4,7 @@
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/frame.hpp"
-#include "runtime/widgets/transform_box.hpp"
+#include "runtime/widgets/transform/transform_box.hpp"
 #include <imgui/imgui.h>
 
 namespace Widget {
@@ -23,11 +23,11 @@ void canvas_shape_set_pod_size(void *, ImVec2);
 
 void canvas_shape_on_module_session_end(void *);
 
-  class CanvasTransform : public CanvasModule{
+class CanvasTransform : public CanvasModule {
 
 public:
   CanvasTransform(Gui *gui, Canvas *node);
-  TransformBox transform_box;
+  Transform::Box transform_box;
 
   typedef struct {
     Canvas *canvas;
@@ -45,7 +45,7 @@ public:
   typedef struct {
     // either scale, move or all, as instance for modules we only want to allow
     // move transformation.
-    TransformBox::Mode transform_mode;
+    Transform::Box::Mode transform_mode;
     // Size accessor of the object
     transform_box_get_size_callback get_size;
     // Position accessor of the object
@@ -79,7 +79,7 @@ public:
 
   void begin() { transform_box.begin(); }
   void end() {
-    if (transform_box.end() == TransformBox::Status_ClearSelection) {
+    if (transform_box.end() == Transform::Box::Status_ClearSelection) {
       canvas_empty_frame_state(node, CanvasFrameState_Selected);
       canvas_empty_module_state(node, CanvasModuleState_Selected);
       canvas_empty_pod_state(node, CanvasPodState_Selected);

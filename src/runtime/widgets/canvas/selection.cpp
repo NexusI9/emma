@@ -4,7 +4,7 @@
 #include "runtime/node/canvas.h"
 #include "runtime/systems/connect_system.h"
 #include "runtime/widgets/frame.hpp"
-#include "runtime/widgets/transform_box.hpp"
+#include "runtime/widgets/transform/transform_box.hpp"
 #include "runtime/widgets/utils.hpp"
 
 void Widget::CanvasSelection::frame_selection_listen(FrameShape *frame) {
@@ -18,8 +18,8 @@ void Widget::CanvasSelection::frame_selection_listen(FrameShape *frame) {
         ImVec2(vpx(frame_node->world_position[0]),
                vpy(frame_node->world_position[1])),
         ImVec2(vpx(frame_node->end_point[0]), vpy(frame_node->end_point[1])),
-        ImColor(im_color(TransformBox::primary_color)), 0, 0,
-        TransformBox::stroke_width);
+        ImColor(im_color(Transform::Box::primary_color)), 0, 0,
+        Transform::Box::stroke_width);
   }
 }
 

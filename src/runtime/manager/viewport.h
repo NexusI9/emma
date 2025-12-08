@@ -57,7 +57,7 @@ static inline float vpy_scene(const float val) {
 
 static inline void vp2_scene(const vec2 src, vec2 dst) {
   dst[0] = vpx_scene(src[0]);
-  dst[1] = vpx_scene(src[1]);
+  dst[1] = vpy_scene(src[1]);
 }
 
 EXTERN_C_END

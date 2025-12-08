@@ -15,6 +15,7 @@
 static const int FRAME_CONNECTOR_HANDLE_COUNT = 4;
 
 static const float FRAME_CLICKBOX_THICKNESS = 40.0f;
+static const float FRAME_MIN_SIZE = 20.0f;
 
 typedef void (*frame_clickbox_updater)(RectCoordinate *, const vec2, const vec2,
                                        const float);
