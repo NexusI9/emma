@@ -71,8 +71,7 @@ public:
 
   void listen_frame(FrameShape *, const ConfigurationType);
 
-
-  void listen_connector_handle(Connector *);
+  void listen_active_connector_handle(ConnectorHandle *, Connector *);
 
   void freeze_transform() { flag_enable(State_Freeze, &state); }
   void unfreeze_transform() { flag_disable(State_Freeze, &state); }

@@ -1,5 +1,6 @@
 #include "transform.hpp"
 #include "nkengine/include/gui.hpp"
+#include "runtime/widgets/utils.hpp"
 
 Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
     : node(node), transform_box(gui) {
@@ -144,6 +145,20 @@ void Widget::CanvasTransform::listen_frame(FrameShape *frame,
     }
 
     transform_box.update_bound_from_selection();
+  }
+}
+
+/**
+   In this function we check if a handle either from an existing connector or
+   a newly created one is active and transform it according to the mouse
+   position.
+ */
+void Widget::CanvasTransform::listen_active_connector_handle(
+    ConnectorHandle *handle, Connector *connector) {
+  if (handle) {
+    ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
+    connector_handle_set_position(handle, (vec2){mouse.x, mouse.y});
+    connector_update_corners(connector);
   }
 }
 

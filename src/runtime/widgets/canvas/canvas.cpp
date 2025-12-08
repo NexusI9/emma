@@ -131,12 +131,13 @@ void Widget::CanvasShape::draw_connectors() {
     Connector *connector =
         allocator_connector_entry(node->connectors->entries[i]);
     ConnectorShape connector_shape = ConnectorShape(gui, connector);
-    
+
     canvas_interaction.listen_connector_highlight(&connector_shape);
     canvas_interaction.listen_connector_handle_highlight(connector);
-    canvas_interaction.listen_active_connector_handle_transform(connector);
+    canvas_transform.listen_active_connector_handle(
+        canvas_interaction.get_active_connector_handle(), connector);
     canvas_interaction.listen_active_connector_handle_release(connector);
-    
+
     connector_shape.draw();
   }
 

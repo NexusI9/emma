@@ -51,20 +51,7 @@ void Widget::CanvasInteraction::listen_connector_handle_highlight(
   }
 }
 
-/**
-   In this function we check if a handle either from an existing connector or
-   a newly created one is active and transform it according to the mouse
-   position.
- */
-void Widget::CanvasInteraction::listen_active_connector_handle_transform(
-    Connector *connector) {
-  if (active_connector_handle) {
-    ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
-    connector_handle_set_position(active_connector_handle,
-                                  (vec2){mouse.x, mouse.y});
-    connector_update_corners(connector);
-  }
-}
+
 /*
    On Connector handle release we check if the handle is within a frame or pod
    bound and connect it to the closest valid frame/pod handle.
@@ -117,8 +104,6 @@ void Widget::CanvasInteraction::listen_connector_highlight(
         allocator_connector_capacity(),
         &node->connectors[CanvasConnectorState_Selected].length, connector->id);
   }
-
-  
 }
 
 void Widget::CanvasInteraction::connector_highlight_begin() {

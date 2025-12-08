@@ -2,6 +2,7 @@
 #define _WIDGET_CANVAS_INTERACTION_H_
 
 #include "runtime/node/canvas.h"
+#include "runtime/node/connector_handle.h"
 #include "runtime/widgets/connector.hpp"
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
@@ -25,10 +26,13 @@ public:
   void listen_connector_handle_highlight(Connector *);
   void connector_highlight_end();
 
+  ConnectorHandle *get_active_connector_handle() {
+    return active_connector_handle;
+  }
+  
   void listen_new_connector_handle(Frame *, ConnectorHandle *,
                                    ConnectorHandleShape *);
 
-  void listen_active_connector_handle_transform(Connector *);
   void listen_active_connector_handle_release(Connector *);
 
   CanvasStatus destroy_listen();
