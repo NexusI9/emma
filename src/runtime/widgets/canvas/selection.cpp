@@ -1,4 +1,4 @@
-#include "interaction.hpp"
+#include "selection.hpp"
 #include "nkengine/include/gui.hpp"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
@@ -7,7 +7,7 @@
 #include "runtime/widgets/transform_box.hpp"
 #include "runtime/widgets/utils.hpp"
 
-void Widget::CanvasInteraction::frame_highlight_listen(FrameShape *frame) {
+void Widget::CanvasSelection::frame_selection_listen(FrameShape *frame) {
 
   if ((selection_state & SelectionState_Freeze) == 0 &&
       frame->boundbox_hovered()) {
@@ -28,7 +28,7 @@ void Widget::CanvasInteraction::frame_highlight_listen(FrameShape *frame) {
    with the mouse on click by updating the touch point position coordinate which
    will then affect the draw called upon.
  */
-void Widget::CanvasInteraction::listen_connector_handle_highlight(
+void Widget::CanvasSelection::listen_connector_handle_selection(
     Connector *connector) {
 
   for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
@@ -56,7 +56,7 @@ void Widget::CanvasInteraction::listen_connector_handle_highlight(
    On Connector handle release we check if the handle is within a frame or pod
    bound and connect it to the closest valid frame/pod handle.
  */
-void Widget::CanvasInteraction::listen_active_connector_handle_release(
+void Widget::CanvasSelection::listen_active_connector_handle_release(
     Connector *connector) {
 
   if (active_connector_handle &&
@@ -87,7 +87,7 @@ void Widget::CanvasInteraction::listen_active_connector_handle_release(
   }
 }
 
-void Widget::CanvasInteraction::listen_connector_highlight(
+void Widget::CanvasSelection::listen_connector_selection(
     ConnectorShape *shape) {
 
   if (SelectionState_Freeze & selection_state)
@@ -106,7 +106,7 @@ void Widget::CanvasInteraction::listen_connector_highlight(
   }
 }
 
-void Widget::CanvasInteraction::connector_highlight_begin() {
+void Widget::CanvasSelection::connector_selection_begin() {
 
   gui_selection_begin(&selection_connector,
                       ImGui::IsMouseClicked(ImGuiMouseButton_Left));
@@ -116,7 +116,7 @@ void Widget::CanvasInteraction::connector_highlight_begin() {
   If didn't catch any connector (active_connector == NULL). Empty the selector
   list.
  */
-void Widget::CanvasInteraction::connector_highlight_end() {
+void Widget::CanvasSelection::connector_selection_end() {
 
   if (selection_status(&selection_connector) == GuiSelectionStatus_Blank)
     stli_empty(node->connectors[CanvasConnectorState_Selected].entries,
@@ -132,7 +132,7 @@ void Widget::CanvasInteraction::connector_highlight_end() {
   }
 }
 
-CanvasStatus Widget::CanvasInteraction::destroy_listen() {
+CanvasStatus Widget::CanvasSelection::destroy_listen() {
 
   CanvasStatus status = CanvasStatus_NothingSelected;
 
@@ -152,7 +152,7 @@ CanvasStatus Widget::CanvasInteraction::destroy_listen() {
 /**
    Check if we click a frame handle connector to create a new one
  */
-void Widget::CanvasInteraction::listen_new_connector_handle(
+void Widget::CanvasSelection::listen_new_connector_handle(
     Frame *frame, ConnectorHandle *handle, ConnectorHandleShape *handle_shape) {
 
   if (gui_selection_hit(&selection_connector,

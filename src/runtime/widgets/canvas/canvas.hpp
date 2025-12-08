@@ -6,7 +6,7 @@
 #include "runtime/manager/allocator_list.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/connector.h"
-#include "runtime/widgets/canvas/interaction.hpp"
+#include "runtime/widgets/canvas/selection.hpp"
 #include "runtime/widgets/canvas/transform.hpp"
 #include "runtime/widgets/connector.hpp"
 #include "runtime/widgets/connector_handle.hpp"
@@ -49,7 +49,7 @@ public:
     switch (state) {
 
     case State_FreezeSelection:
-      canvas_interaction.freeze_selection();
+      canvas_selection.freeze_selection();
       canvas_transform.freeze_transform();
       break;
 
@@ -63,7 +63,7 @@ public:
     switch (state) {
 
     case State_FreezeSelection:
-      canvas_interaction.unfreeze_selection();
+      canvas_selection.unfreeze_selection();
       canvas_transform.unfreeze_transform();
       break;
 
@@ -78,7 +78,7 @@ private:
   GridBackground grid_background;
   ImDrawList *dl;
 
-  CanvasInteraction canvas_interaction;
+  CanvasSelection canvas_selection;
   CanvasTransform canvas_transform;
 
   CanvasCreateMode create_mode = CanvasCreateMode_Frame;

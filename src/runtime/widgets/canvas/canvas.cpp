@@ -28,7 +28,7 @@
 
 Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
     : grid_background("textures/dot-pattern.png", TextureResolution_64),
-      canvas_transform(gui, canvas), canvas_interaction(canvas) {
+      canvas_transform(gui, canvas), canvas_selection(canvas) {
 
   this->gui = gui;
   this->node = canvas;
@@ -54,7 +54,7 @@ void Widget::CanvasShape::draw() {
 
   // Listeners
   {
-    if (canvas_interaction.destroy_listen() == CanvasStatus_Success)
+    if (canvas_selection.destroy_listen() == CanvasStatus_Success)
       canvas_transform.transform_box.empty_objects();
   }
 }
@@ -76,7 +76,7 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
         ConnectorHandleShape(handle, (ConnectorHandleSide)(1 << i));
 
     handle_shape.draw();
-    canvas_interaction.listen_new_connector_handle(frame, handle,
+    canvas_selection.listen_new_connector_handle(frame, handle,
                                                    &handle_shape);
   }
 }
@@ -108,7 +108,7 @@ void Widget::CanvasShape::draw_pods() {
     Frame *pod = allocator_frame_entry(node->pods->entries[i]);
     FrameShape frame_shape = FrameShape(pod);
     frame_shape.draw_pod();
-    canvas_interaction.frame_highlight_listen(&frame_shape);
+    canvas_selection.frame_selection_listen(&frame_shape);
     canvas_transform.listen_frame(&frame_shape,
                                   CanvasTransform::ConfigurationType_Pod);
   }
@@ -118,7 +118,7 @@ void Widget::CanvasShape::draw_modules() {
     Frame *module = allocator_frame_entry(node->modules->entries[i]);
     FrameShape frame_shape = FrameShape(module);
     frame_shape.draw_texture();
-    canvas_interaction.frame_highlight_listen(&frame_shape);
+    canvas_selection.frame_selection_listen(&frame_shape);
     canvas_transform.listen_frame(&frame_shape,
                                   CanvasTransform::ConfigurationType_Module);
   }
@@ -126,22 +126,22 @@ void Widget::CanvasShape::draw_modules() {
 
 void Widget::CanvasShape::draw_connectors() {
 
-  canvas_interaction.connector_highlight_begin();
+  canvas_selection.connector_selection_begin();
   for (size_t i = 0; i < node->connectors->length; i++) {
     Connector *connector =
         allocator_connector_entry(node->connectors->entries[i]);
     ConnectorShape connector_shape = ConnectorShape(gui, connector);
 
-    canvas_interaction.listen_connector_highlight(&connector_shape);
-    canvas_interaction.listen_connector_handle_highlight(connector);
+    canvas_selection.listen_connector_selection(&connector_shape);
+    canvas_selection.listen_connector_handle_selection(connector);
     canvas_transform.listen_active_connector_handle(
-        canvas_interaction.get_active_connector_handle(), connector);
-    canvas_interaction.listen_active_connector_handle_release(connector);
+        canvas_selection.get_active_connector_handle(), connector);
+    canvas_selection.listen_active_connector_handle_release(connector);
 
     connector_shape.draw();
   }
 
-  canvas_interaction.connector_highlight_end();
+  canvas_selection.connector_selection_end();
 }
 
 void Widget::CanvasShape::draw_selected_items_connector_handles() {

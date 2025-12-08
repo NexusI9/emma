@@ -11,20 +11,19 @@
 
 namespace Widget {
 
-class CanvasInteraction {
+class CanvasSelection {
 
 public:
-  CanvasInteraction(Canvas *node) : node(node) {
+  CanvasSelection(Canvas *node) : node(node) {
     gui_selection_init(&selection_connector);
     gui_highlight_init(&highlight);
   }
 
-  void frame_highlight_listen(FrameShape *);
-
-  void connector_highlight_begin();
-  void listen_connector_highlight(ConnectorShape *);
-  void listen_connector_handle_highlight(Connector *);
-  void connector_highlight_end();
+  void frame_selection_listen(FrameShape *);
+  void connector_selection_begin();
+  void listen_connector_selection(ConnectorShape *);
+  void listen_connector_handle_selection(Connector *);
+  void connector_selection_end();
 
   ConnectorHandle *get_active_connector_handle() {
     return active_connector_handle;
