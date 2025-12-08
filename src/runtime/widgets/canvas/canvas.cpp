@@ -54,15 +54,12 @@ void Widget::CanvasShape::draw() {
   }
   module.transform.end();
 
-  // Create
+  module.create.listen();
 
-  // Destroy
-  {
-    if (module.destroy.begin()) {
-      module.destroy.active_connector(&module.selection.active_connector);
-      if (module.destroy.selected_frames() == CanvasStatus_Success)
-        module.transform.transform_box.empty_objects();
-    }
+  if (module.destroy.listen()) {
+    module.destroy.active_connector(&module.selection.active_connector);
+    if (module.destroy.selected_frames() == CanvasStatus_Success)
+      module.transform.transform_box.empty_objects();
   }
 }
 

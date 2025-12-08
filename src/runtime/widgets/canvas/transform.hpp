@@ -45,7 +45,7 @@ public:
   typedef struct {
     // either scale, move or all, as instance for modules we only want to allow
     // move transformation.
-    TransformBoxMode transform_mode;
+    TransformBox::Mode transform_mode;
     // Size accessor of the object
     transform_box_get_size_callback get_size;
     // Position accessor of the object
@@ -79,7 +79,7 @@ public:
 
   void begin() { transform_box.begin(); }
   void end() {
-    if (transform_box.end() == TransformBoxStatus_ClearSelection) {
+    if (transform_box.end() == TransformBox::Status_ClearSelection) {
       canvas_empty_frame_state(node, CanvasFrameState_Selected);
       canvas_empty_module_state(node, CanvasModuleState_Selected);
       canvas_empty_pod_state(node, CanvasPodState_Selected);

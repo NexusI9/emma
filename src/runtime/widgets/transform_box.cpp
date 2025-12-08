@@ -28,20 +28,20 @@ Widget::TransformBox::TransformBox(Gui *gui) {
   gui_selection_init(&selection);
 }
 
-Widget::TransformBoxStatus
-Widget::TransformBox::toggle_object(const TransformBoxObjectDescriptor *desc) {
+Widget::TransformBox::Status
+Widget::TransformBox::toggle_object(const ObjectDescriptor *desc) {
 
   size_t index;
   if (!find_object(desc->handle, &index)) {
     add_object(desc);
-    return TransformBoxStatus_ObjectAdded;
+    return TransformBox::Status_ObjectAdded;
   }
 
   remove_object(desc->handle, &index);
-  return TransformBoxStatus_ObjectRemoved;
+  return TransformBox::Status_ObjectRemoved;
 }
 
-Widget::TransformBoxObject *
+Widget::TransformBox::Object *
 Widget::TransformBox::find_object(const void *handle, size_t *index) {
 
   for (size_t i = 0; i < objects.count; i++) {
@@ -60,12 +60,12 @@ Widget::TransformBox::find_object(const void *handle, size_t *index) {
 }
 
 StaticListStatus
-Widget::TransformBox::add_object(const TransformBoxObjectDescriptor *desc) {
+Widget::TransformBox::add_object(const ObjectDescriptor *desc) {
 
-  if (objects.count == transform_box_objects_capacity)
+  if (objects.count == OBJECT_CAPACITY)
     return StaticListStatus_MaxCapacity;
 
-  TransformBoxObject object = {
+  Object object = {
       .handle = desc->handle,
       .get_position = desc->get_position,
       .set_position = desc->set_position,
@@ -74,9 +74,8 @@ Widget::TransformBox::add_object(const TransformBoxObjectDescriptor *desc) {
       .session_end = desc->session_end,
   };
 
-  return stli_insert(objects.entries, transform_box_objects_capacity,
-                     &objects.count, sizeof(TransformBoxObject), &object,
-                     "Transform Box Target List");
+  return stli_insert(objects.entries, OBJECT_CAPACITY, &objects.count,
+                     sizeof(Object), &object, "Transform Box Target List");
 }
 
 StaticListStatus Widget::TransformBox::remove_object(const void *target,
@@ -90,13 +89,13 @@ StaticListStatus Widget::TransformBox::remove_object(const void *target,
   if (found_index == SIZE_MAX)
     return StaticListStatus_UnfoundEntry;
 
-  return stli_remove_at_index(objects.entries, &objects.count,
-                              sizeof(TransformBoxObject), found_index, NULL);
+  return stli_remove_at_index(objects.entries, &objects.count, sizeof(Object),
+                              found_index, NULL);
 }
 
 StaticListStatus Widget::TransformBox::empty_objects() {
 
-  return stli_empty(objects.entries, &objects.count, sizeof(TransformBoxObject),
+  return stli_empty(objects.entries, &objects.count, sizeof(Object),
                     "Transform Box Target List");
 }
 
@@ -160,7 +159,7 @@ void Widget::TransformBox::cache_initial_attributes() {
   drag_p1 = p1;
 
   for (uint16_t obj = 0; obj < objects.count; obj++) {
-    TransformBoxObject *object = &objects.entries[obj];
+    Object *object = &objects.entries[obj];
     object->get_position(object->handle, object->init_position);
     object->get_size(object->handle, object->init_size);
   }
@@ -179,7 +178,7 @@ void Widget::TransformBox::transform_core(const TransformHandleType handle) {
   offset.y = unit_snap(offset.y);
 
   for (uint16_t obj = 0; obj < objects.count; obj++) {
-    TransformBoxObject *object = &objects.entries[obj];
+    Object *object = &objects.entries[obj];
     ImVec2 new_pos = object->init_position;
     ImVec2 new_size = object->init_size;
 
@@ -231,7 +230,7 @@ void Widget::TransformBox::draw() {
                 0, stroke_width);
 
   // Area Behaviour (Translate)
-  if ((mode & TransformBoxMode_Move) && active_handle == -1 &&
+  if ((mode & Mode_Move) && active_handle == -1 &&
       ImGui::IsMouseHoveringRect(vp_im2(padded_area_0),
                                  vp_im2(padded_area_1)) &&
       ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
@@ -240,7 +239,7 @@ void Widget::TransformBox::draw() {
   }
 
   // Handle Behaviour (Scale)
-  if (TransformBoxMode_Scale & mode)
+  if (Mode_Scale & mode)
     for (uint8_t i = 0; i < transform_box_handles_count; i++) {
 
       if (i == TransformHandleType_MM)
@@ -333,8 +332,8 @@ void Widget::TransformBox::handle_transform(const TransformHandleType type,
 /*
   Position handles according to start and end bound points
  */
-Widget::TransformBoxStatus Widget::TransformBox::update_bound(ImVec2 start,
-                                                              ImVec2 end) {
+Widget::TransformBox::Status Widget::TransformBox::update_bound(ImVec2 start,
+                                                                ImVec2 end) {
 
   p0 = start;
   p1 = end;
@@ -363,17 +362,18 @@ Widget::TransformBoxStatus Widget::TransformBox::update_bound(ImVec2 start,
     }
   }
 
-  return TransformBoxStatus_Success;
+  return TransformBox::Status_Success;
 }
 
-Widget::TransformBoxStatus Widget::TransformBox::update_bound_from_selection() {
+Widget::TransformBox::Status
+Widget::TransformBox::update_bound_from_selection() {
 
   p0 = ImVec2(INFINITY, INFINITY);
   p1 = ImVec2(-INFINITY, -INFINITY);
 
   for (size_t i = 0; i < objects_count(); i++) {
     ImVec2 pos, size;
-    TransformBoxObject *object = &objects.entries[i];
+    Object *object = &objects.entries[i];
     object->get_position(object->handle, pos);
     object->get_size(object->handle, size);
 
@@ -386,27 +386,28 @@ Widget::TransformBoxStatus Widget::TransformBox::update_bound_from_selection() {
 
   update_bound(p0, p1);
 
-  return TransformBoxStatus_Success;
+  return TransformBox::Status_Success;
 }
 
-Widget::TransformBoxStatus Widget::TransformBox::begin() {
+Widget::TransformBox::Status Widget::TransformBox::begin() {
 
-  gui_selection_begin(&selection, ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
-                                  ImGui::IsMouseClicked(ImGuiMouseButton_Left));
+  gui_selection_begin(&selection,
+                      ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
+                          ImGui::IsMouseClicked(ImGuiMouseButton_Left));
 
-  return TransformBoxStatus_Success;
+  return TransformBox::Status_Success;
 }
 
-Widget::TransformBoxStatus Widget::TransformBox::end() {
+Widget::TransformBox::Status Widget::TransformBox::end() {
 
   if (objects_count() > 0)
     draw();
 
-  TransformBoxStatus status = TransformBoxStatus_SessionAlreadyStarted;
+  TransformBox::Status status = TransformBox::Status_SessionAlreadyStarted;
 
   if (selection_status(&selection) == GuiSelectionStatus_Blank) {
     empty_objects();
-    status = TransformBoxStatus_ClearSelection;
+    status = TransformBox::Status_ClearSelection;
   }
 
   selection_end(&selection);

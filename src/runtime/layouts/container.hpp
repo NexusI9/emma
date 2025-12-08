@@ -88,7 +88,7 @@ public:
     return get_display_state() & state;
   }
 
-  void update_canvas_mode(const Widget::CanvasCreateMode mode) {
+  void update_canvas_mode(const Widget::CanvasCreate::Mode mode) {
     canvas_shape.update_create_mode(mode);
   }
 

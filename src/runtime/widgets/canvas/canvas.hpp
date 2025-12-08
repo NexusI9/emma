@@ -21,22 +21,15 @@
 
 namespace Widget {
 
-typedef enum {
-  CanvasCreateMode_Frame,
-  CanvasCreateMode_Module,
-  CanvasCreateMode_Pod,
-  CanvasCreateMode_Note,
-  CanvasCreateMode_Shape,
-  CanvasCreateMode_COUNT,
-} CanvasCreateMode;
-
 class CanvasShape : public CanvasModule {
 
 public:
   CanvasShape(Gui *, Canvas *);
 
   void draw();
-  void update_create_mode(const CanvasCreateMode mode) { create_mode = mode; }
+  void update_create_mode(const CanvasCreate::Mode mode) {
+    module.create.update_mode(mode);
+  }
 
   typedef enum {
     State_None = 0,
@@ -85,8 +78,6 @@ private:
     CanvasDestroy destroy;
     CanvasCreate create;
   } module;
-
-  CanvasCreateMode create_mode = CanvasCreateMode_Frame;
 
   unsigned int state = State_None;
 

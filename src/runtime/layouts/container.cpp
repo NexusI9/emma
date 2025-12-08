@@ -152,5 +152,5 @@ bool container_get_heatmap_state(void *data) {
 
 void on_toolbar_update(const uint8_t active, void *data) {
   Layout::Container *container = (Layout::Container *)data;
-  container->update_canvas_mode((Widget::CanvasCreateMode)active);
+  container->update_canvas_mode((Widget::CanvasCreate::Mode)active);
 }

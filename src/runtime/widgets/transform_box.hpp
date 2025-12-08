@@ -17,82 +17,82 @@ typedef void (*transform_box_on_session_end_callback)(void *);
 
 namespace Widget {
 
-static constexpr uint16_t transform_box_objects_capacity = 16;
-
-typedef enum {
-  TransformBoxStatus_Success,
-  TransformBoxStatus_MaxCapacity,
-  TransformBoxStatus_ObjectAdded,
-  TransformBoxStatus_ObjectRemoved,
-  TransformBoxStatus_SessionAlreadyStarted,
-  TransformBoxStatus_ClearSelection,
-  TransformBoxStatus_OutOfBound,
-  TransformBoxStatus_UndefError,
-} TransformBoxStatus;
-
-typedef struct {
-  void *handle;
-  void *user_data;
-  ImVec2 init_position;
-  ImVec2 init_size;
-  transform_box_set_position_callback set_position;
-  transform_box_set_size_callback set_size;
-  transform_box_get_position_callback get_position;
-  transform_box_get_size_callback get_size;
-  transform_box_on_session_start_callback session_start;
-  transform_box_on_session_end_callback session_end;
-} TransformBoxObject;
-
-typedef struct {
-  void *handle;
-  transform_box_set_position_callback set_position;
-  transform_box_set_size_callback set_size;
-  transform_box_get_position_callback get_position;
-  transform_box_get_size_callback get_size;
-  transform_box_on_session_start_callback session_start;
-  transform_box_on_session_end_callback session_end;
-} TransformBoxObjectDescriptor;
-
-typedef struct {
-  TransformBoxObject entries[transform_box_objects_capacity];
-  size_t count;
-} TransformBoxObjectList;
-
-typedef enum {
-  TransformBoxSessionStatus_Off,
-  TransformBoxSessionStatus_BlankClick,
-  TransformBoxSessionStatus_Hit,
-} TransformBoxSessionStatus;
-
-typedef enum {
-  TransformBoxMode_None = 0,
-  TransformBoxMode_Scale = 1 << 0,
-  TransformBoxMode_Move = 1 << 1,
-  TransformBoxMode_All = ~0,
-} TransformBoxMode;
-
 class TransformBox {
 
 public:
   TransformBox(Gui *gui);
 
-  TransformBoxObject *find_object(const void *, size_t *);
-  TransformBoxStatus toggle_object(const TransformBoxObjectDescriptor *);
-  StaticListStatus add_object(const TransformBoxObjectDescriptor *);
+  static constexpr uint16_t OBJECT_CAPACITY = 16;
+
+  typedef enum {
+    Status_Success,
+    Status_MaxCapacity,
+    Status_ObjectAdded,
+    Status_ObjectRemoved,
+    Status_SessionAlreadyStarted,
+    Status_ClearSelection,
+    Status_OutOfBound,
+    Status_UndefError,
+  } Status;
+
+  typedef struct {
+    void *handle;
+    void *user_data;
+    ImVec2 init_position;
+    ImVec2 init_size;
+    transform_box_set_position_callback set_position;
+    transform_box_set_size_callback set_size;
+    transform_box_get_position_callback get_position;
+    transform_box_get_size_callback get_size;
+    transform_box_on_session_start_callback session_start;
+    transform_box_on_session_end_callback session_end;
+  } Object;
+
+  typedef struct {
+    void *handle;
+    transform_box_set_position_callback set_position;
+    transform_box_set_size_callback set_size;
+    transform_box_get_position_callback get_position;
+    transform_box_get_size_callback get_size;
+    transform_box_on_session_start_callback session_start;
+    transform_box_on_session_end_callback session_end;
+  } ObjectDescriptor;
+
+  typedef struct {
+    Object entries[OBJECT_CAPACITY];
+    size_t count;
+  } ObjectList;
+
+  typedef enum {
+    SessionStatus_Off,
+    SessionStatus_BlankClick,
+    SessionStatus_Hit,
+  } SessionStatus;
+
+  typedef enum {
+    Mode_None = 0,
+    Mode_Scale = 1 << 0,
+    Mode_Move = 1 << 1,
+    Mode_All = ~0,
+  } Mode;
+
+  Object *find_object(const void *, size_t *);
+  Status toggle_object(const ObjectDescriptor *);
+  StaticListStatus add_object(const ObjectDescriptor *);
   StaticListStatus remove_object(const void *, size_t *);
   StaticListStatus empty_objects();
 
-  TransformBoxStatus begin();
-  TransformBoxStatus end();
+  Status begin();
+  Status end();
 
-  TransformBoxStatus update_bound_from_selection();
-  TransformBoxStatus update_bound(ImVec2, ImVec2);
- 
+  Status update_bound_from_selection();
+  Status update_bound(ImVec2, ImVec2);
+
   GuiSelection selection;
 
   uint16_t objects_count() { return objects.count; }
 
-  unsigned int mode = TransformBoxMode_All;
+  unsigned int mode = Mode_All;
   ImGuiMouseButton button;
   void draw();
 
@@ -105,7 +105,7 @@ public:
 
 private:
   Gui *gui;
-  TransformBoxObjectList objects = {0};
+  ObjectList objects = {0};
   TransformHandle handles[transform_box_handles_count];
 
   // caches

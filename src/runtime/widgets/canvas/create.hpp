@@ -15,9 +15,36 @@ namespace Widget {
 class CanvasCreate : public CanvasModule {
 
 public:
+  typedef enum {
+    State_None = 0,
+    State_Freeze = 1 << 0,
+  } State;
+
+  typedef enum {
+    Mode_Frame,
+    Mode_Module,
+    Mode_Pod,
+    Mode_Note,
+    Mode_Shape,
+    Mode_COUNT,
+  } Mode;
+
   CanvasCreate(Gui *gui, Canvas *node) : CanvasModule(gui, node) {}
+  void update_mode(const Mode mode) { this->mode = mode; }
+  void listen();
+  void freeze() { flag_enable(State_Freeze, &state); };
+  void unfreeze() { flag_disable(State_Freeze, &state); };
 
+private:
+  Mode mode = Mode_Frame;
+  unsigned int state = State_None;
+  bool active = false;
 
+  void frame();
+  void module();
+  void pod();
+  void shape();
+  void note();
 };
 
 } // namespace Widget

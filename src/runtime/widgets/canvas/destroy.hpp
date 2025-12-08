@@ -17,7 +17,7 @@ class CanvasDestroy : public CanvasModule {
 public:
   CanvasDestroy(Gui *gui, Canvas *node) : CanvasModule(gui, node) {}
 
-  bool begin() { return input_key(INPUT_KEY_BACKSPACE); }
+  bool listen() { return input_key(INPUT_KEY_BACKSPACE); }
   void active_connector(Connector **);
   CanvasStatus selected_frames();
 };
