@@ -13,7 +13,6 @@
 #include "runtime/node/heatmap.h"
 #include "runtime/node/octagon.h"
 #include "runtime/node/persona.h"
-#include "runtime/widgets/canvas.hpp"
 #include <emscripten/emscripten.h>
 
 void create_pod(Canvas *canvas) {

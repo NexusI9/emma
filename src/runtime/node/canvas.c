@@ -628,11 +628,6 @@ CanvasStatus canvas_destroy_frame(Canvas *canvas, Frame *frame) {
 
 CanvasStatus canvas_destroy_module(Canvas *canvas, Frame *frame) {
 
-  // DEBUG
-  printf("selected length: %lu\n",
-         canvas->modules[CanvasModuleState_Selected].length);
-  printf("frame: %p | %llu\n", frame, frame->id);
-
   // unregister it from other state list
   for (uint8_t i = 1; i < CanvasModuleState_COUNT; i++) {
     allocator_id_list_pop(canvas->modules[i].entries,

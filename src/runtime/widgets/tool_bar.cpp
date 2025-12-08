@@ -4,7 +4,8 @@
 #include "webgpu/webgpu.h"
 
 Widget::ToolBarShape::ToolBarShape(WGPUTextureView view)
-    : bg_sprite(view, ui_sprite(UISprite_Toolbar)),
+    : background(view, ui_sprite(UISprite_Toolbar)),
+      selector(view, ui_sprite(UISprite_Toolbar_Icon_Selector)),
       tools{
           ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Frame)),
           ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Module)),
@@ -15,11 +16,12 @@ Widget::ToolBarShape::ToolBarShape(WGPUTextureView view)
 
   const float scale = context_dpi();
 
-  bg_sprite.set_position(
+  background.set_position(
       ImVec2(scale * context_width() / 2.0f, scale * context_height()),
       GuiSpriteAnchor_BottomMiddle);
 
   const float tool_w = tools[0].sprite.region->size[0];
+  const float sel_w = selector.region->size[0];
   const float spacing = -60.0f;
   const float N = TOOLS_COUNT - 1;
 
@@ -35,12 +37,41 @@ Widget::ToolBarShape::ToolBarShape(WGPUTextureView view)
         ImVec2(x * scale, y * scale),
         GuiSpriteAnchor_BottomLeft // better for left-to-right alignment
     );
+
+    // cache selector position
+    const ImVec2 diff = ImVec2(
+        (selector.region->size[0] - tools[i].sprite.region->size[0]) / 2,
+        (selector.region->size[1] - tools[i].sprite.region->size[1]) / 2);
+
+    selector_positions[i] = ImVec2(x * scale - diff.x, y * scale + diff.y);
   }
+
+  selector.set_position(selector_positions[0], GuiSpriteAnchor_BottomLeft);
 }
 
 void Widget::ToolBarShape::draw() {
 
-  bg_sprite.draw();
-  for (uint8_t i = 0; i < TOOLS_COUNT; i++)
+  background.draw();
+  selector.draw();
+
+  for (uint8_t i = 0; i < TOOLS_COUNT; i++) {
     tools[i].sprite.draw();
+    if (tools[i].sprite.clicked(ImGuiMouseButton_Left)) {
+      active_tool = i;
+      selector.set_position(selector_positions[i], GuiSpriteAnchor_BottomLeft);
+      for (uint8_t j = 0; j < callbacks.count; j++)
+        callbacks.entries[j].callback(i, callbacks.entries[j].data);
+    }
+  }
+}
+
+StaticListStatus
+Widget::ToolBarShape::add_callback(Widget::on_tool_change callback,
+                                   void *data) {
+
+  ToolBarShapeCallback entry = {.callback = callback, .data = data};
+
+  return stli_insert(callbacks.entries, TOOLBAR_CALLBACK_CAPACITY,
+                     &callbacks.count, sizeof(ToolBarShapeCallback), &entry,
+                     "Tool Bar Shape Callback List");
 }

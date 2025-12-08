@@ -3,8 +3,7 @@
 
 #include "nkengine/include/texture.h"
 
-// automatially generated with SpriteGen Plugin
-
+// automatially generated with UISprite Plugin
 typedef enum {
   UISprite_Toolbar,
   UISprite_Toolbar_Icon_Frame,
@@ -12,6 +11,7 @@ typedef enum {
   UISprite_Toolbar_Icon_Shape,
   UISprite_Toolbar_Icon_Note,
   UISprite_Toolbar_Icon_Persona,
+  UISprite_Toolbar_Icon_Selector,
   UISprite_Pod_Base,
   UISprite_Pod_Window,
   UISprite_Persona_Striver,
@@ -64,6 +64,13 @@ static const TextureAtlasRegion sprites[] = {
             .uv0 = {0.682f, 0.073f},
             .uv1 = {0.755f, 0.146f},
             .size = {150, 150},
+        },
+    [UISprite_Toolbar_Icon_Selector] =
+        {
+            .label = "Toolbar Icon Selector",
+            .uv0 = {0.312f, 0.174f},
+            .uv1 = {0.469f, 0.330f},
+            .size = {320, 320},
         },
     [UISprite_Pod_Base] =
         {

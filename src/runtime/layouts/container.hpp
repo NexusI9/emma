@@ -4,7 +4,7 @@
 #include "nkengine/include/renderer.h"
 #include "runtime/layouts/nav_bar.hpp"
 #include "runtime/node/heatmap.h"
-#include "runtime/widgets/canvas.hpp"
+#include "runtime/widgets/canvas/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
 
 EXTERN_C_BEGIN
@@ -14,6 +14,7 @@ void container_set_octalysis_state(bool, void *);
 void container_set_heatmap_state(bool, void *);
 bool container_get_octalysis_state(void *);
 bool container_get_heatmap_state(void *);
+void on_toolbar_update(const uint8_t, void *);
 
 EXTERN_C_END
 
@@ -46,17 +47,49 @@ public:
   void draw();
 
   void enable_display_state(const DisplayState state) {
-    display_state |= state;
+    flag_enable(state, &display_state);
+
+    switch (state) {
+
+    case DisplayState_Heatmap:
+      canvas_shape.enable_state(Widget::CanvasShape::State_FreezeSelection);
+      break;
+
+    case DisplayState_Octagon:
+      canvas_shape.enable_state(Widget::CanvasShape::State_ShowOctagon);
+      break;
+
+    default:
+      break;
+    }
   }
 
   void disable_display_state(const DisplayState state) {
-    display_state &= ~state;
+    flag_disable(state, &display_state);
+
+    switch (state) {
+
+    case DisplayState_Heatmap:
+      canvas_shape.disable_state(Widget::CanvasShape::State_FreezeSelection);
+      break;
+
+    case DisplayState_Octagon:
+      canvas_shape.disable_state(Widget::CanvasShape::State_ShowOctagon);
+      break;
+
+    default:
+      break;
+    }
   }
 
   unsigned int get_display_state() { return display_state; }
 
   bool display_state_enabled(const DisplayState state) {
     return get_display_state() & state;
+  }
+
+  void update_canvas_mode(const Widget::CanvasCreateMode mode) {
+    canvas_shape.update_create_mode(mode);
   }
 
   Widget::HeatmapShape heatmaps[HeatmapType_COUNT];

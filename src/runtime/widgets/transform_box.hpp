@@ -101,7 +101,6 @@ public:
   static constexpr float area_padding = 20.0f;
   static constexpr uint8_t transform_box_handles_count = 9;
   static constexpr float transform_box_handle_size = 10.0f;
-
   static constexpr float stroke_width = 4.0f;
 
 private:

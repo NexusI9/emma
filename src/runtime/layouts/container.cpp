@@ -3,7 +3,6 @@
 #include "runtime/manager/atlas.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/heatmap.h"
-#include "runtime/widgets/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
 #include "utils/input.h"
 
@@ -42,6 +41,8 @@ Layout::Container::Container(Gui *gui, Canvas *canvas,
         ImVec2(gui_scale(gui, 1275), gui_scale(gui, 80));
     heatmap_list_shape.size = ImVec2(0, 0);
   }
+
+  tool_bar.add_callback(on_toolbar_update, this);
 }
 
 void Layout::Container::draw() {
@@ -71,20 +72,8 @@ void Layout::Container::draw() {
 
   UI::FullScreenWindow().Begin("Root container");
   {
-    // TODO: instead of checking them during loop-time, update them when on
-    // switch change
-    int canvas_flag;
-    if (display_state_enabled(DisplayState_Octagon))
-      canvas_flag |= Widget::CanvasDrawFlag_ShowOctagon;
-    else
-      canvas_flag &= ~Widget::CanvasDrawFlag_ShowOctagon;
 
-    if (display_state_enabled(DisplayState_Heatmap))
-      canvas_flag |= Widget::CanvasDrawFlag_FreezeSelection;
-    else
-      canvas_flag &= ~Widget::CanvasDrawFlag_FreezeSelection;
-
-    canvas_shape.draw(canvas_flag);
+    canvas_shape.draw();
     tool_bar.draw();
 
     if (display_state_enabled(DisplayState_Heatmap)) {
@@ -159,4 +148,9 @@ bool container_get_octalysis_state(void *data) {
 bool container_get_heatmap_state(void *data) {
   return ((Layout::Container *)data)
       ->display_state_enabled(Layout::Container::DisplayState_Heatmap);
+}
+
+void on_toolbar_update(const uint8_t active, void *data) {
+  Layout::Container *container = (Layout::Container *)data;
+  container->update_canvas_mode((Widget::CanvasCreateMode)active);
 }
