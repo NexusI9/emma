@@ -51,7 +51,6 @@ void Widget::CanvasSelection::listen_connector_handle_selection(
   }
 }
 
-
 /*
    On Connector handle release we check if the handle is within a frame or pod
    bound and connect it to the closest valid frame/pod handle.
@@ -103,6 +102,7 @@ void Widget::CanvasSelection::listen_connector_selection(
         node->connectors[CanvasConnectorState_Selected].entries,
         allocator_connector_capacity(),
         &node->connectors[CanvasConnectorState_Selected].length, connector->id);
+    active_connector = connector;
   }
 }
 
@@ -118,10 +118,12 @@ void Widget::CanvasSelection::connector_selection_begin() {
  */
 void Widget::CanvasSelection::connector_selection_end() {
 
-  if (selection_status(&selection_connector) == GuiSelectionStatus_Blank)
+  if (selection_status(&selection_connector) == GuiSelectionStatus_Blank) {
     stli_empty(node->connectors[CanvasConnectorState_Selected].entries,
                &node->connectors[CanvasConnectorState_Selected].length,
                sizeof(alloc_id), "Canvas Selected Connectors List");
+    active_connector = nullptr;
+  }
 
   selection_end(&selection_connector);
 
@@ -130,23 +132,6 @@ void Widget::CanvasSelection::connector_selection_end() {
     active_connector_handle = nullptr;
     flag_disable(SelectionState_ConnectorHandle, &selection_state);
   }
-}
-
-CanvasStatus Widget::CanvasSelection::destroy_listen() {
-
-  CanvasStatus status = CanvasStatus_NothingSelected;
-
-  if (input_key(INPUT_KEY_BACKSPACE)) {
-
-    if (active_connector) {
-      canvas_destroy_connector(node, active_connector);
-      active_connector = nullptr;
-    }
-
-    status = canvas_destroy_all_selected_frames(node);
-  }
-
-  return status;
 }
 
 /**

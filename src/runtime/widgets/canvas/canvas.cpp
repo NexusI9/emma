@@ -28,11 +28,13 @@
 
 Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
     : grid_background("textures/dot-pattern.png", TextureResolution_64),
-      canvas_transform(gui, canvas), canvas_selection(canvas) {
-
-  this->gui = gui;
-  this->node = canvas;
-}
+      module{
+          .transform = {gui, canvas},
+          .selection = {gui, canvas},
+          .destroy = {gui, canvas},
+          .create = {gui, canvas},
+      },
+      CanvasModule(gui, canvas) {}
 
 void Widget::CanvasShape::draw() {
 
@@ -41,7 +43,7 @@ void Widget::CanvasShape::draw() {
   grid_background.draw_texture(gui->pass_encoder);
 
   // Main Canvas Entities
-  canvas_transform.begin();
+  module.transform.begin();
   {
     draw_pods();
     draw_frames();
@@ -50,12 +52,17 @@ void Widget::CanvasShape::draw() {
     draw_modules();
     draw_connectors();
   }
-  canvas_transform.end();
+  module.transform.end();
 
-  // Listeners
+  // Create
+
+  // Destroy
   {
-    if (canvas_selection.destroy_listen() == CanvasStatus_Success)
-      canvas_transform.transform_box.empty_objects();
+    if (module.destroy.begin()) {
+      module.destroy.active_connector(&module.selection.active_connector);
+      if (module.destroy.selected_frames() == CanvasStatus_Success)
+        module.transform.transform_box.empty_objects();
+    }
   }
 }
 
@@ -76,8 +83,7 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
         ConnectorHandleShape(handle, (ConnectorHandleSide)(1 << i));
 
     handle_shape.draw();
-    canvas_selection.listen_new_connector_handle(frame, handle,
-                                                   &handle_shape);
+    module.selection.listen_new_connector_handle(frame, handle, &handle_shape);
   }
 }
 
@@ -98,7 +104,7 @@ void Widget::CanvasShape::draw_frames() {
     Frame *frame = allocator_frame_entry(node->frames->entries[i]);
     FrameShape frame_shape = FrameShape(frame);
     frame_shape.draw();
-    canvas_transform.listen_frame(&frame_shape,
+    module.transform.listen_frame(&frame_shape,
                                   CanvasTransform::ConfigurationType_Frame);
   }
 }
@@ -108,40 +114,40 @@ void Widget::CanvasShape::draw_pods() {
     Frame *pod = allocator_frame_entry(node->pods->entries[i]);
     FrameShape frame_shape = FrameShape(pod);
     frame_shape.draw_pod();
-    canvas_selection.frame_selection_listen(&frame_shape);
-    canvas_transform.listen_frame(&frame_shape,
+    module.selection.frame_selection_listen(&frame_shape);
+    module.transform.listen_frame(&frame_shape,
                                   CanvasTransform::ConfigurationType_Pod);
   }
 }
 void Widget::CanvasShape::draw_modules() {
   for (size_t i = 0; i < node->modules->length; i++) {
-    Frame *module = allocator_frame_entry(node->modules->entries[i]);
-    FrameShape frame_shape = FrameShape(module);
+    Frame *frame = allocator_frame_entry(node->modules->entries[i]);
+    FrameShape frame_shape = FrameShape(frame);
     frame_shape.draw_texture();
-    canvas_selection.frame_selection_listen(&frame_shape);
-    canvas_transform.listen_frame(&frame_shape,
+    module.selection.frame_selection_listen(&frame_shape);
+    module.transform.listen_frame(&frame_shape,
                                   CanvasTransform::ConfigurationType_Module);
   }
 }
 
 void Widget::CanvasShape::draw_connectors() {
 
-  canvas_selection.connector_selection_begin();
+  module.selection.connector_selection_begin();
   for (size_t i = 0; i < node->connectors->length; i++) {
     Connector *connector =
         allocator_connector_entry(node->connectors->entries[i]);
     ConnectorShape connector_shape = ConnectorShape(gui, connector);
 
-    canvas_selection.listen_connector_selection(&connector_shape);
-    canvas_selection.listen_connector_handle_selection(connector);
-    canvas_transform.listen_active_connector_handle(
-        canvas_selection.get_active_connector_handle(), connector);
-    canvas_selection.listen_active_connector_handle_release(connector);
+    module.selection.listen_connector_selection(&connector_shape);
+    module.selection.listen_connector_handle_selection(connector);
+    module.transform.listen_active_connector_handle(
+        module.selection.active_connector_handle, connector);
+    module.selection.listen_active_connector_handle_release(connector);
 
     connector_shape.draw();
   }
 
-  canvas_selection.connector_selection_end();
+  module.selection.connector_selection_end();
 }
 
 void Widget::CanvasShape::draw_selected_items_connector_handles() {

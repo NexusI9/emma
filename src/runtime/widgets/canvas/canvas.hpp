@@ -6,6 +6,9 @@
 #include "runtime/manager/allocator_list.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/connector.h"
+#include "runtime/widgets/canvas/core.hpp"
+#include "runtime/widgets/canvas/create.hpp"
+#include "runtime/widgets/canvas/destroy.hpp"
 #include "runtime/widgets/canvas/selection.hpp"
 #include "runtime/widgets/canvas/transform.hpp"
 #include "runtime/widgets/connector.hpp"
@@ -27,7 +30,7 @@ typedef enum {
   CanvasCreateMode_COUNT,
 } CanvasCreateMode;
 
-class CanvasShape {
+class CanvasShape : public CanvasModule {
 
 public:
   CanvasShape(Gui *, Canvas *);
@@ -49,8 +52,8 @@ public:
     switch (state) {
 
     case State_FreezeSelection:
-      canvas_selection.freeze_selection();
-      canvas_transform.freeze_transform();
+      module.selection.freeze_selection();
+      module.transform.freeze_transform();
       break;
 
     default:
@@ -63,8 +66,8 @@ public:
     switch (state) {
 
     case State_FreezeSelection:
-      canvas_selection.unfreeze_selection();
-      canvas_transform.unfreeze_transform();
+      module.selection.unfreeze_selection();
+      module.transform.unfreeze_transform();
       break;
 
     default:
@@ -73,13 +76,15 @@ public:
   }
 
 private:
-  Gui *gui;
-  Canvas *node;
   GridBackground grid_background;
   ImDrawList *dl;
 
-  CanvasSelection canvas_selection;
-  CanvasTransform canvas_transform;
+  struct {
+    CanvasSelection selection;
+    CanvasTransform transform;
+    CanvasDestroy destroy;
+    CanvasCreate create;
+  } module;
 
   CanvasCreateMode create_mode = CanvasCreateMode_Frame;
 

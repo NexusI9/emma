@@ -1,8 +1,9 @@
-#ifndef _WIDGET_CANVAS_INTERACTION_H_
-#define _WIDGET_CANVAS_INTERACTION_H_
+#ifndef _WIDGET_CANVAS_SELECTION_H_
+#define _WIDGET_CANVAS_SELECTION_H_
 
 #include "runtime/node/canvas.h"
 #include "runtime/node/connector_handle.h"
+#include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/connector.hpp"
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
@@ -11,10 +12,10 @@
 
 namespace Widget {
 
-class CanvasSelection {
+class CanvasSelection : public CanvasModule {
 
 public:
-  CanvasSelection(Canvas *node) : node(node) {
+  CanvasSelection(Gui *gui, Canvas *node) : CanvasModule(gui, node) {
     gui_selection_init(&selection_connector);
     gui_highlight_init(&highlight);
   }
@@ -25,16 +26,13 @@ public:
   void listen_connector_handle_selection(Connector *);
   void connector_selection_end();
 
-  ConnectorHandle *get_active_connector_handle() {
-    return active_connector_handle;
-  }
-  
+  ConnectorHandle *active_connector_handle = nullptr;
+  Connector *active_connector = nullptr;
+
   void listen_new_connector_handle(Frame *, ConnectorHandle *,
                                    ConnectorHandleShape *);
 
   void listen_active_connector_handle_release(Connector *);
-
-  CanvasStatus destroy_listen();
 
   void freeze_selection() {
     flag_enable(SelectionState_Freeze, &selection_state);
@@ -45,10 +43,6 @@ public:
   };
 
 private:
-  Canvas *node;
-  ConnectorHandle *active_connector_handle = nullptr;
-  Connector *active_connector = nullptr;
-
   typedef enum {
     SelectionState_None = 0,
     SelectionState_ConnectorHandle = 1 << 0,

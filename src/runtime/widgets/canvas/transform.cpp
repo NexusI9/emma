@@ -1,9 +1,10 @@
 #include "transform.hpp"
 #include "nkengine/include/gui.hpp"
+#include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/utils.hpp"
 
 Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
-    : node(node), transform_box(gui) {
+    : node(node), transform_box(gui), CanvasModule(gui, node) {
 
   transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
 

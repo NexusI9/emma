@@ -2,6 +2,7 @@
 #define _WIDGET_CANVAS_TRANSFORM_H_
 
 #include "runtime/node/canvas.h"
+#include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/transform_box.hpp"
 #include <imgui/imgui.h>
@@ -22,7 +23,7 @@ void canvas_shape_set_pod_size(void *, ImVec2);
 
 void canvas_shape_on_module_session_end(void *);
 
-class CanvasTransform {
+  class CanvasTransform : public CanvasModule{
 
 public:
   CanvasTransform(Gui *gui, Canvas *node);
