@@ -43,14 +43,14 @@ typedef struct {
   alloc_id id;
   vec2 position, start, end;
   float scale;
-  color color;
+  const float *color;
 } ConnectorHandle;
 
 typedef struct {
   const char *label;
   const vec2 position;
   const float scale;
-  const color color;
+  const float *color;
 } ConnectorHandleDescriptor;
 
 typedef ConnectorHandle ConnectorHandleGroup[4];
@@ -81,8 +81,8 @@ connector_handle_set_position(ConnectorHandle *handle, const vec2 value) {
 }
 
 static inline ConnectorHandleStatus
-connector_handle_set_color(ConnectorHandle *handle, const vec4 value) {
-  glm_vec4_copy((float *)value, handle->color);
+connector_handle_set_color(ConnectorHandle *handle, const float *value) {
+  handle->color = value;
   return ConnectorHandleStatus_Success;
 }
 
@@ -107,7 +107,7 @@ connector_handle_copy(const ConnectorHandle *src, ConnectorHandle *dst) {
   glm_vec2_copy((float *)src->position, dst->position);
   glm_vec2_copy((float *)src->start, dst->start);
   glm_vec2_copy((float *)src->end, dst->end);
-  glm_vec4_copy((float *)src->color, dst->color);
+  dst->color = src->color;
 
   return ConnectorHandleStatus_Success;
 }

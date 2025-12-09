@@ -16,12 +16,6 @@ class Box {
 public:
   Box(Gui *gui);
 
-  static constexpr color primary_color = {
-      87.0f / 255.0f,
-      154.0f / 255.0f,
-      212.0f / 255.0f,
-      1.0f,
-  };
   static constexpr float area_padding = 20.0f;
   static constexpr uint8_t transform_box_handles_count = 9;
   static constexpr float transform_box_handle_size = 10.0f;

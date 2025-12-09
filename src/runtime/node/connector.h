@@ -2,17 +2,19 @@
 #define _CONNECTOR_H_
 
 #include "nkengine/include/utils.h"
+#include "resources/theme.emma.h"
 #include "runtime/geometry/core.h"
+#include "runtime/manager/theme.h"
 #include "runtime/node/connector_handle.h"
 #include "utils/id.h"
 #include <cglm/cglm.h>
 
+// clang-format off
 static const uint8_t CONNECTOR_HANDLE_COUNT = 2;
 static const uint8_t CONNECTOR_CLICKBOX_COUNT = 5;
 static const uint8_t CONNECTOR_CLICKBOX_THICKNESS = 20;
-
-static const color CONNECTOR_COLOR = {0.6f, 0.6f, 0.6f, 1.0f};
 static const float CONNECTOR_THICKNESS = 6.0f;
+// clang-format on
 
 typedef enum {
   ConnectorStatus_Success,
@@ -34,7 +36,7 @@ typedef struct {
   RectCoordinate clickboxes[CONNECTOR_CLICKBOX_COUNT];
   connector_corners corners;
   float thickness;
-  color color;
+  const float *color;
 } Connector;
 
 typedef struct {
@@ -58,7 +60,7 @@ ConnectorStatus connector_update_clickboxes(Connector *, const float);
 static inline ConnectorStatus connector_set_start_handle(Connector *, const ConnectorHandle *);
 static inline ConnectorStatus connector_set_end_handle(Connector *, const ConnectorHandle *);
 static inline ConnectorStatus connector_update_handle_position(Connector *);
-static inline ConnectorStatus connector_set_color(Connector *, const color);
+static inline ConnectorStatus connector_set_color(Connector *, const float*);
 static inline ConnectorStatus connector_set_thickness(Connector *, const float);
 // clang-format on
 
@@ -92,7 +94,7 @@ ConnectorStatus connector_update_handle_position(Connector *connector) {
 
 ConnectorStatus connector_set_color(Connector *connector, const color value) {
 
-  glm_vec4_copy((float *)value, connector->color);
+  connector->color = value;
   return ConnectorStatus_Success;
 }
 
@@ -107,7 +109,7 @@ ConnectorStatus connector_set_thickness(Connector *connector,
 // clang-format off
 static inline const ConnectorHandle *connector_get_start_handle(Connector *);
 static inline const ConnectorHandle *connector_get_end_handle(Connector *);
-static inline ConnectorStatus connector_get_color(Connector *, color);
+static inline const float* connector_get_color(Connector *);
 static inline float connector_get_thickness(Connector *);
 static inline const vec2 *connector_get_corners(Connector *);
 static inline ConnectorDirection connector_get_direction(Connector *);
@@ -121,9 +123,8 @@ const ConnectorHandle *connector_get_end_handle(Connector *connector) {
   return connector->h1;
 }
 
-ConnectorStatus connector_get_color(Connector *connector, color dest) {
-  glm_vec4_copy(connector->color, dest);
-  return ConnectorStatus_Success;
+const float *connector_get_color(Connector *connector) {
+  return connector->color;
 }
 
 float connector_get_thickness(Connector *connector) {

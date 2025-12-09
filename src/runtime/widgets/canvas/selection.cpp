@@ -18,7 +18,7 @@ void Widget::Canvas::Selection::frame_selection_listen(FrameShape *frame) {
         ImVec2(vpx(frame_node->world_position[0]),
                vpy(frame_node->world_position[1])),
         ImVec2(vpx(frame_node->end_point[0]), vpy(frame_node->end_point[1])),
-        ImColor(im_color(Transform::Box::primary_color)), 0, 0,
+        ImColor(im_color(emma_color(ThemeEmmaColor_Border_Brand_Base))), 0, 0,
         Transform::Box::stroke_width);
   }
 }
@@ -162,7 +162,7 @@ void Widget::Canvas::Selection::listen_new_connector_handle(
     ConnectorDescriptor connector_desc = {};
     connector_desc.start = handle;
     connector_desc.thickness = CONNECTOR_THICKNESS;
-    connector_desc.color = CONNECTOR_COLOR;
+    connector_desc.color = emma_color(ThemeEmmaColor_Border_Subtle_On_Dark);
 
     Connector *new_connector = canvas_create_connector(node, &connector_desc);
 

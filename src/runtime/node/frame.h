@@ -51,7 +51,7 @@ typedef struct {
   vec2 size;
   vec2 end_point; // pos + size, usefull to get full area for mouse interaction
   vec2 uv0, uv1;
-  color background;
+  const float *background;
 
   struct {
     RectCoordinate entries[BOUNDBOX_FRAME_RECT_COUNT];
@@ -68,7 +68,7 @@ typedef struct {
   const char *label;
   const vec2 position;
   const vec2 size;
-  const color background;
+  const float *background;
   const vec2 uv0, uv1;
   const FrameClickboxDescriptor *clickbox;
 } FrameDescriptor;
@@ -160,8 +160,8 @@ FrameStatus frame_set_local_position(Frame *node, const vec2 value) {
   return FrameStatus_Success;
 }
 
-FrameStatus frame_set_background(Frame *node, const color value) {
-  glm_vec4_copy((float *)value, node->background);
+FrameStatus frame_set_background(Frame *node, const float *value) {
+  node->background = value;
   return FrameStatus_Success;
 }
 

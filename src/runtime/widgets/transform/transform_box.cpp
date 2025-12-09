@@ -1,5 +1,7 @@
 #include "transform_box.hpp"
 #include "nkengine/include/gui.hpp"
+#include "resources/theme.emma.h"
+#include "runtime/manager/theme.h"
 #include "runtime/manager/unit.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/transform_handle.h"
@@ -18,10 +20,9 @@ Widget::Transform::Box::Box(Gui *gui) {
     TransformHandleDescriptor desc = {
         .position = {0.0f},
         .scale = transform_box_handle_size,
-        .color = {1.0f, 1.0f, 1.0f, 1.0f},
+        .color = emma_color(ThemeEmmaColor_Surface_Highest),
         .stroke_width = stroke_width,
-        .stroke_color = {primary_color[0], primary_color[1], primary_color[2],
-                         primary_color[3]},
+        .stroke_color = emma_color(ThemeEmmaColor_Border_Brand_Base),
     };
     transform_handle_create(&handles[i], &desc);
   }
@@ -156,8 +157,10 @@ void Widget::Transform::Box::draw() {
   ImDrawList *draw = ImGui::GetWindowDrawList();
 
   // Add frame
-  draw->AddRect(vp_im2(p0), vp_im2(p1), im_color((float *)primary_color), 0.0f,
-                0, stroke_width);
+  draw->AddRect(
+      vp_im2(p0), vp_im2(p1),
+      im_color((const float *)emma_color(ThemeEmmaColor_Border_Brand_Base)),
+      0.0f, 0, stroke_width);
 
   // Area Behaviour (Translate)
   if ((mode & Mode_Move) && active_handle == -1 &&

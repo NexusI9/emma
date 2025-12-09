@@ -1,6 +1,8 @@
 #include "nav_bar.hpp"
 #include "nkengine/include/gui.hpp"
+#include "resources/theme.emma.h"
 #include "runtime/node/canvas.h"
+#include "runtime/widgets/utils.hpp"
 
 Layout::NavBar::NavBar(Gui *gui, Canvas *canvas, NavBarSwitchConfig octa_config,
                        NavBarSwitchConfig heatmap_config)
@@ -30,29 +32,35 @@ Layout::NavBar::NavBar(Gui *gui, Canvas *canvas, NavBarSwitchConfig octa_config,
 
   {
     // === Setup right panel ===
+
+    // clang-format off
     right_panel.position =
         ImVec2(gui_scale(gui, 1160), gui_scale(gui, margin.y));
-    right_panel.background_color = bg_color;
-    right_panel.border_color = bd_color;
+    right_panel.background_color = emma_im_color(ThemeEmmaColor_Surface_Lower);
+    right_panel.border_color = emma_im_color(ThemeEmmaColor_Border_Subtle_On_Dark);
     right_panel.padding = gui_scale_im_vec2(gui, padding);
     right_panel.border_radius = gui_scale(gui, bd_radius);
     right_panel.size = ImVec2(0, gui_scale(gui, height));
+    // clang-format on
   }
 
   {
     // === Setup switches ===
     for (uint8_t i = 0; i < DisplaySwitch_COUNT; i++) {
+
+      // clang-format off
       switches[i].component.width = gui_scale(gui, 48);
       switches[i].component.height = gui_scale(gui, 24);
       switches[i].component.border_radius = gui_scale(gui, 6.0f);
       switches[i].component.dot_size = gui_scale(gui, 18.0f);
       switches[i].component.dot_border_radius = gui_scale(gui, 3.0f);
-      switches[i].component.bg_color_default = ImColor(44, 44, 44, 255);
-      switches[i].component.bg_color_active = ImColor(2, 45, 105, 255);
-      switches[i].component.border_color_default = ImColor(123, 123, 123, 255);
-      switches[i].component.border_color_active = ImColor(152, 217, 255, 255);
-      switches[i].component.dot_color_default = ImColor(123, 123, 123, 255);
-      switches[i].component.dot_color_active = ImColor(12, 140, 233, 255);
+      switches[i].component.bg_color_default = emma_im_color(ThemeEmmaColor_Surface_Lower);
+      switches[i].component.bg_color_active = emma_im_color(ThemeEmmaColor_Background_Brand_Strong);
+      switches[i].component.border_color_default = emma_im_color(ThemeEmmaColor_Border_Subtle_On_Dark);
+      switches[i].component.border_color_active = emma_im_color(ThemeEmmaColor_Border_Brand_Subtle);
+      switches[i].component.dot_color_default = emma_im_color(ThemeEmmaColor_Surface_Base);
+      switches[i].component.dot_color_active = emma_im_color(ThemeEmmaColor_Background_Brand_Base);
+      // clang-format on
     }
   }
 }
@@ -71,7 +79,9 @@ void Layout::NavBar::render() {
     ImGui::Text("EMMA [v0.15 - alpha]");
     ImGui::SetCursorPosX(gui_scale(gui, margin.x));
     ImGui::SetWindowFontScale(0.8f);
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
+    ImGui::PushStyleColor(
+        ImGuiCol_Text,
+        (ImVec4)emma_im_color(ThemeEmmaColor_Text_Subtle_On_Dark));
     ImGui::Text("Emotional Mapper");
     ImGui::PopStyleColor();
     ImGui::SetWindowFontScale(1.0f);

@@ -1,10 +1,12 @@
 #include "container.hpp"
+#include "resources/theme.emma.h"
 #include "runtime/layouts/nav_bar.hpp"
 #include "runtime/manager/atlas.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
+#include "runtime/widgets/utils.hpp"
 #include "utils/input.h"
 
 Layout::Container::Container(Gui *gui, Canvas *canvas,
@@ -34,8 +36,8 @@ Layout::Container::Container(Gui *gui, Canvas *canvas,
   {
     // === Create heamap select shape ===
     heatmap_list_shape = UI::Frame();
-    heatmap_list_shape.background_color = nav_bar.bg_color;
-    heatmap_list_shape.border_color = nav_bar.bd_color;
+    heatmap_list_shape.background_color = emma_im_color(ThemeEmmaColor_Surface_Lower);
+    heatmap_list_shape.border_color = emma_im_color(ThemeEmmaColor_Border_Subtle_On_Dark);
     heatmap_list_shape.padding = gui_scale_im_vec2(gui, nav_bar.padding);
     heatmap_list_shape.border_radius = gui_scale(gui, nav_bar.bd_radius);
     heatmap_list_shape.position =

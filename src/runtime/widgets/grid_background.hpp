@@ -3,7 +3,10 @@
 
 #include "nkengine/include/mesh.h"
 #include "nkengine/include/texture.h"
+#include "resources/theme.emma.h"
+#include "runtime/manager/theme.h"
 #include "runtime/manager/viewport.h"
+#include "runtime/widgets/utils.hpp"
 #include "webgpu/webgpu.h"
 #include <imgui/imgui.h>
 
@@ -19,8 +22,9 @@ public:
   float grid_scale = 5.0f;
   float spacing = 32.0f;
   float dot_size = 3.0f;
-  ImU32 bg_color = IM_COL32(20, 20, 20, 255);
-  ImU32 dot_color = IM_COL32(120, 120, 120, 100);
+  const ImColor bg_color =
+      emma_im_color(ThemeEmmaColor_Background_System_Strong_On_Dark);
+  const ImColor dot_color = emma_im_color(ThemeEmmaColor_Icon_Subtlest_On_Dark);
 
 private:
   void create_grid_texture(const char *, const TextureResolution);

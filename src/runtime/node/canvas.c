@@ -1,9 +1,11 @@
 #include "canvas.h"
+#include "resources/theme.emma.h"
 #include "runtime/geometry/boundbox.h"
 #include "runtime/geometry/vector.h"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/manager/module.h"
+#include "runtime/manager/theme.h"
 #include "runtime/manager/ui_sprite.h"
 #include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
@@ -93,7 +95,7 @@ Frame *canvas_create_frame_core(Canvas *canvas,
 Frame *canvas_create_frame(Canvas *canvas) {
 
   FrameDescriptor frame_desc = {
-      .background = {1.0f, 1.0f, 1.0f, 1.0f},
+      .background = emma_color(ThemeEmmaColor_Surface_Highest),
       .position = {200, 200},
       .size = {FRAME_MIN_SIZE, FRAME_MIN_SIZE},
       // TODO: replace the boundbox descriptor by a discriminator
@@ -227,7 +229,7 @@ ConnectorHandle *canvas_create_connector_handle(Canvas *canvas) {
   ConnectorHandleDescriptor handle_desc = {
       .position = {0.0f, 0.0f},
       .scale = 10.0f,
-      .color = {0.6f, 0.6f, 0.6f, 1.0f},
+      .color = emma_color(ThemeEmmaColor_Border_Subtle_On_Dark),
   };
   connector_handle_create(handle, &handle_desc);
 
@@ -501,7 +503,7 @@ void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
 
   // create connector
   ConnectorDescriptor cn_desc = {
-      .color = CONNECTOR_COLOR,
+      .color = emma_color(ThemeEmmaColor_Border_Subtle_On_Dark),
       .thickness = CONNECTOR_THICKNESS,
       .start = closest_handle_a,
       .end = closest_handle_b,

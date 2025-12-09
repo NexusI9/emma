@@ -42,14 +42,14 @@ typedef struct {
   alloc_id id;
   vec2 position;
   float scale;
-  color color, stroke_color;
+  const float *color, *stroke_color;
   float stroke_width;
 } TransformHandle;
 
 typedef struct {
   const vec2 position;
   const float scale;
-  const color color, stroke_color;
+  const float *color, *stroke_color;
   const float stroke_width;
 } TransformHandleDescriptor;
 
