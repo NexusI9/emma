@@ -25,7 +25,8 @@ public:
     State_SelectConnectorHandle = 1 << 0,
     State_SelectNewConnectorHandle = 1 << 1,
     State_SelectConnector = 1 << 2,
-    State_Freeze = 1 << 3,
+    State_Deselect = 1 << 3,
+    State_Freeze = 1 << 4,
   } State;
 
   void frame_selection_listen(FrameShape *);

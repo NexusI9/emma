@@ -207,7 +207,8 @@ bool Widget::Canvas::Shape::disable_creation() {
 
   // Selection module is selecting a connector
   bool selection_active =
-      ::Widget::Canvas::Selection::State::State_SelectConnector &
+      (::Widget::Canvas::Selection::State::State_SelectConnector |
+       ::Widget::Canvas::Selection::State::State_Deselect) &
       module.selection.get_state();
 
   return heatmap_displayed || transform_box_dragging ||

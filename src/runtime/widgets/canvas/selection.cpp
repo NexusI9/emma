@@ -1,5 +1,6 @@
 #include "selection.hpp"
 #include "nkengine/include/gui.hpp"
+#include "runtime/manager/allocator_list.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
 #include "runtime/systems/connect_system.h"
@@ -41,8 +42,8 @@ void Widget::Canvas::Selection::listen_connector_handle_selection(
       handle_shape.draw();
 
       if (gui_selection_hit(&selection_connector,
-                            ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
-                                State_None == state)) {
+                            ImGui::IsMouseDown(ImGuiMouseButton_Left))) {
+
         active_connector_handle = handle;
         flag_enable(State_SelectConnectorHandle, &state);
       }
@@ -97,19 +98,27 @@ void Widget::Canvas::Selection::listen_connector_selection(
                         ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
                             shape->clickbox_hovered())) {
 
+    allocator_id_list_empty(
+        node->connectors[CanvasConnectorState_Selected].entries,
+        &node->connectors[CanvasConnectorState_Selected].length);
+
     allocator_id_list_push(
         node->connectors[CanvasConnectorState_Selected].entries,
         allocator_connector_capacity(),
         &node->connectors[CanvasConnectorState_Selected].length, connector->id);
+
     active_connector = connector;
     flag_enable(State_SelectConnector, &state);
+    flag_disable(State_Deselect, &state);
   }
 }
 
 void Widget::Canvas::Selection::connector_selection_begin() {
 
-  gui_selection_begin(&selection_connector,
-                      ImGui::IsMouseClicked(ImGuiMouseButton_Left));
+  if (gui_selection_begin(&selection_connector,
+                          ImGui::IsMouseClicked(ImGuiMouseButton_Left))) {
+    flag_disable(State_Deselect, &state);
+  }
 }
 
 /*
@@ -118,17 +127,22 @@ void Widget::Canvas::Selection::connector_selection_begin() {
  */
 void Widget::Canvas::Selection::connector_selection_end() {
 
-  if (selection_status(&selection_connector) == GuiSelectionStatus_Blank) {
-    stli_empty(node->connectors[CanvasConnectorState_Selected].entries,
-               &node->connectors[CanvasConnectorState_Selected].length,
-               sizeof(alloc_id), "Canvas Selected Connectors List");
+  if (active_connector &&
+      selection_status(&selection_connector) == GuiSelectionStatus_Blank) {
+
+    allocator_id_list_empty(
+        node->connectors[CanvasConnectorState_Selected].entries,
+        &node->connectors[CanvasConnectorState_Selected].length);
+
     active_connector = nullptr;
     flag_disable(State_SelectConnector, &state);
+    flag_enable(State_Deselect, &state);
   }
 
   selection_end(&selection_connector);
 
-  if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
+  if (active_connector_handle &&
+      ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
       (State_SelectConnectorHandle & state)) {
     active_connector_handle = nullptr;
     flag_disable(State_SelectConnectorHandle, &state);
