@@ -52,7 +52,9 @@ public:
     switch (state) {
 
     case DisplayState_Heatmap:
+
       canvas_shape.enable_state(
+          Widget::Canvas::Shape::State_ShowHeatmap |
           Widget::Canvas::Shape::State_FreezeSelection |
           Widget::Canvas::Shape::State_FreezeTransform |
           Widget::Canvas::Shape::State_FreezeCreationSession);
@@ -77,7 +79,8 @@ public:
     case DisplayState_Heatmap:
       canvas_shape.enable_state(
           Widget::Canvas::Shape::State_FreezeCreationSession);
-      canvas_shape.disable_state(Widget::Canvas::Shape::State_FreezeSelection |
+      canvas_shape.disable_state(Widget::Canvas::Shape::State_ShowHeatmap |
+                                 Widget::Canvas::Shape::State_FreezeSelection |
                                  Widget::Canvas::Shape::State_FreezeTransform);
       break;
 

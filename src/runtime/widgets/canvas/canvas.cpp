@@ -210,7 +210,7 @@ bool Widget::Canvas::Shape::disable_creation() {
       (::Widget::Canvas::Selection::State::State_SelectConnector |
        ::Widget::Canvas::Selection::State::State_Deselect) &
       module.selection.get_state();
-
+  
   return heatmap_displayed || transform_box_dragging ||
          transform_module_active || selection_active;
 }
