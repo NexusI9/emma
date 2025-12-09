@@ -5,8 +5,8 @@
 #include "runtime/widgets/transform/transform_box.hpp"
 #include "runtime/widgets/utils.hpp"
 
-Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
-    : node(node), transform_box(gui), CanvasModule(gui, node) {
+Widget::Canvas::Transform::Transform(Gui *gui, ::Canvas *node)
+    : transform_box(gui), Module(gui, node) {
 
   transform_box.update_bound(ImVec2(20, 20), ImVec2(900, 300));
 
@@ -14,7 +14,7 @@ Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
     // Frame transform config
     Configuration *fm_conf = &transform_configuration[ConfigurationType_Frame];
 
-    fm_conf->transform_mode = Transform::Box::Mode_All;
+    fm_conf->transform_mode = ::Widget::Transform::Box::Mode_All;
     fm_conf->get_position = canvas_shape_get_frame_position;
     fm_conf->set_position = canvas_shape_set_frame_position;
     fm_conf->get_size = canvas_shape_get_frame_size;
@@ -28,7 +28,7 @@ Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
     // Module transform config
     Configuration *md_conf = &transform_configuration[ConfigurationType_Module];
 
-    md_conf->transform_mode = Transform::Box::Mode_Move;
+    md_conf->transform_mode = ::Widget::Transform::Box::Mode_Move;
     md_conf->get_position = canvas_shape_get_frame_position;
     md_conf->get_size = canvas_shape_get_frame_size;
     md_conf->set_position = canvas_shape_set_module_position;
@@ -43,7 +43,7 @@ Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
     // Pod transform config
     Configuration *pod_conf = &transform_configuration[ConfigurationType_Pod];
 
-    pod_conf->transform_mode = Transform::Box::Mode_Move;
+    pod_conf->transform_mode = ::Widget::Transform::Box::Mode_Move;
     pod_conf->get_position = canvas_shape_get_frame_position;
     pod_conf->set_position = canvas_shape_set_pod_position;
     pod_conf->get_size = canvas_shape_get_frame_size;
@@ -57,10 +57,10 @@ Widget::CanvasTransform::CanvasTransform(Gui *gui, Canvas *node)
    Handle the boundbox interaction along with the transformation for frames
    and modules.
  */
-void Widget::CanvasTransform::listen_frame(FrameShape *frame,
-                                           const ConfigurationType type) {
+void Widget::Canvas::Transform::listen_frame(FrameShape *frame,
+                                             const ConfigurationType type) {
 
-  if (state & State_Freeze)
+  if (State_Freeze & state)
     return;
 
   const Configuration *conf = &transform_configuration[type];
@@ -89,7 +89,7 @@ void Widget::CanvasTransform::listen_frame(FrameShape *frame,
                     "Canvas Transform Frame Data") != StaticListStatus_Success)
       return;
 
-    Transform::ObjectManager::ObjectDescriptor object = {
+    ::Widget::Transform::ObjectManager::ObjectDescriptor object = {
         .handle = &transform_frame_data.entries[transform_frame_data.count - 1],
         .get_position = conf->get_position,
         .set_position = conf->set_position,
@@ -98,7 +98,7 @@ void Widget::CanvasTransform::listen_frame(FrameShape *frame,
         .session_end = conf->session_end,
     };
 
-    Transform::ObjectManager::Object *found_obj =
+    ::Widget::Transform::ObjectManager::Object *found_obj =
         transform_box.find_object(object.handle, NULL);
 
     // remove object TODO DEBUG: NEVER CALLS THIS CONDITION
@@ -156,12 +156,17 @@ void Widget::CanvasTransform::listen_frame(FrameShape *frame,
    a newly created one is active and transform it according to the mouse
    position.
  */
-void Widget::CanvasTransform::listen_active_connector_handle(
+void Widget::Canvas::Transform::listen_active_connector_handle(
     ConnectorHandle *handle, Connector *connector) {
   if (handle) {
+    flag_enable(State_Dragging, &state);
+    
     ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
     connector_handle_set_position(handle, (vec2){mouse.x, mouse.y});
     connector_update_corners(connector);
+  } else {
+    flag_disable(State_Dragging, &state);
+    
   }
 }
 
@@ -170,9 +175,10 @@ void Widget::CanvasTransform::listen_active_connector_handle(
    parent bound to break the relationship. And and vice versa, i.e. if a child
    is included in a parent bound then add it as child.
  */
-void Widget::canvas_shape_on_module_session_end(void *data) {
+void Widget::Canvas::canvas_shape_on_module_session_end(void *data) {
 
-  CanvasTransform::FrameData *frame_data = (CanvasTransform::FrameData *)data;
+  Canvas::Transform::FrameData *frame_data =
+      (Canvas::Transform::FrameData *)data;
 
   Frame *frame = allocator_frame_entry(frame_data->frame->id);
 
@@ -196,9 +202,25 @@ void Widget::canvas_shape_on_module_session_end(void *data) {
     }
 }
 
-void Widget::canvas_shape_get_frame_position(void *data, ImVec2 &value) {
+/*
 
-  CanvasTransform::FrameData *frame_data = (CanvasTransform::FrameData *)data;
+   ▗▄▄▄▖▗▄▄▖  ▗▄▖ ▗▖  ▗▖ ▗▄▄▖ ▗▄▖ ▗▄▄▄▖▗▖  ▗▖    ▗▄▄▖  ▗▄▖ ▗▖  ▗▖
+     █  ▐▌ ▐▌▐▌ ▐▌▐▛▚▖▐▌▐▌   ▐▌ ▐▌▐▌   ▐▛▚▞▜▌    ▐▌ ▐▌▐▌ ▐▌ ▝▚▞▘
+     █  ▐▛▀▚▖▐▛▀▜▌▐▌ ▝▜▌ ▝▀▚▖▐▌ ▐▌▐▛▀▀▘▐▌  ▐▌    ▐▛▀▚▖▐▌ ▐▌  ▐▌
+     █  ▐▌ ▐▌▐▌ ▐▌▐▌  ▐▌▗▄▄▞▘▝▚▄▞▘▐▌   ▐▌  ▐▌    ▐▙▄▞▘▝▚▄▞▘▗▞▘▝▚▖
+
+           ▗▄▄▖ ▗▄▖ ▗▖   ▗▖   ▗▄▄▖  ▗▄▖  ▗▄▄▖▗▖ ▗▖ ▗▄▄▖
+          ▐▌   ▐▌ ▐▌▐▌   ▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌▗▞▘▐▌
+          ▐▌   ▐▛▀▜▌▐▌   ▐▌   ▐▛▀▚▖▐▛▀▜▌▐▌   ▐▛▚▖  ▝▀▚▖
+          ▝▚▄▄▖▐▌ ▐▌▐▙▄▄▖▐▙▄▄▖▐▙▄▞▘▐▌ ▐▌▝▚▄▄▖▐▌ ▐▌▗▄▄▞▘
+
+
+ */
+void Widget::Canvas::canvas_shape_get_frame_position(void *data,
+                                                     ImVec2 &value) {
+
+  Canvas::Transform::FrameData *frame_data =
+      (Canvas::Transform::FrameData *)data;
 
   Frame *frame = frame_data->frame;
 
@@ -206,18 +228,20 @@ void Widget::canvas_shape_get_frame_position(void *data, ImVec2 &value) {
   value = ImVec2(world_pos[0], world_pos[1]);
 }
 
-void Widget::canvas_shape_get_frame_size(void *data, ImVec2 &value) {
+void Widget::Canvas::canvas_shape_get_frame_size(void *data, ImVec2 &value) {
 
-  CanvasTransform::FrameData *frame_data = (CanvasTransform::FrameData *)data;
+  Canvas::Transform::FrameData *frame_data =
+      (Canvas::Transform::FrameData *)data;
 
   Frame *frame = frame_data->frame;
 
   value = im_vec2(frame->size);
 }
 
-void Widget::canvas_shape_set_frame_position(void *data, ImVec2 value) {
+void Widget::Canvas::canvas_shape_set_frame_position(void *data, ImVec2 value) {
 
-  CanvasTransform::FrameData *frame_data = (CanvasTransform::FrameData *)data;
+  Canvas::Transform::FrameData *frame_data =
+      (Canvas::Transform::FrameData *)data;
 
   Frame *frame = frame_data->frame;
   canvas_set_frame_position(frame_data->canvas, frame,
@@ -226,27 +250,31 @@ void Widget::canvas_shape_set_frame_position(void *data, ImVec2 value) {
   canvas_update_frame_connectors(frame_data->canvas, frame_data->frame);
 }
 
-void Widget::canvas_shape_set_frame_size(void *data, ImVec2 value) {
+void Widget::Canvas::canvas_shape_set_frame_size(void *data, ImVec2 value) {
 
-  CanvasTransform::FrameData *frame_data = (CanvasTransform::FrameData *)data;
+  Canvas::Transform::FrameData *frame_data =
+      (Canvas::Transform::FrameData *)data;
 
   Frame *frame = frame_data->frame;
 
   canvas_set_frame_size(frame_data->canvas, frame, (vec2){value.x, value.y});
 }
 
-void Widget::canvas_shape_set_module_size(void *data, ImVec2 value) {
+void Widget::Canvas::canvas_shape_set_module_size(void *data, ImVec2 value) {
 
-  CanvasTransform::FrameData *frame_data = (CanvasTransform::FrameData *)data;
+  Canvas::Transform::FrameData *frame_data =
+      (Canvas::Transform::FrameData *)data;
 
   Frame *frame = frame_data->frame;
 
   canvas_set_module_size(frame_data->canvas, frame, (vec2){value.x, value.y});
 }
 
-void Widget::canvas_shape_set_module_position(void *data, ImVec2 value) {
+void Widget::Canvas::canvas_shape_set_module_position(void *data,
+                                                      ImVec2 value) {
 
-  CanvasTransform::FrameData *frame_data = (CanvasTransform::FrameData *)data;
+  Canvas::Transform::FrameData *frame_data =
+      (Canvas::Transform::FrameData *)data;
 
   Frame *frame = frame_data->frame;
 
@@ -277,18 +305,20 @@ void Widget::canvas_shape_set_module_position(void *data, ImVec2 value) {
   }
 }
 
-void Widget::canvas_shape_set_pod_size(void *data, ImVec2 value) {
+void Widget::Canvas::canvas_shape_set_pod_size(void *data, ImVec2 value) {
 
-  CanvasTransform::FrameData *frame_data = (CanvasTransform::FrameData *)data;
+  Canvas::Transform::FrameData *frame_data =
+      (Canvas::Transform::FrameData *)data;
 
   Frame *frame = frame_data->frame;
 
   canvas_set_pod_size(frame_data->canvas, frame, (vec2){value.x, value.y});
 }
 
-void Widget::canvas_shape_set_pod_position(void *data, ImVec2 value) {
+void Widget::Canvas::canvas_shape_set_pod_position(void *data, ImVec2 value) {
 
-  CanvasTransform::FrameData *frame_data = (CanvasTransform::FrameData *)data;
+  Canvas::Transform::FrameData *frame_data =
+      (Canvas::Transform::FrameData *)data;
 
   Frame *frame = frame_data->frame;
 

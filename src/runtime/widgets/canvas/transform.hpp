@@ -9,6 +9,7 @@
 
 namespace Widget {
 
+namespace Canvas {
 void canvas_shape_get_frame_position(void *, ImVec2 &);
 void canvas_shape_get_frame_size(void *, ImVec2 &);
 
@@ -23,14 +24,14 @@ void canvas_shape_set_pod_size(void *, ImVec2);
 
 void canvas_shape_on_module_session_end(void *);
 
-class CanvasTransform : public CanvasModule {
+class Transform : public Module {
 
 public:
-  CanvasTransform(Gui *gui, Canvas *node);
-  Transform::Box transform_box;
+  Transform(Gui *gui, ::Canvas *node);
+  ::Widget::Transform::Box transform_box;
 
   typedef struct {
-    Canvas *canvas;
+    ::Canvas *canvas;
     Frame *frame;
     FrameAllocList *parent_list;
   } FrameData;
@@ -42,10 +43,17 @@ public:
     ConfigurationType_COUNT,
   } ConfigurationType;
 
+  typedef enum {
+    State_None = 0,
+    State_Freeze = 1 << 0,
+    State_Dragging = 1 << 1,
+    State_Deselect = 1 << 2,
+  } State;
+
   typedef struct {
     // either scale, move or all, as instance for modules we only want to allow
     // move transformation.
-    Transform::Box::Mode transform_mode;
+    ::Widget::Transform::Box::Mode transform_mode;
     // Size accessor of the object
     transform_box_get_size_callback get_size;
     // Position accessor of the object
@@ -72,26 +80,27 @@ public:
 
   void listen_frame(FrameShape *, const ConfigurationType);
 
+  const unsigned int get_state() { return state; }
+
   void listen_active_connector_handle(ConnectorHandle *, Connector *);
 
-  void freeze_transform() { flag_enable(State_Freeze, &state); }
-  void unfreeze_transform() { flag_disable(State_Freeze, &state); }
+  void freeze() { flag_enable(State_Freeze, &state); }
+  void unfreeze() { flag_disable(State_Freeze, &state); }
 
   void begin() { transform_box.begin(); }
   void end() {
-    if (transform_box.end() == Transform::Box::Status_ClearSelection) {
+    if (transform_box.end() ==
+        ::Widget::Transform::Box::Status_ClearSelection) {
+      flag_enable(State_Deselect, &state);
       canvas_empty_frame_state(node, CanvasFrameState_Selected);
       canvas_empty_module_state(node, CanvasModuleState_Selected);
       canvas_empty_pod_state(node, CanvasPodState_Selected);
+    } else {
+      flag_disable(State_Deselect, &state);
     }
   }
 
 private:
-  typedef enum {
-    State_None = 0,
-    State_Freeze = 1 << 0,
-  } State;
-
   struct {
     FrameData entries[ALLOCATOR_MAX_FRAMES];
     size_t count;
@@ -99,10 +108,10 @@ private:
 
   Configuration transform_configuration[ConfigurationType_COUNT] = {};
 
-  Canvas *node;
   unsigned int state = State_None;
 };
 
+} // namespace Canvas
 }; // namespace Widget
 
 #endif

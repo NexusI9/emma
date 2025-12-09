@@ -20,7 +20,8 @@ class ToolBarShape {
 
 public:
   ToolBarShape(WGPUTextureView view);
-  void draw();
+  void update();
+  void render();
   StaticListStatus add_callback(on_tool_change, void *);
 
 private:

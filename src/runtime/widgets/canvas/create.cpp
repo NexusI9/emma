@@ -6,9 +6,9 @@
 #include "runtime/node/canvas.h"
 #include "runtime/node/frame.h"
 
-void Widget::CanvasCreate::listen() {
+void Widget::Canvas::Create::begin() {
 
-  if ((state & State_Freeze) == 0) {
+  if ((state & SessionState_Freeze) == 0) {
 
     // Clicked based creation
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
@@ -54,18 +54,25 @@ void Widget::CanvasCreate::listen() {
       }
     }
 
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
       frame_release();
-    }
   }
 }
 
-void Widget::CanvasCreate::get_mouse_position(vec2 dest) {
+/**
+   Similarily to selection system, we reset the session state at the end of the loop.
+   Important to separate:
+   1. (Persistent) State : maintained between loops
+   2. Session State: reset at the end of each loops
+ */
+void Widget::Canvas::Create::end() { unfreeze(); }
+
+void Widget::Canvas::Create::get_mouse_position(vec2 dest) {
   glm_vec2(ImGui::GetIO().MousePos, dest);
   vp2_scene(dest, dest);
 }
 
-void Widget::CanvasCreate::frame_create() {
+void Widget::Canvas::Create::frame_create() {
 
   if (new_frame != nullptr)
     return;
@@ -77,7 +84,7 @@ void Widget::CanvasCreate::frame_create() {
   canvas_set_frame_position(node, new_frame, mouse_pos);
 }
 
-void Widget::CanvasCreate::frame_resize() {
+void Widget::Canvas::Create::frame_resize() {
 
   if (new_frame == nullptr)
     return;
@@ -97,7 +104,7 @@ void Widget::CanvasCreate::frame_resize() {
   didn't drag), then we set its size equal to the last created frame in the
   list.
 */
-void Widget::CanvasCreate::frame_release() {
+void Widget::Canvas::Create::frame_release() {
 
   if (!new_frame)
     return;
@@ -114,9 +121,9 @@ void Widget::CanvasCreate::frame_release() {
   new_frame = nullptr;
 }
 
-void Widget::CanvasCreate::module() {}
+void Widget::Canvas::Create::module() {}
 
-void Widget::CanvasCreate::pod() {
+void Widget::Canvas::Create::pod() {
 
   Frame *pod = canvas_create_pod(node);
   if (pod) {
@@ -128,6 +135,6 @@ void Widget::CanvasCreate::pod() {
   }
 }
 
-void Widget::CanvasCreate::shape() {}
+void Widget::Canvas::Create::shape() {}
 
-void Widget::CanvasCreate::note() {}
+void Widget::Canvas::Create::note() {}

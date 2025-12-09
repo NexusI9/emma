@@ -7,10 +7,9 @@
 #include "runtime/widgets/transform/transform_box.hpp"
 #include "runtime/widgets/utils.hpp"
 
-void Widget::CanvasSelection::frame_selection_listen(FrameShape *frame) {
+void Widget::Canvas::Selection::frame_selection_listen(FrameShape *frame) {
 
-  if ((selection_state & SelectionState_Freeze) == 0 &&
-      frame->boundbox_hovered()) {
+  if ((state & State_Freeze) == 0 && frame->boundbox_hovered()) {
 
     ImDrawList *dl = ImGui::GetWindowDrawList();
     Frame *frame_node = frame->get_node();
@@ -28,7 +27,7 @@ void Widget::CanvasSelection::frame_selection_listen(FrameShape *frame) {
    with the mouse on click by updating the touch point position coordinate which
    will then affect the draw called upon.
  */
-void Widget::CanvasSelection::listen_connector_handle_selection(
+void Widget::Canvas::Selection::listen_connector_handle_selection(
     Connector *connector) {
 
   for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
@@ -43,9 +42,9 @@ void Widget::CanvasSelection::listen_connector_handle_selection(
 
       if (gui_selection_hit(&selection_connector,
                             ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
-                                SelectionState_None == selection_state)) {
+                                State_None == state)) {
         active_connector_handle = handle;
-        flag_enable(SelectionState_ConnectorHandle, &selection_state);
+        flag_enable(State_SelectConnectorHandle, &state);
       }
     }
   }
@@ -55,7 +54,7 @@ void Widget::CanvasSelection::listen_connector_handle_selection(
    On Connector handle release we check if the handle is within a frame or pod
    bound and connect it to the closest valid frame/pod handle.
  */
-void Widget::CanvasSelection::listen_active_connector_handle_release(
+void Widget::Canvas::Selection::listen_active_connector_handle_release(
     Connector *connector) {
 
   if (active_connector_handle &&
@@ -78,18 +77,18 @@ void Widget::CanvasSelection::listen_active_connector_handle_release(
               frames[i].list->length,
               frames[i].sides) == ConnectSystemStatus_Success) {
         active_connector_handle = nullptr;
-        flag_disable(SelectionState_ConnectorHandle, &selection_state);
-        flag_disable(SelectionState_NewConnectorHandle, &selection_state);
+        flag_disable(State_SelectConnectorHandle, &state);
+        flag_disable(State_SelectNewConnectorHandle, &state);
         break;
       }
     }
   }
 }
 
-void Widget::CanvasSelection::listen_connector_selection(
+void Widget::Canvas::Selection::listen_connector_selection(
     ConnectorShape *shape) {
 
-  if (SelectionState_Freeze & selection_state)
+  if (State_Freeze & state)
     return;
 
   Connector *connector = shape->get_node();
@@ -103,10 +102,11 @@ void Widget::CanvasSelection::listen_connector_selection(
         allocator_connector_capacity(),
         &node->connectors[CanvasConnectorState_Selected].length, connector->id);
     active_connector = connector;
+    flag_enable(State_SelectConnector, &state);
   }
 }
 
-void Widget::CanvasSelection::connector_selection_begin() {
+void Widget::Canvas::Selection::connector_selection_begin() {
 
   gui_selection_begin(&selection_connector,
                       ImGui::IsMouseClicked(ImGuiMouseButton_Left));
@@ -116,34 +116,34 @@ void Widget::CanvasSelection::connector_selection_begin() {
   If didn't catch any connector (active_connector == NULL). Empty the selector
   list.
  */
-void Widget::CanvasSelection::connector_selection_end() {
+void Widget::Canvas::Selection::connector_selection_end() {
 
   if (selection_status(&selection_connector) == GuiSelectionStatus_Blank) {
     stli_empty(node->connectors[CanvasConnectorState_Selected].entries,
                &node->connectors[CanvasConnectorState_Selected].length,
                sizeof(alloc_id), "Canvas Selected Connectors List");
     active_connector = nullptr;
+    flag_disable(State_SelectConnector, &state);
   }
 
   selection_end(&selection_connector);
 
   if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
-      (SelectionState_ConnectorHandle & selection_state)) {
+      (State_SelectConnectorHandle & state)) {
     active_connector_handle = nullptr;
-    flag_disable(SelectionState_ConnectorHandle, &selection_state);
+    flag_disable(State_SelectConnectorHandle, &state);
   }
 }
 
 /**
    Check if we click a frame handle connector to create a new one
  */
-void Widget::CanvasSelection::listen_new_connector_handle(
+void Widget::Canvas::Selection::listen_new_connector_handle(
     Frame *frame, ConnectorHandle *handle, ConnectorHandleShape *handle_shape) {
 
   if (gui_selection_hit(&selection_connector,
                         ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
-                            handle_shape->hovered() &&
-                            SelectionState_None == selection_state)) {
+                            handle_shape->hovered() && State_None == state)) {
 
     ConnectorDescriptor connector_desc = {};
     connector_desc.start = handle;
@@ -164,7 +164,7 @@ void Widget::CanvasSelection::listen_new_connector_handle(
       connector_handle_set_position(active_connector_handle,
                                     (vec2){mouse.x, mouse.y});
 
-      flag_enable(SelectionState_NewConnectorHandle, &selection_state);
+      flag_enable(State_SelectNewConnectorHandle, &state);
     }
   }
 }

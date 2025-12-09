@@ -12,14 +12,16 @@
 #include <imgui/imgui.h>
 
 namespace Widget {
-
-class CanvasCreate : public CanvasModule {
+namespace Canvas {
+class Create : public Module {
 
 public:
+
+  // Session states are reset at the end of each loop
   typedef enum {
-    State_None = 0,
-    State_Freeze = 1 << 0,
-  } State;
+    SessionState_None = 0,
+    SessionState_Freeze = 1 << 0,
+  } SessionState;
 
   typedef enum {
     Mode_Frame,
@@ -30,18 +32,23 @@ public:
     Mode_COUNT,
   } Mode;
 
-  CanvasCreate(Gui *gui, Canvas *node) : CanvasModule(gui, node) {
+  Create(Gui *gui, ::Canvas *node) : Module(gui, node) {
     glm_vec2_copy((float *)ui_sprite(UISprite_Pod_Base)->size, pod_half_size);
     glm_vec2_scale(pod_half_size, 0.5f, pod_half_size);
   }
   void update_mode(const Mode mode) { this->mode = mode; }
-  void listen();
-  void freeze() { flag_enable(State_Freeze, &state); };
-  void unfreeze() { flag_disable(State_Freeze, &state); };
+  
+  void begin();
+  void end();
+
+  void freeze() { flag_enable(SessionState_Freeze, &state); };
+  void unfreeze() { flag_disable(SessionState_Freeze, &state); };
+ 
 
 private:
   Mode mode = Mode_Frame;
-  unsigned int state = State_None;
+  unsigned int state = SessionState_None;
+
   vec2 pod_half_size;
   Frame *new_frame = nullptr;
 
@@ -56,6 +63,7 @@ private:
   void note();
 };
 
+} // namespace Canvas
 } // namespace Widget
 
 #endif

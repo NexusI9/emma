@@ -52,11 +52,16 @@ public:
     switch (state) {
 
     case DisplayState_Heatmap:
-      canvas_shape.enable_state(Widget::CanvasShape::State_FreezeSelection);
+      canvas_shape.enable_state(
+          Widget::Canvas::Shape::State_FreezeSelection |
+          Widget::Canvas::Shape::State_FreezeTransform |
+          Widget::Canvas::Shape::State_FreezeCreationSession);
       break;
 
     case DisplayState_Octagon:
-      canvas_shape.enable_state(Widget::CanvasShape::State_ShowOctagon);
+      canvas_shape.enable_state(
+          Widget::Canvas::Shape::State_ShowOctagon |
+          Widget::Canvas::Shape::State_FreezeCreationSession);
       break;
 
     default:
@@ -70,16 +75,29 @@ public:
     switch (state) {
 
     case DisplayState_Heatmap:
-      canvas_shape.disable_state(Widget::CanvasShape::State_FreezeSelection);
+      canvas_shape.enable_state(
+          Widget::Canvas::Shape::State_FreezeCreationSession);
+      canvas_shape.disable_state(Widget::Canvas::Shape::State_FreezeSelection |
+                                 Widget::Canvas::Shape::State_FreezeTransform);
       break;
 
     case DisplayState_Octagon:
-      canvas_shape.disable_state(Widget::CanvasShape::State_ShowOctagon);
+      canvas_shape.enable_state(
+          Widget::Canvas::Shape::State_FreezeCreationSession);
+      canvas_shape.disable_state(Widget::Canvas::Shape::State_ShowOctagon);
       break;
 
     default:
       break;
     }
+  }
+
+  void canvas_enable_state(const Widget::Canvas::Shape::State state) {
+    canvas_shape.enable_state(state);
+  }
+
+  void canvas_disable_state(const Widget::Canvas::Shape::State state) {
+    canvas_shape.disable_state(state);
   }
 
   unsigned int get_display_state() { return display_state; }
@@ -88,7 +106,7 @@ public:
     return get_display_state() & state;
   }
 
-  void update_canvas_mode(const Widget::CanvasCreate::Mode mode) {
+  void update_canvas_mode(const Widget::Canvas::Create::Mode mode) {
     canvas_shape.update_create_mode(mode);
   }
 
@@ -100,7 +118,7 @@ private:
   Gui *gui;
   unsigned int display_state = 0;
 
-  Widget::CanvasShape canvas_shape;
+  Widget::Canvas::Shape canvas_shape;
   Widget::ToolBarShape tool_bar;
   Layout::NavBar nav_bar;
   UI::Frame heatmap_list_shape;

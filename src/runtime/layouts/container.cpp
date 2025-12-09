@@ -3,6 +3,7 @@
 #include "runtime/manager/atlas.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/heatmap.h"
+#include "runtime/widgets/canvas/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
 #include "utils/input.h"
 
@@ -73,15 +74,18 @@ void Layout::Container::draw() {
   UI::FullScreenWindow().Begin("Root container");
   {
 
+    nav_bar.update();
+    tool_bar.update();
+    
     canvas_shape.draw();
-    tool_bar.draw();
 
     if (display_state_enabled(DisplayState_Heatmap)) {
       heatmaps[active_heatmap].draw();
       draw_heatmap_list();
     }
 
-    nav_bar.draw();
+    nav_bar.render();
+    tool_bar.render();
   }
   UI::FullScreenWindow().End();
 
@@ -152,5 +156,7 @@ bool container_get_heatmap_state(void *data) {
 
 void on_toolbar_update(const uint8_t active, void *data) {
   Layout::Container *container = (Layout::Container *)data;
-  container->update_canvas_mode((Widget::CanvasCreate::Mode)active);
+  container->update_canvas_mode((Widget::Canvas::Create::Mode)active);
+  container->canvas_enable_state(
+      Widget::Canvas::Shape::State::State_FreezeCreationSession);
 }

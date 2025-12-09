@@ -11,17 +11,18 @@
 #include <imgui/imgui.h>
 
 namespace Widget {
-
-class CanvasDestroy : public CanvasModule {
+namespace Canvas {
+class Destroy : public Module {
 
 public:
-  CanvasDestroy(Gui *gui, Canvas *node) : CanvasModule(gui, node) {}
+  Destroy(Gui *gui, ::Canvas *node) : Module(gui, node) {}
 
   bool listen() { return input_key(INPUT_KEY_BACKSPACE); }
   void active_connector(Connector **);
   CanvasStatus selected_frames();
 };
 
+} // namespace Canvas
 } // namespace Widget
 
 #endif

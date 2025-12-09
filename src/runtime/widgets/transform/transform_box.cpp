@@ -195,7 +195,7 @@ void Widget::Transform::Box::draw() {
   if (active_handle >= 0 && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
     active_handle = -1;
     flag_disable(State_Dragging, &state);
-    
+
     for (size_t i = 0; i < object_manager.count(); i++) {
 
       ObjectManager::Object *entry = object_manager.get_entry(i);
@@ -340,7 +340,8 @@ Widget::Transform::Box::Status Widget::Transform::Box::end() {
 
   Transform::Box::Status status = Transform::Box::Status_SessionAlreadyStarted;
 
-  if (selection_status(&selection) == GuiSelectionStatus_Blank) {
+  if (object_manager.count() &&
+      selection_status(&selection) == GuiSelectionStatus_Blank) {
     object_manager.empty();
     status = Transform::Box::Status_ClearSelection;
   }

@@ -11,20 +11,30 @@
 #include <imgui/imgui.h>
 
 namespace Widget {
-
-class CanvasSelection : public CanvasModule {
+namespace Canvas {
+class Selection : public Module {
 
 public:
-  CanvasSelection(Gui *gui, Canvas *node) : CanvasModule(gui, node) {
+  Selection(Gui *gui, ::Canvas *node) : Module(gui, node) {
     gui_selection_init(&selection_connector);
     gui_highlight_init(&highlight);
   }
+
+  typedef enum {
+    State_None = 0,
+    State_SelectConnectorHandle = 1 << 0,
+    State_SelectNewConnectorHandle = 1 << 1,
+    State_SelectConnector = 1 << 2,
+    State_Freeze = 1 << 3,
+  } State;
 
   void frame_selection_listen(FrameShape *);
   void connector_selection_begin();
   void listen_connector_selection(ConnectorShape *);
   void listen_connector_handle_selection(Connector *);
   void connector_selection_end();
+
+  const unsigned int get_state() { return state; }
 
   ConnectorHandle *active_connector_handle = nullptr;
   Connector *active_connector = nullptr;
@@ -34,22 +44,11 @@ public:
 
   void listen_active_connector_handle_release(Connector *);
 
-  void freeze_selection() {
-    flag_enable(SelectionState_Freeze, &selection_state);
-  };
+  void freeze() { flag_enable(State_Freeze, &state); };
 
-  void unfreeze_selection() {
-    flag_disable(SelectionState_Freeze, &selection_state);
-  };
+  void unfreeze() { flag_disable(State_Freeze, &state); };
 
 private:
-  typedef enum {
-    SelectionState_None = 0,
-    SelectionState_ConnectorHandle = 1 << 0,
-    SelectionState_NewConnectorHandle = 1 << 1,
-    SelectionState_Freeze = 1 << 2,
-  } SelectionState;
-
   typedef enum {
     HighlightConfigurationType_Frame,
     HighlightConfigurationType_Module_N_Pod,
@@ -59,9 +58,10 @@ private:
 
   GuiHighlight highlight;
   GuiSelection selection_connector;
-  unsigned int selection_state = SelectionState_None;
+  unsigned int state = State_None;
 };
 
+} // namespace Canvas
 }; // namespace Widget
 
 #endif

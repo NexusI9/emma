@@ -14,6 +14,7 @@
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "runtime/systems/connect_system.h"
+#include "runtime/widgets/canvas/selection.hpp"
 #include "runtime/widgets/connector.hpp"
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
@@ -26,7 +27,7 @@
 #include <imgui/imconfig.h>
 #include <imgui/imgui_impl_wgpu.h>
 
-Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
+Widget::Canvas::Shape::Shape(Gui *gui, ::Canvas *canvas)
     : grid_background("textures/dot-pattern.png", TextureResolution_64),
       module{
           .transform = {gui, canvas},
@@ -34,9 +35,9 @@ Widget::CanvasShape::CanvasShape(Gui *gui, Canvas *canvas)
           .destroy = {gui, canvas},
           .create = {gui, canvas},
       },
-      CanvasModule(gui, canvas) {}
+      Module(gui, canvas) {}
 
-void Widget::CanvasShape::draw() {
+void Widget::Canvas::Shape::draw() {
 
   dl = ImGui::GetWindowDrawList();
 
@@ -54,7 +55,11 @@ void Widget::CanvasShape::draw() {
   }
   module.transform.end();
 
-  module.create.listen();
+  if (disable_creation())
+    module.create.freeze();
+
+  module.create.begin();
+  module.create.end();
 
   if (module.destroy.listen()) {
     module.destroy.active_connector(&module.selection.active_connector);
@@ -63,14 +68,14 @@ void Widget::CanvasShape::draw() {
   }
 }
 
-void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
-                                                       const int side) {
+void Widget::Canvas::Shape::draw_frame_handle_connectors(Frame *frame,
+                                                         const int side) {
 
   for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
 
     // TODO: maybe make a dedicated draw function for side to prevent
     // branching
-    if ((side & (1 << i)) == 0)
+    if (!(side & (1 << i)))
       continue;
 
     ConnectorHandle *handle =
@@ -82,16 +87,16 @@ void Widget::CanvasShape::draw_frame_handle_connectors(Frame *frame,
     handle_shape.draw();
 
     // disable new connector creation if dragging transform box
-    if ((Transform::Box::State_Dragging &
+    if ((::Widget::Transform::Box::State_Dragging &
          module.transform.transform_box.get_state()) == 0)
       module.selection.listen_new_connector_handle(frame, handle,
                                                    &handle_shape);
   }
 }
 
-void Widget::CanvasShape::draw_frames_octagon() {
+void Widget::Canvas::Shape::draw_frames_octagon() {
 
-  if ((State_ShowOctagon & state) == 0)
+  if (!(State_ShowOctagon & state))
     return;
 
   for (size_t i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
@@ -101,16 +106,16 @@ void Widget::CanvasShape::draw_frames_octagon() {
   }
 }
 
-void Widget::CanvasShape::draw_frames() {
+void Widget::Canvas::Shape::draw_frames() {
   for (size_t i = 0; i < node->frames->length; i++) {
     Frame *frame = allocator_frame_entry(node->frames->entries[i]);
     FrameShape frame_shape = FrameShape(frame);
     frame_shape.draw();
     module.transform.listen_frame(&frame_shape,
-                                  CanvasTransform::ConfigurationType_Frame);
+                                  Transform::ConfigurationType_Frame);
   }
 }
-void Widget::CanvasShape::draw_pods() {
+void Widget::Canvas::Shape::draw_pods() {
 
   for (size_t i = 0; i < node->pods->length; i++) {
     Frame *pod = allocator_frame_entry(node->pods->entries[i]);
@@ -118,21 +123,21 @@ void Widget::CanvasShape::draw_pods() {
     frame_shape.draw_pod();
     module.selection.frame_selection_listen(&frame_shape);
     module.transform.listen_frame(&frame_shape,
-                                  CanvasTransform::ConfigurationType_Pod);
+                                  Transform::ConfigurationType_Pod);
   }
 }
-void Widget::CanvasShape::draw_modules() {
+void Widget::Canvas::Shape::draw_modules() {
   for (size_t i = 0; i < node->modules->length; i++) {
     Frame *frame = allocator_frame_entry(node->modules->entries[i]);
     FrameShape frame_shape = FrameShape(frame);
     frame_shape.draw_texture();
     module.selection.frame_selection_listen(&frame_shape);
     module.transform.listen_frame(&frame_shape,
-                                  CanvasTransform::ConfigurationType_Module);
+                                  Transform::ConfigurationType_Module);
   }
 }
 
-void Widget::CanvasShape::draw_connectors() {
+void Widget::Canvas::Shape::draw_connectors() {
 
   module.selection.connector_selection_begin();
   for (size_t i = 0; i < node->connectors->length; i++) {
@@ -143,8 +148,9 @@ void Widget::CanvasShape::draw_connectors() {
     module.selection.listen_connector_selection(&connector_shape);
 
     // disable new handle transform if dragging transform box
-    if ((Transform::Box::State_Dragging &
-         module.transform.transform_box.get_state()) == 0) {
+    if (!(::Widget::Transform::Box::State_Dragging &
+          module.transform.transform_box.get_state())) {
+
       module.selection.listen_connector_handle_selection(connector);
       module.transform.listen_active_connector_handle(
           module.selection.active_connector_handle, connector);
@@ -158,7 +164,7 @@ void Widget::CanvasShape::draw_connectors() {
   module.selection.connector_selection_end();
 }
 
-void Widget::CanvasShape::draw_selected_items_connector_handles() {
+void Widget::Canvas::Shape::draw_selected_items_connector_handles() {
 
   size_t i;
   for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
@@ -181,4 +187,29 @@ void Widget::CanvasShape::draw_selected_items_connector_handles() {
 
     ConnectorShape(gui, connector).draw_handles();
   }
+}
+
+bool Widget::Canvas::Shape::disable_creation() {
+
+  // Heatmap is shown
+  bool heatmap_displayed = state & State_ShowHeatmap;
+
+  // Transform box is dragging
+  bool transform_box_dragging =
+      ::Widget::Transform::Box::State::State_Dragging &
+      module.transform.transform_box.get_state();
+
+  // Transform module is moving or clicking to deselect
+  bool transform_module_active =
+      (::Widget::Canvas::Transform::State::State_Dragging |
+       ::Widget::Canvas::Transform::State::State_Deselect) &
+      module.transform.get_state();
+
+  // Selection module is selecting a connector
+  bool selection_active =
+      ::Widget::Canvas::Selection::State::State_SelectConnector &
+      module.selection.get_state();
+
+  return heatmap_displayed || transform_box_dragging ||
+         transform_module_active || selection_active;
 }

@@ -21,7 +21,8 @@ class NavBar {
 
 public:
   NavBar(Gui *, Canvas *, NavBarSwitchConfig, NavBarSwitchConfig);
-  void draw();
+  void update();
+  void render();
 
   // TODO make it a global theme
   static constexpr ImVec2 margin = ImVec2(50.0, 20.0);
@@ -39,10 +40,21 @@ private:
   NavBarSwitchConfig heatmap_config;
 
   UI::Frame left_panel, right_panel;
-  UI::Switch oct_switch, heat_switch;
 
-  void draw_switch(UI::Switch *, const char *, const char *,
-                   NavBarSwitchConfig *, const float);
+  typedef enum {
+    DisplaySwitch_Octagon,
+    DisplaySwitch_Heatmap,
+    DisplaySwitch_COUNT,
+  } DisplaySwitch;
+
+  struct {
+    UI::Switch component;
+    ImVec2 cached_position = ImVec2(0, 0);
+  } switches[DisplaySwitch_COUNT];
+
+  void update_switch(const DisplaySwitch, const char *, NavBarSwitchConfig *);
+
+  void draw_switch(const DisplaySwitch, const char *, const float);
 };
 
 } // namespace Layout

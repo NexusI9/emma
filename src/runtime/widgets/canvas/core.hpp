@@ -4,17 +4,18 @@
 #include "runtime/node/canvas.h"
 
 namespace Widget {
-
-class CanvasModule {
+namespace Canvas {
+class Module {
 
 public:
-  CanvasModule(Gui *gui, Canvas *node) : gui(gui), node(node) {}
+  Module(Gui *gui, ::Canvas *node) : gui(gui), node(node) {}
 
 protected:
   Gui *gui;
-  Canvas *node;
+  ::Canvas *node;
 };
 
+} // namespace Canvas
 } // namespace Widget
 
 #endif

@@ -49,13 +49,9 @@ Widget::ToolBarShape::ToolBarShape(WGPUTextureView view)
   selector.set_position(selector_positions[0], GuiSpriteAnchor_BottomLeft);
 }
 
-void Widget::ToolBarShape::draw() {
-
-  background.draw();
-  selector.draw();
+void Widget::ToolBarShape::update() {
 
   for (uint8_t i = 0; i < TOOLS_COUNT; i++) {
-    tools[i].sprite.draw();
     if (tools[i].sprite.clicked(ImGuiMouseButton_Left)) {
       active_tool = i;
       selector.set_position(selector_positions[i], GuiSpriteAnchor_BottomLeft);
@@ -63,6 +59,15 @@ void Widget::ToolBarShape::draw() {
         callbacks.entries[j].callback(i, callbacks.entries[j].data);
     }
   }
+}
+
+void Widget::ToolBarShape::render() {
+
+  background.draw();
+  selector.draw();
+
+  for (uint8_t i = 0; i < TOOLS_COUNT; i++)
+    tools[i].sprite.draw();
 }
 
 StaticListStatus

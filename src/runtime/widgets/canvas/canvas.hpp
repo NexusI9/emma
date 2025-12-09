@@ -20,52 +20,51 @@
 #include "utils/id.h"
 
 namespace Widget {
-
-class CanvasShape : public CanvasModule {
+namespace Canvas {
+class Shape : public Module {
 
 public:
-  CanvasShape(Gui *, Canvas *);
+  Shape(Gui *, ::Canvas *);
 
   void draw();
-  void update_create_mode(const CanvasCreate::Mode mode) {
+  void update_create_mode(const Create::Mode mode) {
     module.create.update_mode(mode);
   }
 
   typedef enum {
     State_None = 0,
     State_ShowOctagon = 1 << 0,
-    State_FreezeSelection = 1 << 1,
+    State_ShowHeatmap = 1 << 1,
+    State_FreezeSelection = 1 << 2,
+    State_FreezeTransform = 1 << 3,
+    State_FreezeCreationSession = 1 << 4,
   } State;
 
   // TODO maybe replace with more direct function like "freeze_selection()"
-  void enable_state(const State state) {
-
+  void enable_state(const unsigned int state) {
     flag_enable(state, &this->state);
 
-    switch (state) {
+    if (State_FreezeSelection & state)
+      module.selection.freeze();
 
-    case State_FreezeSelection:
-      module.selection.freeze_selection();
-      module.transform.freeze_transform();
-      break;
+    if (State_FreezeTransform & state)
+      module.transform.freeze();
 
-    default:
-      break;
-    }
+    if (State_FreezeCreationSession & state)
+      module.create.freeze();
   }
-  void disable_state(const State state) {
+
+  void disable_state(const unsigned int state) {
     flag_disable(state, &this->state);
 
-    switch (state) {
+    if (State_FreezeSelection & state)
+      module.selection.unfreeze();
 
-    case State_FreezeSelection:
-      module.selection.unfreeze_selection();
-      module.transform.unfreeze_transform();
-      break;
+    if (State_FreezeTransform & state)
+      module.transform.unfreeze();
 
-    default:
-      break;
-    }
+    // if (State_FreezeCreation & state)
+    // module.create.unfreeze();
   }
 
 private:
@@ -73,10 +72,10 @@ private:
   ImDrawList *dl;
 
   struct {
-    CanvasSelection selection;
-    CanvasTransform transform;
-    CanvasDestroy destroy;
-    CanvasCreate create;
+    Selection selection;
+    Transform transform;
+    Destroy destroy;
+    Create create;
   } module;
 
   unsigned int state = State_None;
@@ -88,8 +87,11 @@ private:
   void draw_pods();
   void draw_modules();
   void draw_connectors();
+
+  bool disable_creation();
 };
 
+} // namespace Canvas
 } // namespace Widget
 
 #endif
