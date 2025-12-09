@@ -2,7 +2,10 @@
 #define _LAYOUT_NAV_BAR_H_
 
 #include "nkengine/include/gui.hpp"
+#include "resources/theme.emma.h"
+#include "runtime/manager/theme.h"
 #include "runtime/node/canvas.h"
+#include "runtime/widgets/utils.hpp"
 #include <imgui/imgui.h>
 
 namespace Layout {
@@ -24,13 +27,10 @@ public:
   void update();
   void render();
 
-  // TODO make it a global theme
-  static constexpr ImVec2 margin = ImVec2(50.0, 20.0);
-  static constexpr uint8_t height = 42;
-  static constexpr ImColor bg_color = ImColor(52, 52, 52, 255);
-  static constexpr ImColor bd_color = ImColor(74, 74, 74, 255);
-  static constexpr uint8_t bd_radius = 3;
-  static constexpr ImVec2 padding = ImVec2(12, 6);
+  const ImVec2 margin = ImVec2(50.0, 20.0);
+  const uint8_t height = 42;
+  const float bd_radius = emma_size(ThemeEmmaSize_Radius_Base);
+  const ImVec2 padding = ImVec2(12, 6);
 
 private:
   Gui *gui;
@@ -39,7 +39,7 @@ private:
   NavBarSwitchConfig octalysis_config;
   NavBarSwitchConfig heatmap_config;
 
-  UI::Frame left_panel, right_panel;
+  UI::Frame main_panel;
 
   typedef enum {
     DisplaySwitch_Octagon,

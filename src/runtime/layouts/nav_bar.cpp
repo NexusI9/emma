@@ -19,28 +19,16 @@ Layout::NavBar::NavBar(Gui *gui, Canvas *canvas, NavBarSwitchConfig octa_config,
       },
       octalysis_config(octa_config), heatmap_config(heatmap_config) {
 
-  // TODO COLOR
   {
-    // === Setup left panel ===
-    left_panel.position = gui_scale_im_vec2(gui, margin);
-    left_panel.background_color = ImColor(0.0f, 0.0f, 0.0f, 0.0f);
-    left_panel.border_color = ImColor(0.0f, 0.0f, 0.0f, 0.0f);
-    left_panel.padding = gui_scale_im_vec2(gui, padding);
-    left_panel.border_radius = gui_scale(gui, bd_radius);
-    left_panel.size = ImVec2(gui_scale(gui, 180), gui_scale(gui, height));
-  }
-
-  {
-    // === Setup right panel ===
+    // === Setup main panel ===
 
     // clang-format off
-    right_panel.position =
-        ImVec2(gui_scale(gui, 1160), gui_scale(gui, margin.y));
-    right_panel.background_color = emma_im_color(ThemeEmmaColor_Surface_Lower);
-    right_panel.border_color = emma_im_color(ThemeEmmaColor_Border_Subtle_On_Dark);
-    right_panel.padding = gui_scale_im_vec2(gui, padding);
-    right_panel.border_radius = gui_scale(gui, bd_radius);
-    right_panel.size = ImVec2(0, gui_scale(gui, height));
+    main_panel.position = ImVec2(gui_scale(gui, margin.x), gui_scale(gui, margin.y));
+    main_panel.background_color =  emma_im_color(ThemeEmmaColor_Surface_Transparent);
+    main_panel.border_color = ImColor(0.0f, 0.0f, 0.0f, 0.0f);
+    main_panel.padding = gui_scale_im_vec2(gui, padding);
+    main_panel.border_radius = gui_scale(gui, bd_radius);
+    main_panel.size = ImVec2(0, gui_scale(gui, height));
     // clang-format on
   }
 
@@ -72,30 +60,26 @@ void Layout::NavBar::update() {
 
 void Layout::NavBar::render() {
 
-  left_panel.Begin("Left Panel");
-  {
-    const float base_y = ImGui::GetCursorPosY();
-    ImGui::SetCursorPosY(base_y + gui_scale(gui, 3));
-    ImGui::Text("EMMA [v0.15 - alpha]");
-    ImGui::SetCursorPosX(gui_scale(gui, margin.x));
-    ImGui::SetWindowFontScale(0.8f);
-    ImGui::PushStyleColor(
-        ImGuiCol_Text,
-        (ImVec4)emma_im_color(ThemeEmmaColor_Text_Subtle_On_Dark));
-    ImGui::Text("Emotional Mapper");
-    ImGui::PopStyleColor();
-    ImGui::SetWindowFontScale(1.0f);
-  }
-  left_panel.End();
+  main_panel.Begin("Main Panel");
 
-  right_panel.Begin("Right Panel");
-  {
-    const float base_y = ImGui::GetCursorPosY();
-    draw_switch(DisplaySwitch_Octagon, "Octalysis", base_y);
-    ImGui::SameLine(0.0f, gui_scale(gui, 16));
-    draw_switch(DisplaySwitch_Heatmap, "Heatmap", base_y);
-  }
-  right_panel.End();
+  const float base_y = ImGui::GetCursorPosY();
+  ImGui::SetCursorPosY(base_y + gui_scale(gui, 3));
+  ImGui::Text("EMMA [v0.15 - alpha]");
+  ImGui::SetCursorPosX(gui_scale(gui, margin.x));
+  ImGui::SetWindowFontScale(0.8f);
+  ImGui::PushStyleColor(
+      ImGuiCol_Text, (ImVec4)emma_im_color(ThemeEmmaColor_Text_Subtle_On_Dark));
+  ImGui::Text("Emotional Mapper");
+  ImGui::PopStyleColor();
+  ImGui::SetWindowFontScale(1.0f);
+
+  // display sitches
+  ImGui::SetCursorPosX(gui_scale(gui, 1160));
+  draw_switch(DisplaySwitch_Octagon, "Octalysis", base_y);
+  ImGui::SameLine(0.0f, gui_scale(gui, 16));
+  draw_switch(DisplaySwitch_Heatmap, "Heatmap", base_y);
+
+  main_panel.End();
 }
 
 /**
