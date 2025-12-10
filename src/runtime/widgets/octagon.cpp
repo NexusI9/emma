@@ -4,7 +4,7 @@
 #include "runtime/manager/viewport.h"
 #include <imgui/imgui.h>
 
-ImU32 Widget::OctagonShape::vertex_color(const int vertex) {
+ImU32 Widget::Octagon::Component::vertex_color(const int vertex) {
 
   static const ImU32 colors[] = {
       IM_COL32(69, 251, 255, 255),  IM_COL32(112, 0, 255, 255),
@@ -18,7 +18,7 @@ ImU32 Widget::OctagonShape::vertex_color(const int vertex) {
 
 // Calculate interpolated color based on segment index (0 to 7)
 // This creates the color gradient around the perimeter
-ImU32 Widget::OctagonShape::vertex_color_rgb(const int vertex) {
+ImU32 Widget::Octagon::Component::vertex_color_rgb(const int vertex) {
 
   float t =
       (float)vertex / OCTAGON_VERTEX_COUNT; // t goes from 0.0 to approx 0.875
@@ -39,7 +39,7 @@ ImU32 Widget::OctagonShape::vertex_color_rgb(const int vertex) {
   }
 }
 
-void Widget::OctagonShape::draw_labels(ImDrawList *draw_list) {
+void Widget::Octagon::Component::draw_labels(ImDrawList *draw_list) {
 
   for (int i = 0; i < OCTAGON_VERTEX_COUNT; i++) {
     // Calculate position
@@ -56,7 +56,7 @@ void Widget::OctagonShape::draw_labels(ImDrawList *draw_list) {
   }
 }
 
-void Widget::OctagonShape::draw_inner_shape(ImDrawList *draw_list) {
+void Widget::Octagon::Component::draw_inner_shape(ImDrawList *draw_list) {
 
   ImVec2 vp_vertices[OCTAGON_VERTEX_COUNT];
 
@@ -68,7 +68,7 @@ void Widget::OctagonShape::draw_inner_shape(ImDrawList *draw_list) {
                                  im_color(node->inner_color));
 }
 
-void Widget::OctagonShape::draw_outer_gradient(ImDrawList *draw_list) {
+void Widget::Octagon::Component::draw_outer_gradient(ImDrawList *draw_list) {
 
   static const int num_segments = OCTAGON_VERTEX_COUNT;
   static const int num_vertices =
@@ -144,7 +144,7 @@ void Widget::OctagonShape::draw_outer_gradient(ImDrawList *draw_list) {
   draw_list->_VtxCurrentIdx += num_vertices;
 }
 
-void Widget::OctagonShape::draw() {
+void Widget::Octagon::Component::draw() {
 
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 

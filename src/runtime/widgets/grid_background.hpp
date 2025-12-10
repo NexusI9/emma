@@ -12,18 +12,19 @@
 
 namespace Widget {
 
-class GridBackground {
+namespace GridBackground {
+class Component {
 
 public:
-  GridBackground(const char *, const TextureResolution);
+  Component(const char *, const TextureResolution);
   void draw();
   void draw_texture(WGPURenderPassEncoder);
 
   float grid_scale = 5.0f;
   float spacing = 32.0f;
   float dot_size = 3.0f;
-  const ImColor bg_color =
-      emma_im_color(ThemeEmmaColor_Background_System_Strong_On_Dark);
+  const float *bg_color =
+      emma_color(ThemeEmmaColor_Background_System_Strong_On_Dark);
   const ImColor dot_color = emma_im_color(ThemeEmmaColor_Icon_Subtlest_On_Dark);
 
 private:
@@ -42,6 +43,7 @@ private:
   MeshDrawPacket draw_packet;
 };
 
+} // namespace GridBackground
 } // namespace Widget
 
 #endif

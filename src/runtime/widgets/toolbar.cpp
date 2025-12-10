@@ -1,17 +1,17 @@
-#include "tool_bar.hpp"
+#include "toolbar.hpp"
 #include "nkengine/include/gui.hpp"
 #include "runtime/manager/ui_sprite.h"
 #include "webgpu/webgpu.h"
 
-Widget::ToolBarShape::ToolBarShape(WGPUTextureView view)
+Widget::ToolBar::Component::Component(WGPUTextureView view)
     : background(view, ui_sprite(UISprite_Toolbar)),
       selector(view, ui_sprite(UISprite_Toolbar_Icon_Selector)),
       tools{
-          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Frame)),
-          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Module)),
-          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Persona)),
-          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Note)),
-          ToolButtonShape(view, ui_sprite(UISprite_Toolbar_Icon_Shape)),
+          Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Frame)),
+          Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Module)),
+          Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Persona)),
+          Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Note)),
+          Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Shape)),
       } {
 
   const float scale = context_dpi();
@@ -49,7 +49,7 @@ Widget::ToolBarShape::ToolBarShape(WGPUTextureView view)
   selector.set_position(selector_positions[0], GuiSpriteAnchor_BottomLeft);
 }
 
-void Widget::ToolBarShape::update() {
+void Widget::ToolBar::Component::update() {
 
   for (uint8_t i = 0; i < TOOLS_COUNT; i++) {
     if (tools[i].sprite.clicked(ImGuiMouseButton_Left)) {
@@ -61,7 +61,7 @@ void Widget::ToolBarShape::update() {
   }
 }
 
-void Widget::ToolBarShape::render() {
+void Widget::ToolBar::Component::render() {
 
   background.draw();
   selector.draw();
@@ -71,12 +71,11 @@ void Widget::ToolBarShape::render() {
 }
 
 StaticListStatus
-Widget::ToolBarShape::add_callback(Widget::on_tool_change callback,
-                                   void *data) {
+Widget::ToolBar::Component::add_callback(on_tool_change callback, void *data) {
 
-  ToolBarShapeCallback entry = {.callback = callback, .data = data};
+  ToolBar::UpdateCallback entry = {.callback = callback, .data = data};
 
   return stli_insert(callbacks.entries, TOOLBAR_CALLBACK_CAPACITY,
-                     &callbacks.count, sizeof(ToolBarShapeCallback), &entry,
+                     &callbacks.count, sizeof(ToolBar::UpdateCallback), &entry,
                      "Tool Bar Shape Callback List");
 }

@@ -10,6 +10,7 @@
 namespace Widget {
 
 namespace Canvas {
+
 void canvas_shape_get_frame_position(void *, ImVec2 &);
 void canvas_shape_get_frame_size(void *, ImVec2 &);
 
@@ -32,7 +33,7 @@ public:
 
   typedef struct {
     ::Canvas *canvas;
-    Frame *frame;
+    ::Frame *frame;
     FrameAllocList *parent_list;
   } FrameData;
 
@@ -78,11 +79,11 @@ public:
     ImGuiMouseButton button;
   } Configuration;
 
-  void listen_frame(FrameShape *, const ConfigurationType);
+  void listen_frame(Frame::Component *, const ConfigurationType);
 
   const unsigned int get_state() { return state; }
 
-  void listen_active_connector_handle(ConnectorHandle *, Connector *);
+  void listen_active_connector_handle(::ConnectorHandle *, ::Connector *);
 
   void freeze() { flag_enable(State_Freeze, &state); }
   void unfreeze() { flag_disable(State_Freeze, &state); }

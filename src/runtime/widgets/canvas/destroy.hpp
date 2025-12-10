@@ -18,7 +18,7 @@ public:
   Destroy(Gui *gui, ::Canvas *node) : Module(gui, node) {}
 
   bool listen() { return input_key(INPUT_KEY_BACKSPACE); }
-  void active_connector(Connector **);
+  void active_connector(::Connector **);
   CanvasStatus selected_frames();
 };
 

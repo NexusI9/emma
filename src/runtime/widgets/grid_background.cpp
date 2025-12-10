@@ -1,21 +1,23 @@
 #include "grid_background.hpp"
 #include "imgui/imgui_impl_wgpu.h"
 #include "nkengine/include/context.h"
+#include "nkengine/include/gui.hpp"
 #include "nkengine/include/resource_manager.h"
 #include "nkengine/include/texture.h"
+#include "runtime/manager/theme.h"
 #include "runtime/manager/viewport.h"
 #include "webgpu/webgpu.h"
 #include <cglm/cglm.h>
 
-Widget::GridBackground::GridBackground(const char *path,
-                                       const TextureResolution resolution) {
+Widget::GridBackground::Component::Component(
+    const char *path, const TextureResolution resolution) {
 
   // create texture
   create_grid_texture(path, resolution);
   create_mesh();
 }
 
-void Widget::GridBackground::update_uv() {
+void Widget::GridBackground::Component::update_uv() {
 
   const float scale = viewport_get_scale();
   const float *pan = viewport_get_pan();
@@ -38,7 +40,7 @@ void Widget::GridBackground::update_uv() {
                    sizeof(TextureCoordinatesUniform), REMWriteFlag_None);
 }
 
-void Widget::GridBackground::create_mesh() {
+void Widget::GridBackground::Component::create_mesh() {
 
   // create mesh
   quad = rem_new_mesh();
@@ -63,8 +65,7 @@ void Widget::GridBackground::create_mesh() {
   buffer_desc.usage = WGPUBufferUsage_Uniform | WGPUBufferUsage_CopyDst;
   texture_coordinates_buffer = rem_new_buffer(&buffer_desc);
 
-  glm_vec4_copy((vec4){20.0f / 255.0f, 20.0f / 255.0f, 20.0f / 255.0f, 1.0f},
-                texture_coo_uniform.color);
+  glm_vec4_copy((float *)bg_color, texture_coo_uniform.color);
 
   rem_write_buffer(texture_coordinates_buffer, 0, &texture_coo_uniform,
                    sizeof(TextureCoordinatesUniform), REMWriteFlag_None);
@@ -114,7 +115,7 @@ void Widget::GridBackground::create_mesh() {
   }
 }
 
-void Widget::GridBackground::create_grid_texture(
+void Widget::GridBackground::Component::create_grid_texture(
     const char *path, const TextureResolution resolution) {
 
   texture_resolution = resolution;
@@ -160,14 +161,15 @@ void Widget::GridBackground::create_grid_texture(
 }
 
 // UNUSED: two costly, we just use a tiled texture
-void Widget::GridBackground::draw() {
+void Widget::GridBackground::Component::draw() {
   ImDrawList *dl = ImGui::GetBackgroundDrawList();
   const ImGuiViewport *vp = ImGui::GetMainViewport();
   ImVec2 pos = vp->Pos;
   ImVec2 size = vp->Size;
 
   // Background fill
-  dl->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), bg_color);
+  dl->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y),
+                    im_color(bg_color));
 
   //  Grid dots (squares)
   if (viewport_get_scale() > 0.6) {
@@ -224,7 +226,8 @@ void Widget::GridBackground::draw() {
   }
 }
 
-void Widget::GridBackground::draw_texture(WGPURenderPassEncoder pass_encoder) {
+void Widget::GridBackground::Component::draw_texture(
+    WGPURenderPassEncoder pass_encoder) {
 
   const ImGuiViewport *vp = ImGui::GetMainViewport();
   ImVec2 pos = vp->Pos;
@@ -242,6 +245,7 @@ void Widget::GridBackground::draw_texture(WGPURenderPassEncoder pass_encoder) {
                 pass_encoder);
     mesh_draw(&draw_packet, pass_encoder);
   } else {
-    dl->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), bg_color);
+    dl->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y),
+                      im_color(bg_color));
   }
 }

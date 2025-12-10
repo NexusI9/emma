@@ -29,21 +29,21 @@ public:
     State_Freeze = 1 << 4,
   } State;
 
-  void frame_selection_listen(FrameShape *);
+  void frame_selection_listen(Frame::Component *);
   void connector_selection_begin();
-  void listen_connector_selection(ConnectorShape *);
-  void listen_connector_handle_selection(Connector *);
+  void listen_connector_selection(Connector::Component *);
+  void listen_connector_handle_selection(::Connector *);
   void connector_selection_end();
 
   const unsigned int get_state() { return state; }
 
-  ConnectorHandle *active_connector_handle = nullptr;
-  Connector *active_connector = nullptr;
+  ::ConnectorHandle *active_connector_handle = nullptr;
+  ::Connector *active_connector = nullptr;
 
-  void listen_new_connector_handle(Frame *, ConnectorHandle *,
-                                   ConnectorHandleShape *);
+  void listen_new_connector_handle(::Frame *, ::ConnectorHandle *,
+                                   ConnectorHandle::Component *);
 
-  void listen_active_connector_handle_release(Connector *);
+  void listen_active_connector_handle_release(::Connector *);
 
   void freeze() { flag_enable(State_Freeze, &state); };
 

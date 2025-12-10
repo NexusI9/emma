@@ -57,7 +57,7 @@ Widget::Canvas::Transform::Transform(Gui *gui, ::Canvas *node)
    Handle the boundbox interaction along with the transformation for frames
    and modules.
  */
-void Widget::Canvas::Transform::listen_frame(FrameShape *frame,
+void Widget::Canvas::Transform::listen_frame(Frame::Component *frame,
                                              const ConfigurationType type) {
 
   if (State_Freeze & state)
@@ -65,7 +65,7 @@ void Widget::Canvas::Transform::listen_frame(FrameShape *frame,
 
   const Configuration *conf = &transform_configuration[type];
 
-  Frame *frame_node = frame->get_node();
+  ::Frame *frame_node = frame->get_node();
 
   // no matter the button, if a click happened and hit a frame *area*, we update
   // the transform session status to "Has Hit"
@@ -160,13 +160,12 @@ void Widget::Canvas::Transform::listen_active_connector_handle(
     ConnectorHandle *handle, Connector *connector) {
   if (handle) {
     flag_enable(State_Dragging, &state);
-    
+
     ImVec2 mouse = vp_im2_scene(ImGui::GetIO().MousePos);
     connector_handle_set_position(handle, (vec2){mouse.x, mouse.y});
     connector_update_corners(connector);
   } else {
     flag_disable(State_Dragging, &state);
-    
   }
 }
 
@@ -180,12 +179,12 @@ void Widget::Canvas::canvas_shape_on_module_session_end(void *data) {
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  Frame *frame = allocator_frame_entry(frame_data->frame->id);
+  ::Frame *frame = allocator_frame_entry(frame_data->frame->id);
 
   // check if still within parent bound
   if (frame_data->frame->parent != ID_UNDEFINED) {
 
-    Frame *parent = allocator_frame_entry(frame->parent);
+    ::Frame *parent = allocator_frame_entry(frame->parent);
 
     if (!frame_collide(parent, frame))
       frame_remove_child(parent, frame->id);
@@ -194,7 +193,7 @@ void Widget::Canvas::canvas_shape_on_module_session_end(void *data) {
   // check if the frame is within a parent frame scope
   if (frame_data->parent_list)
     for (size_t i = 0; i < frame_data->parent_list->length; i++) {
-      Frame *parent =
+      ::Frame *parent =
           allocator_frame_entry(frame_data->parent_list->entries[i]);
       if (frame_collide(parent, frame)) {
         frame_add_child(parent, frame->id);
@@ -222,7 +221,7 @@ void Widget::Canvas::canvas_shape_get_frame_position(void *data,
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  Frame *frame = frame_data->frame;
+  ::Frame *frame = frame_data->frame;
 
   const float *world_pos = frame_get_world_position(frame);
   value = ImVec2(world_pos[0], world_pos[1]);
@@ -233,7 +232,7 @@ void Widget::Canvas::canvas_shape_get_frame_size(void *data, ImVec2 &value) {
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  Frame *frame = frame_data->frame;
+  ::Frame *frame = frame_data->frame;
 
   value = im_vec2(frame->size);
 }
@@ -243,7 +242,7 @@ void Widget::Canvas::canvas_shape_set_frame_position(void *data, ImVec2 value) {
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  Frame *frame = frame_data->frame;
+  ::Frame *frame = frame_data->frame;
   canvas_set_frame_position(frame_data->canvas, frame,
                             (vec2){value.x, value.y});
 
@@ -255,7 +254,7 @@ void Widget::Canvas::canvas_shape_set_frame_size(void *data, ImVec2 value) {
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  Frame *frame = frame_data->frame;
+  ::Frame *frame = frame_data->frame;
 
   canvas_set_frame_size(frame_data->canvas, frame, (vec2){value.x, value.y});
 }
@@ -265,7 +264,7 @@ void Widget::Canvas::canvas_shape_set_module_size(void *data, ImVec2 value) {
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  Frame *frame = frame_data->frame;
+  ::Frame *frame = frame_data->frame;
 
   canvas_set_module_size(frame_data->canvas, frame, (vec2){value.x, value.y});
 }
@@ -276,7 +275,7 @@ void Widget::Canvas::canvas_shape_set_module_position(void *data,
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  Frame *frame = frame_data->frame;
+  ::Frame *frame = frame_data->frame;
 
   canvas_set_module_world_position(frame_data->canvas, frame,
                                    (vec2){value.x, value.y});
@@ -299,7 +298,7 @@ void Widget::Canvas::canvas_shape_set_module_position(void *data,
    experience.
    */
   if (frame_data->frame->parent != ID_UNDEFINED) {
-    Frame *parent = allocator_frame_entry(frame->parent);
+    ::Frame *parent = allocator_frame_entry(frame->parent);
     if (!frame_collide(parent, frame))
       frame_remove_child(parent, frame->id);
   }
@@ -310,7 +309,7 @@ void Widget::Canvas::canvas_shape_set_pod_size(void *data, ImVec2 value) {
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  Frame *frame = frame_data->frame;
+  ::Frame *frame = frame_data->frame;
 
   canvas_set_pod_size(frame_data->canvas, frame, (vec2){value.x, value.y});
 }
@@ -320,7 +319,7 @@ void Widget::Canvas::canvas_shape_set_pod_position(void *data, ImVec2 value) {
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  Frame *frame = frame_data->frame;
+  ::Frame *frame = frame_data->frame;
 
   canvas_set_pod_position(frame_data->canvas, frame, (vec2){value.x, value.y});
   canvas_update_frame_connectors(frame_data->canvas, frame_data->frame);

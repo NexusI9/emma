@@ -9,10 +9,11 @@
 
 namespace Widget {
 
-class HeatmapShape {
+namespace Heatmap {
+class Component {
 
 public:
-  HeatmapShape(Gui *gui, Heatmap *node)
+  Component(Gui *gui, ::Heatmap *node)
       : gui(gui), node(node),
         gradient(
             gui_scale_im_vec2(gui, gradient_anchor),
@@ -28,7 +29,7 @@ public:
 
 private:
   Gui *gui;
-  Heatmap *node;
+  ::Heatmap *node;
 
   static constexpr ImVec2 gradient_anchor = ImVec2(40, 200);
   static constexpr int gradient_width = 30;
@@ -45,6 +46,7 @@ private:
   void draw_gradient_legend(ImDrawList *, ImVec2, ImVec2, const char *);
 };
 
+} // namespace Heatmap
 } // namespace Widget
 
 #endif

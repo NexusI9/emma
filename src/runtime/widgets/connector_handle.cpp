@@ -6,7 +6,7 @@
 #include <cglm/cglm.h>
 #include <imgui/imgui.h>
 
-void Widget::ConnectorHandleShape::draw() {
+void Widget::ConnectorHandle::Component::draw() {
 
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
@@ -18,7 +18,7 @@ void Widget::ConnectorHandleShape::draw() {
                            im_color(node->color));
 }
 
-bool Widget::ConnectorHandleShape::hovered() {
+bool Widget::ConnectorHandle::Component::hovered() {
 
   vec2 vstart, vend;
   vp2(node->start, vstart);

@@ -3,42 +3,46 @@
 
 #include "nkengine/include/gui.hpp"
 #include "nkengine/include/texture.h"
-#include "runtime/widgets/tool_button.hpp"
+#include "runtime/widgets/toolbar_button.hpp"
 #include "webgpu/webgpu.h"
 #include <imgui/imgui.h>
 
 namespace Widget {
+
+namespace ToolBar {
 
 typedef void (*on_tool_change)(const uint8_t, void *);
 
 typedef struct {
   on_tool_change callback;
   void *data;
-} ToolBarShapeCallback;
+} UpdateCallback;
 
-class ToolBarShape {
+class Component {
 
 public:
-  ToolBarShape(WGPUTextureView view);
+  Component(WGPUTextureView view);
   void update();
   void render();
   StaticListStatus add_callback(on_tool_change, void *);
 
 private:
-  Component::Sprite background, selector;
+  
+  ::Component::Sprite background, selector;
 
   static constexpr uint8_t TOOLS_COUNT = 5;
   uint8_t active_tool = 0;
-  ToolButtonShape tools[TOOLS_COUNT];
+  Button::Component tools[TOOLS_COUNT];
   ImVec2 selector_positions[TOOLS_COUNT];
 
   static constexpr uint8_t TOOLBAR_CALLBACK_CAPACITY = 128;
   struct {
-    ToolBarShapeCallback entries[TOOLBAR_CALLBACK_CAPACITY];
+    UpdateCallback entries[TOOLBAR_CALLBACK_CAPACITY];
     size_t count;
   } callbacks;
 };
 
+} // namespace ToolBar
 } // namespace Widget
 
 #endif

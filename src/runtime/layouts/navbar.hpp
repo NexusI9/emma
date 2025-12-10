@@ -3,6 +3,7 @@
 
 #include "nkengine/include/gui.hpp"
 #include "resources/theme.emma.h"
+#include "runtime/layouts/core.hpp"
 #include "runtime/manager/theme.h"
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/utils.hpp"
@@ -10,20 +11,21 @@
 
 namespace Layout {
 
-typedef void (*navbar_switch_set_state)(bool, void *);
-typedef bool (*navbar_switch_get_state)(void *);
+namespace NavBar {
+typedef void (*switch_set_state)(bool, void *);
+typedef bool (*switch_get_state)(void *);
 
 typedef struct {
   const bool init_state;
-  navbar_switch_set_state setter;
-  navbar_switch_get_state getter;
+  switch_set_state setter;
+  switch_get_state getter;
   void *user_data;
-} NavBarSwitchConfig;
+} SwitchConfig;
 
-class NavBar {
+class Component : public Core {
 
 public:
-  NavBar(Gui *, Canvas *, NavBarSwitchConfig, NavBarSwitchConfig);
+  Component(Gui *, Canvas *, SwitchConfig, SwitchConfig);
   void update();
   void render();
 
@@ -33,11 +35,8 @@ public:
   const ImVec2 padding = ImVec2(12, 6);
 
 private:
-  Gui *gui;
-  Canvas *canvas;
-
-  NavBarSwitchConfig octalysis_config;
-  NavBarSwitchConfig heatmap_config;
+  SwitchConfig octalysis_config;
+  SwitchConfig heatmap_config;
 
   UI::Frame main_panel;
 
@@ -52,11 +51,11 @@ private:
     ImVec2 cached_position = ImVec2(0, 0);
   } switches[DisplaySwitch_COUNT];
 
-  void update_switch(const DisplaySwitch, const char *, NavBarSwitchConfig *);
+  void update_switch(const DisplaySwitch, const char *, SwitchConfig *);
 
   void draw_switch(const DisplaySwitch, const char *, const float);
 };
-
+} // namespace NavBar
 } // namespace Layout
 
 #endif

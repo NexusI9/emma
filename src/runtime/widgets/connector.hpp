@@ -8,20 +8,23 @@
 
 namespace Widget {
 
-class ConnectorShape {
+namespace Connector {
+
+class Component {
 public:
-  ConnectorShape(Gui *gui, Connector *node) : gui(gui), node(node) {}
+  Component(Gui *gui, ::Connector *node) : gui(gui), node(node) {}
   void draw();
   void draw_handles();
   bool clickbox_hovered();
-  Connector *get_node() { return node; }
+  ::Connector *get_node() { return node; }
 
 private:
   Gui *gui;
-  Connector *node;
+  ::Connector *node;
   static constexpr float arrow_dist = 10.0f;
 };
 
+} // namespace Connector
 } // namespace Widget
 
 #endif

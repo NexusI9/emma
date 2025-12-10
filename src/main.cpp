@@ -19,8 +19,8 @@ void create_pod(Canvas *canvas) {
   Frame *pod = canvas_create_pod(canvas);
   canvas_set_pod_position(canvas, pod, (vec2){300.0f, 600.0f});
 
-  //canvas_connect_frames(canvas, pod,
-  //                      allocator_frame_entry(canvas->frames->entries[0]));
+  // canvas_connect_frames(canvas, pod,
+  //                       allocator_frame_entry(canvas->frames->entries[0]));
 
   canvas_add_pod_persona(canvas, pod, PersonaType_Artisan);
   canvas_add_pod_persona(canvas, pod, PersonaType_Operator);
@@ -284,9 +284,11 @@ int main() {
 
   // need to allocate on the heap, may be too heavy for the stack (causes server
   // crash)
-  Layout::Container *container = new Layout::Container(gui, &canvas, heatmaps);
-  renderer_add_draw_callback(renderer, container_draw_callback, container,
-                             RendererDrawMode_All);
+  Layout::Container::Component *container =
+      new Layout::Container::Component(gui, &canvas, heatmaps);
+
+  renderer_add_draw_callback(renderer, Layout::Container::draw_callback,
+                             container, RendererDrawMode_All);
 
   renderer_draw(renderer);
 

@@ -112,7 +112,7 @@ void Widget::Canvas::Create::frame_release() {
   if (new_frame->size[0] == FRAME_MIN_SIZE &&
       new_frame->size[1] == FRAME_MIN_SIZE && node->frames->length > 1) {
 
-    Frame *last_frame =
+    ::Frame *last_frame =
         allocator_frame_entry(node->frames->entries[node->frames->length - 2]);
 
     canvas_set_frame_size(node, new_frame, last_frame->size);
@@ -125,7 +125,7 @@ void Widget::Canvas::Create::module() {}
 
 void Widget::Canvas::Create::pod() {
 
-  Frame *pod = canvas_create_pod(node);
+  ::Frame *pod = canvas_create_pod(node);
   if (pod) {
     vec2 mouse_pos;
     get_mouse_position(mouse_pos);

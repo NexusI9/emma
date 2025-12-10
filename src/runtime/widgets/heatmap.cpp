@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <imgui/imgui.h>
 
-void Widget::HeatmapShape::compute_offline(WGPUCommandEncoder encoder) {
+void Widget::Heatmap::Component::compute_offline(WGPUCommandEncoder encoder) {
 
   const float *pan = viewport_get_pan();
   init_offset.x = pan[0];
@@ -34,7 +34,7 @@ void Widget::HeatmapShape::compute_offline(WGPUCommandEncoder encoder) {
       &node->compute_passes[HeatmapComputePass_Colormap], encoder);
 }
 
-void Widget::HeatmapShape::compute_render_pass(WGPUCommandEncoder encoder) {
+void Widget::Heatmap::Component::compute_render_pass(WGPUCommandEncoder encoder) {
 
   WGPURenderPassColorAttachment color = {};
   color.clearValue = {0};
@@ -70,17 +70,17 @@ void Widget::HeatmapShape::compute_render_pass(WGPUCommandEncoder encoder) {
 
   // draw each modules
   for (size_t i = 0; i < *node->frames.length; i++) {
-    Frame *parent_frame = allocator_frame_entry(node->frames.entries[i]);
+    ::Frame *parent_frame = allocator_frame_entry(node->frames.entries[i]);
 
     for (size_t j = 0; j < parent_frame->children.length; j++) {
-      Frame *module = allocator_frame_entry(parent_frame->children.entries[j]);
+      ::Frame *module = allocator_frame_entry(parent_frame->children.entries[j]);
 
       // float module_intensity = node->intensity_mapper(node, module, NULL);
       int rd_r = ((float)rand() / RAND_MAX) * 255;
       int rd_g = ((float)rand() / RAND_MAX) * 255;
       int rd_b = ((float)rand() / RAND_MAX) * 255;
 
-      FrameShape(module).draw_fill(ImColor(rd_r, rd_g, rd_b, 255),
+      Frame::Component(module).draw_fill(ImColor(rd_r, rd_g, rd_b, 255),
                                     node->scale);
     }
   }
@@ -93,7 +93,7 @@ void Widget::HeatmapShape::compute_render_pass(WGPUCommandEncoder encoder) {
   wgpuRenderPassEncoderEnd(pass);
 }
 
-void Widget::HeatmapShape::draw() {
+void Widget::Heatmap::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
@@ -115,7 +115,7 @@ void Widget::HeatmapShape::draw() {
   draw_gradient(dl);
 }
 
-void Widget::HeatmapShape::draw_gradient(ImDrawList *dl) {
+void Widget::Heatmap::Component::draw_gradient(ImDrawList *dl) {
 
   ImGui::BeginGroup();
 
@@ -143,7 +143,7 @@ void Widget::HeatmapShape::draw_gradient(ImDrawList *dl) {
   ImGui::EndGroup();
 }
 
-void Widget::HeatmapShape::draw_gradient_legend(ImDrawList *dl, ImVec2 start,
+void Widget::Heatmap::Component::draw_gradient_legend(ImDrawList *dl, ImVec2 start,
                                                 ImVec2 end, const char *label) {
 
   static const int line_value = 140;

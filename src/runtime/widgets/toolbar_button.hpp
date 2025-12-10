@@ -8,16 +8,20 @@
 
 namespace Widget {
 
-class ToolButtonShape {
+namespace ToolBar {
+
+namespace Button {
+class Component {
 
 public:
-  ToolButtonShape(WGPUTextureView, const TextureAtlasRegion *);
-  Component::Sprite sprite;
-  
+  Component(WGPUTextureView, const TextureAtlasRegion *);
+  ::Component::Sprite sprite;
 
 private:
 };
 
+} // namespace Button
+} // namespace ToolBar
 } // namespace Widget
 
 #endif

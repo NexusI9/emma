@@ -6,23 +6,24 @@
 
 namespace Widget {
 
-  
-class OctagonShape {
+namespace Octagon {
+class Component {
 
 public:
-  OctagonShape(Octagon *node) : node(node) {}
+  Component(::Octagon *node) : node(node) {}
   void draw();
 
 private:
-  Octagon *node;
+  ::Octagon *node;
   void draw_labels(ImDrawList *);
   void draw_outer_gradient(ImDrawList *);
   void draw_inner_shape(ImDrawList *);
-  
+
   ImU32 vertex_color_rgb(const int);
   ImU32 vertex_color(const int);
 };
 
+} // namespace Octagon
 } // namespace Widget
 
 #endif

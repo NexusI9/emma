@@ -1,6 +1,6 @@
 #include "container.hpp"
 #include "resources/theme.emma.h"
-#include "runtime/layouts/nav_bar.hpp"
+#include "runtime/layouts/navbar.hpp"
 #include "runtime/manager/atlas.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/heatmap.h"
@@ -9,46 +9,49 @@
 #include "runtime/widgets/utils.hpp"
 #include "utils/input.h"
 
-Layout::Container::Container(Gui *gui, Canvas *canvas,
-                             Heatmap hm[HeatmapType_COUNT])
-    : gui(gui), canvas_shape(gui, canvas),
-      tool_bar(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI)),
+Layout::Container::Component::Component(Gui *gui, Canvas *canvas,
+                                        Heatmap hm[HeatmapType_COUNT])
+    : Core(gui, canvas), canvas(gui, canvas),
+      toolbar(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI)),
       heatmaps{
           {gui, &hm[0]},
           {gui, &hm[1]},
           {gui, &hm[2]},
           {gui, &hm[3]},
       },
-      nav_bar(gui, canvas,
-              {
-                  .setter = container_set_octalysis_state,
-                  .getter = container_get_octalysis_state,
-                  .init_state = display_state_enabled(DisplayState_Octagon),
-                  .user_data = this,
-              },
-              {
-                  .setter = container_set_heatmap_state,
-                  .getter = container_get_heatmap_state,
-                  .init_state = display_state_enabled(DisplayState_Heatmap),
-                  .user_data = this,
-              }) {
+      sidebar(gui, canvas),
+      navbar(gui, canvas,
+             {
+                 .setter = set_octalysis_state,
+                 .getter = get_octalysis_state,
+                 .init_state = display_state_enabled(DisplayState_Octagon),
+                 .user_data = this,
+             },
+             {
+                 .setter = set_heatmap_state,
+                 .getter = get_heatmap_state,
+                 .init_state = display_state_enabled(DisplayState_Heatmap),
+                 .user_data = this,
+             }) {
 
   {
     // === Create heamap select shape ===
     heatmap_list_shape = UI::Frame();
-    heatmap_list_shape.background_color = emma_im_color(ThemeEmmaColor_Surface_Lower);
-    heatmap_list_shape.border_color = emma_im_color(ThemeEmmaColor_Border_Subtle_On_Dark);
-    heatmap_list_shape.padding = gui_scale_im_vec2(gui, nav_bar.padding);
-    heatmap_list_shape.border_radius = gui_scale(gui, nav_bar.bd_radius);
+    heatmap_list_shape.background_color =
+        emma_im_color(ThemeEmmaColor_Surface_Lower);
+    heatmap_list_shape.border_color =
+        emma_im_color(ThemeEmmaColor_Border_Subtle_On_Dark);
+    heatmap_list_shape.padding = gui_scale_im_vec2(gui, navbar.padding);
+    heatmap_list_shape.border_radius = gui_scale(gui, navbar.bd_radius);
     heatmap_list_shape.position =
         ImVec2(gui_scale(gui, 1275), gui_scale(gui, 80));
     heatmap_list_shape.size = ImVec2(0, 0);
   }
 
-  tool_bar.add_callback(on_toolbar_update, this);
+  toolbar.add_callback(on_toolbar_update, this);
 }
 
-void Layout::Container::draw() {
+void Layout::Container::Component::draw() {
 
   gui_command_begin(gui);
   gui_draw_update_io(gui);
@@ -76,18 +79,20 @@ void Layout::Container::draw() {
   UI::FullScreenWindow().Begin("Root container");
   {
 
-    nav_bar.update();
-    tool_bar.update();
-    
-    canvas_shape.draw();
+    navbar.update();
+    toolbar.update();
+    sidebar.update();
+
+    canvas.draw();
 
     if (display_state_enabled(DisplayState_Heatmap)) {
       heatmaps[active_heatmap].draw();
       draw_heatmap_list();
     }
 
-    nav_bar.render();
-    tool_bar.render();
+    navbar.render();
+    toolbar.render();
+    sidebar.render();
   }
   UI::FullScreenWindow().End();
 
@@ -100,7 +105,7 @@ void Layout::Container::draw() {
   viewport_update(&g_viewport_manager);
 }
 
-void Layout::Container::draw_heatmap_list() {
+void Layout::Container::Component::draw_heatmap_list() {
 
   heatmap_list_shape.Begin("##Heatmap list");
 
@@ -116,49 +121,70 @@ void Layout::Container::draw_heatmap_list() {
   heatmap_list_shape.End();
 }
 
-void container_draw_callback(Renderer *renderer, void *data) {
+void Layout::Container::draw_callback(Renderer *renderer, void *data) {
 
-  Layout::Container *container = (Layout::Container *)data;
+  Layout::Container::Component *container =
+      (Layout::Container::Component *)data;
   container->draw();
 }
 
-void container_set_octalysis_state(bool value, void *data) {
+void Layout::Container::set_octalysis_state(bool value, void *data) {
 
-  Layout::Container *container = (Layout::Container *)data;
+  Layout::Container::Component *container =
+      (Layout::Container::Component *)data;
 
   if (value) {
-    container->enable_display_state(Layout::Container::DisplayState_Octagon);
+    container->enable_display_state(
+        Layout::Container::Component::DisplayState_Octagon);
   } else {
-    container->disable_display_state(Layout::Container::DisplayState_Octagon);
+    container->disable_display_state(
+        Layout::Container::Component::DisplayState_Octagon);
   }
 }
 
-void container_set_heatmap_state(bool value, void *data) {
+void Layout::Container::set_heatmap_state(bool value, void *data) {
 
-  Layout::Container *container = (Layout::Container *)data;
+  Layout::Container::Component *container =
+      (Layout::Container::Component *)data;
 
   if (value) {
-    container->enable_display_state(Layout::Container::DisplayState_Heatmap);
+    container->enable_display_state(
+        Layout::Container::Component::DisplayState_Heatmap);
   } else {
-    container->disable_display_state(Layout::Container::DisplayState_Heatmap);
+    container->disable_display_state(
+        Layout::Container::Component::DisplayState_Heatmap);
   }
 
-  container->heatmap_state |= Layout::Container::HeatmapState_RequireUpdate;
+  container->heatmap_state |=
+      Layout::Container::Component::HeatmapState_RequireUpdate;
 }
 
-bool container_get_octalysis_state(void *data) {
-  return ((Layout::Container *)data)
-      ->display_state_enabled(Layout::Container::DisplayState_Octagon);
+bool Layout::Container::get_octalysis_state(void *data) {
+  return ((Layout::Container::Component *)data)
+      ->display_state_enabled(
+          Layout::Container::Component::DisplayState_Octagon);
 }
 
-bool container_get_heatmap_state(void *data) {
-  return ((Layout::Container *)data)
-      ->display_state_enabled(Layout::Container::DisplayState_Heatmap);
+bool Layout::Container::get_heatmap_state(void *data) {
+  return ((Layout::Container::Component *)data)
+      ->display_state_enabled(
+          Layout::Container::Component::DisplayState_Heatmap);
 }
 
-void on_toolbar_update(const uint8_t active, void *data) {
-  Layout::Container *container = (Layout::Container *)data;
+void Layout::Container::on_toolbar_update(const uint8_t active, void *data) {
+  Layout::Container::Component *container =
+      (Layout::Container::Component *)data;
   container->update_canvas_mode((Widget::Canvas::Create::Mode)active);
   container->canvas_enable_state(
-      Widget::Canvas::Shape::State::State_FreezeCreationSession);
+      Widget::Canvas::Component::State::State_FreezeCreationSession);
+}
+
+void Layout::Container::on_sidebar_tab_update(const uint8_t active,
+                                              void *data) {
+
+  Layout::Container::Component *container =
+      (Layout::Container::Component *)data;
+  container->update_canvas_mode((Widget::Canvas::Create::Mode)active);
+  container->canvas_enable_state(
+      Widget::Canvas::Component::State::State_FreezeCreationSession);
 }

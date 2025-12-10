@@ -15,16 +15,16 @@
 #include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/grid_background.hpp"
-#include "runtime/widgets/tool_bar.hpp"
+#include "runtime/widgets/toolbar.hpp"
 #include "runtime/widgets/transform/transform_box.hpp"
 #include "utils/id.h"
 
 namespace Widget {
 namespace Canvas {
-class Shape : public Module {
+class Component : public Module {
 
 public:
-  Shape(Gui *, ::Canvas *);
+  Component(Gui *, ::Canvas *);
 
   void draw();
   void update_create_mode(const Create::Mode mode) {
@@ -68,7 +68,7 @@ public:
   }
 
 private:
-  GridBackground grid_background;
+  GridBackground::Component grid_background;
   ImDrawList *dl;
 
   struct {
@@ -81,7 +81,7 @@ private:
   unsigned int state = State_None;
 
   void draw_selected_items_connector_handles();
-  void draw_frame_handle_connectors(Frame *, const int);
+  void draw_frame_handle_connectors(::Frame *, const int);
   void draw_frames();
   void draw_frames_octagon();
   void draw_pods();

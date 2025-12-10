@@ -10,7 +10,7 @@
 #include <imgui/imgui.h>
 #include <stdint.h>
 
-void Widget::ConnectorShape::draw() {
+void Widget::Connector::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
@@ -48,7 +48,7 @@ void Widget::ConnectorShape::draw() {
               im_color(node->color), node->thickness);
 }
 
-bool Widget::ConnectorShape::clickbox_hovered() {
+bool Widget::Connector::Component::clickbox_hovered() {
   for (uint8_t i = 0; i < CONNECTOR_CLICKBOX_COUNT; i++)
     if (ImGui::IsMouseHoveringRect(ImVec2(vpx(node->clickboxes[i].p0[0]),
                                           vpy(node->clickboxes[i].p0[1])),
@@ -59,7 +59,7 @@ bool Widget::ConnectorShape::clickbox_hovered() {
   return false;
 }
 
-void Widget::ConnectorShape::draw_handles() {
+void Widget::Connector::Component::draw_handles() {
   for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++)
-    ConnectorHandleShape(node->handles[i], ConnectorHandleSide_None).draw();
+    ConnectorHandle::Component(node->handles[i], ConnectorHandleSide_None).draw();
 }

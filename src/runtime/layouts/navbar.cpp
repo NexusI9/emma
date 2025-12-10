@@ -1,12 +1,13 @@
-#include "nav_bar.hpp"
+#include "navbar.hpp"
 #include "nkengine/include/gui.hpp"
 #include "resources/theme.emma.h"
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/utils.hpp"
 
-Layout::NavBar::NavBar(Gui *gui, Canvas *canvas, NavBarSwitchConfig octa_config,
-                       NavBarSwitchConfig heatmap_config)
-    : canvas(canvas), gui(gui),
+Layout::NavBar::Component::Component(Gui *gui, Canvas *canvas,
+                                     SwitchConfig octa_config,
+                                     SwitchConfig heatmap_config)
+    : Core(gui, canvas),
       switches{
           {
               .component = {octa_config.init_state},
@@ -53,12 +54,12 @@ Layout::NavBar::NavBar(Gui *gui, Canvas *canvas, NavBarSwitchConfig octa_config,
   }
 }
 
-void Layout::NavBar::update() {
+void Layout::NavBar::Component::update() {
   update_switch(DisplaySwitch_Octagon, "##oct_switch", &octalysis_config);
   update_switch(DisplaySwitch_Heatmap, "##heat_switch", &heatmap_config);
 }
 
-void Layout::NavBar::render() {
+void Layout::NavBar::Component::render() {
 
   main_panel.Begin("Main Panel");
 
@@ -87,8 +88,9 @@ void Layout::NavBar::render() {
    the rendering cause the switch callback need to happened before the canvas
    draw.
  */
-void Layout::NavBar::update_switch(const DisplaySwitch type, const char *id,
-                                   NavBarSwitchConfig *config) {
+void Layout::NavBar::Component::update_switch(const DisplaySwitch type,
+                                              const char *id,
+                                              SwitchConfig *config) {
 
   UI::Switch *component = &switches[type].component;
 
@@ -102,8 +104,9 @@ void Layout::NavBar::update_switch(const DisplaySwitch type, const char *id,
     config->setter(false, config->user_data);
 }
 
-void Layout::NavBar::draw_switch(const DisplaySwitch type, const char *label,
-                                 const float base_y) {
+void Layout::NavBar::Component::draw_switch(const DisplaySwitch type,
+                                            const char *label,
+                                            const float base_y) {
 
   static const float switch_padding_top = 11.0f;
   static const float text_padding_top = 20.0f;

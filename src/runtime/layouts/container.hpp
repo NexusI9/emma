@@ -2,25 +2,27 @@
 #define _LAYOUT_CONTAINER_H_
 
 #include "nkengine/include/renderer.h"
-#include "runtime/layouts/nav_bar.hpp"
+#include "runtime/layouts/core.hpp"
+#include "runtime/layouts/navbar.hpp"
+#include "runtime/layouts/sidebar.hpp"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
-
-EXTERN_C_BEGIN
-
-void container_draw_callback(Renderer *, void *);
-void container_set_octalysis_state(bool, void *);
-void container_set_heatmap_state(bool, void *);
-bool container_get_octalysis_state(void *);
-bool container_get_heatmap_state(void *);
-void on_toolbar_update(const uint8_t, void *);
-
-EXTERN_C_END
+#include "runtime/widgets/toolbar.hpp"
 
 namespace Layout {
 
-class Container {
+namespace Container {
+
+void draw_callback(Renderer *, void *);
+void set_octalysis_state(bool, void *);
+void set_heatmap_state(bool, void *);
+bool get_octalysis_state(void *);
+bool get_heatmap_state(void *);
+void on_toolbar_update(const uint8_t, void *);
+void on_sidebar_tab_update(const uint8_t, void *);
+
+class Component : public Core {
 
 public:
   typedef enum {
@@ -43,7 +45,7 @@ public:
     HeatmapState_RequireUpdate = 1 << 1,
   } HeatmapState;
 
-  Container(Gui *, Canvas *, Heatmap[HeatmapType_COUNT]);
+  Component(Gui *, Canvas *, Heatmap[HeatmapType_COUNT]);
   void draw();
 
   void enable_display_state(const DisplayState state) {
@@ -53,17 +55,17 @@ public:
 
     case DisplayState_Heatmap:
 
-      canvas_shape.enable_state(
-          Widget::Canvas::Shape::State_ShowHeatmap |
-          Widget::Canvas::Shape::State_FreezeSelection |
-          Widget::Canvas::Shape::State_FreezeTransform |
-          Widget::Canvas::Shape::State_FreezeCreationSession);
+      canvas.enable_state(
+          Widget::Canvas::Component::State_ShowHeatmap |
+          Widget::Canvas::Component::State_FreezeSelection |
+          Widget::Canvas::Component::State_FreezeTransform |
+          Widget::Canvas::Component::State_FreezeCreationSession);
       break;
 
     case DisplayState_Octagon:
-      canvas_shape.enable_state(
-          Widget::Canvas::Shape::State_ShowOctagon |
-          Widget::Canvas::Shape::State_FreezeCreationSession);
+      canvas.enable_state(
+          Widget::Canvas::Component::State_ShowOctagon |
+          Widget::Canvas::Component::State_FreezeCreationSession);
       break;
 
     default:
@@ -77,17 +79,17 @@ public:
     switch (state) {
 
     case DisplayState_Heatmap:
-      canvas_shape.enable_state(
-          Widget::Canvas::Shape::State_FreezeCreationSession);
-      canvas_shape.disable_state(Widget::Canvas::Shape::State_ShowHeatmap |
-                                 Widget::Canvas::Shape::State_FreezeSelection |
-                                 Widget::Canvas::Shape::State_FreezeTransform);
+      canvas.enable_state(
+          Widget::Canvas::Component::State_FreezeCreationSession);
+      canvas.disable_state(Widget::Canvas::Component::State_ShowHeatmap |
+                           Widget::Canvas::Component::State_FreezeSelection |
+                           Widget::Canvas::Component::State_FreezeTransform);
       break;
 
     case DisplayState_Octagon:
-      canvas_shape.enable_state(
-          Widget::Canvas::Shape::State_FreezeCreationSession);
-      canvas_shape.disable_state(Widget::Canvas::Shape::State_ShowOctagon);
+      canvas.enable_state(
+          Widget::Canvas::Component::State_FreezeCreationSession);
+      canvas.disable_state(Widget::Canvas::Component::State_ShowOctagon);
       break;
 
     default:
@@ -95,12 +97,12 @@ public:
     }
   }
 
-  void canvas_enable_state(const Widget::Canvas::Shape::State state) {
-    canvas_shape.enable_state(state);
+  void canvas_enable_state(const Widget::Canvas::Component::State state) {
+    canvas.enable_state(state);
   }
 
-  void canvas_disable_state(const Widget::Canvas::Shape::State state) {
-    canvas_shape.disable_state(state);
+  void canvas_disable_state(const Widget::Canvas::Component::State state) {
+    canvas.disable_state(state);
   }
 
   unsigned int get_display_state() { return display_state; }
@@ -110,25 +112,27 @@ public:
   }
 
   void update_canvas_mode(const Widget::Canvas::Create::Mode mode) {
-    canvas_shape.update_create_mode(mode);
+    canvas.update_create_mode(mode);
   }
 
-  Widget::HeatmapShape heatmaps[HeatmapType_COUNT];
+  Widget::Heatmap::Component heatmaps[HeatmapType_COUNT];
   HeatmapType active_heatmap = HeatmapType_Excitment;
   unsigned int heatmap_state = HeatmapState_None;
 
 private:
-  Gui *gui;
   unsigned int display_state = 0;
 
-  Widget::Canvas::Shape canvas_shape;
-  Widget::ToolBarShape tool_bar;
-  Layout::NavBar nav_bar;
+  Widget::Canvas::Component canvas;
+  Widget::ToolBar::Component toolbar;
+  NavBar::Component navbar;
+  SideBar::Component sidebar;
+  
   UI::Frame heatmap_list_shape;
 
   void draw_heatmap_list();
 };
 
+} // namespace Container
 } // namespace Layout
 
 #endif

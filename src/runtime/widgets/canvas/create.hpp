@@ -50,7 +50,7 @@ private:
   unsigned int state = SessionState_None;
 
   vec2 pod_half_size;
-  Frame *new_frame = nullptr;
+  ::Frame *new_frame = nullptr;
 
   void get_mouse_position(vec2);
 

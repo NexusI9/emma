@@ -6,23 +6,26 @@
 
 namespace Widget {
 
-class FrameShape {
+namespace Frame {
+
+class Component {
 
 public:
-  FrameShape() {}
-  FrameShape(Frame *node) : node(node) {}
+  Component() {}
+  Component(::Frame *node) : node(node) {}
   void draw();
   void draw_fill(ImColor, const float);
   void draw_texture();
   void draw_pod();
 
-  Frame *get_node() { return node; }
+  ::Frame *get_node() { return node; }
   bool boundbox_hovered();
   bool clickbox_hovered();
 
 private:
-  Frame *node;
+  ::Frame *node;
 };
+} // namespace Frame
 
 } // namespace Widget
 

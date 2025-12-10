@@ -4,16 +4,19 @@
 #include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
 #include "runtime/systems/connect_system.h"
+#include "runtime/widgets/connector.hpp"
+#include "runtime/widgets/connector_handle.hpp"
 #include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/transform/transform_box.hpp"
 #include "runtime/widgets/utils.hpp"
 
-void Widget::Canvas::Selection::frame_selection_listen(FrameShape *frame) {
+void Widget::Canvas::Selection::frame_selection_listen(
+    Frame::Component *frame) {
 
   if ((state & State_Freeze) == 0 && frame->boundbox_hovered()) {
 
     ImDrawList *dl = ImGui::GetWindowDrawList();
-    Frame *frame_node = frame->get_node();
+    ::Frame *frame_node = frame->get_node();
     dl->AddRect(
         ImVec2(vpx(frame_node->world_position[0]),
                vpy(frame_node->world_position[1])),
@@ -29,13 +32,13 @@ void Widget::Canvas::Selection::frame_selection_listen(FrameShape *frame) {
    will then affect the draw called upon.
  */
 void Widget::Canvas::Selection::listen_connector_handle_selection(
-    Connector *connector) {
+    ::Connector *connector) {
 
   for (uint8_t i = 0; i < CONNECTOR_HANDLE_COUNT; i++) {
 
-    ConnectorHandle *handle = connector->handles[i];
-    ConnectorHandleShape handle_shape =
-        ConnectorHandleShape(handle, ConnectorHandleSide_None);
+    ::ConnectorHandle *handle = connector->handles[i];
+    ConnectorHandle::Component handle_shape =
+        ConnectorHandle::Component(handle, ConnectorHandleSide_None);
 
     if (handle_shape.hovered()) {
 
@@ -56,7 +59,7 @@ void Widget::Canvas::Selection::listen_connector_handle_selection(
    bound and connect it to the closest valid frame/pod handle.
  */
 void Widget::Canvas::Selection::listen_active_connector_handle_release(
-    Connector *connector) {
+    ::Connector *connector) {
 
   if (active_connector_handle &&
       ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
@@ -87,12 +90,12 @@ void Widget::Canvas::Selection::listen_active_connector_handle_release(
 }
 
 void Widget::Canvas::Selection::listen_connector_selection(
-    ConnectorShape *shape) {
+    Connector::Component *shape) {
 
   if (State_Freeze & state)
     return;
 
-  Connector *connector = shape->get_node();
+  ::Connector *connector = shape->get_node();
 
   if (gui_selection_hit(&selection_connector,
                         ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
@@ -153,7 +156,8 @@ void Widget::Canvas::Selection::connector_selection_end() {
    Check if we click a frame handle connector to create a new one
  */
 void Widget::Canvas::Selection::listen_new_connector_handle(
-    Frame *frame, ConnectorHandle *handle, ConnectorHandleShape *handle_shape) {
+    ::Frame *frame, ::ConnectorHandle *handle,
+    ConnectorHandle::Component *handle_shape) {
 
   if (gui_selection_hit(&selection_connector,
                         ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
@@ -164,7 +168,7 @@ void Widget::Canvas::Selection::listen_new_connector_handle(
     connector_desc.thickness = CONNECTOR_THICKNESS;
     connector_desc.color = emma_color(ThemeEmmaColor_Border_Subtle_On_Dark);
 
-    Connector *new_connector = canvas_create_connector(node, &connector_desc);
+    ::Connector *new_connector = canvas_create_connector(node, &connector_desc);
 
     if (new_connector) {
       frame_register_connector(frame, new_connector->id);
