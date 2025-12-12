@@ -49,6 +49,7 @@ Layout::Container::Component::Component(Gui *gui, Canvas *canvas,
   }
 
   toolbar.add_callback(on_toolbar_update, this);
+  sidebar.add_tab_update_callback(on_sidebar_tab_update, this);
 }
 
 void Layout::Container::Component::draw() {
@@ -85,14 +86,15 @@ void Layout::Container::Component::draw() {
 
     canvas.draw();
 
+    toolbar.render();
+    sidebar.render();
+
     if (display_state_enabled(DisplayState_Heatmap)) {
       heatmaps[active_heatmap].draw();
       draw_heatmap_list();
     }
 
     navbar.render();
-    toolbar.render();
-    sidebar.render();
   }
   UI::FullScreenWindow().End();
 
@@ -184,7 +186,7 @@ void Layout::Container::on_sidebar_tab_update(const uint8_t active,
 
   Layout::Container::Component *container =
       (Layout::Container::Component *)data;
-  container->update_canvas_mode((Widget::Canvas::Create::Mode)active);
+
   container->canvas_enable_state(
       Widget::Canvas::Component::State::State_FreezeCreationSession);
 }

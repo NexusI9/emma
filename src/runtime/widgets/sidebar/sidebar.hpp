@@ -1,11 +1,14 @@
-#ifndef _LAYOUT_SIDE_BAR_H_
-#define _LAYOUT_SIDE_BAR_H_
+#ifndef _WIDGET_SIDEBAR_H_
+#define _WIDGET_SIDEBAR_H_
 
 #include "runtime/layouts/core.hpp"
 #include "runtime/node/canvas.h"
-#include "runtime/widgets/sidebar_button.hpp"
+#include "runtime/widgets/sidebar/content/content.hpp"
+#include "runtime/widgets/sidebar/content/modules.hpp"
+#include "runtime/widgets/sidebar/panel.hpp"
+#include "runtime/widgets/sidebar/tab_button.hpp"
 
-namespace Layout {
+namespace Widget {
 
 namespace SideBar {
 
@@ -16,7 +19,7 @@ typedef struct {
   void *data;
 } TabUpdateCallbackEntry;
 
-class Component : public Core {
+class Component : public Widget {
 
 public:
   Component(Gui *, Canvas *);
@@ -33,11 +36,24 @@ public:
                        "Tab Update Callback List");
   }
 
+  // Used to set per-module respective API calls
+  // NOTE: don't forget to sync with the 'contents' array bellow
+  struct {
+    Content::Modules::Component modules;
+  } content;
+
 private:
   static constexpr uint8_t CALLBACK_CAPACITY = 8;
   static constexpr uint8_t TABS_COUNT = 1;
   int8_t active_tab = -1;
-  Widget::SideBar::Button::Component tabs[TABS_COUNT];
+
+  Panel::Component panel;
+  TabButton::Component tabs[TABS_COUNT];
+
+  // Used for draw/update auto call depending on active tab
+  Content::Component *contents[TABS_COUNT] = {
+      &content.modules,
+  };
 
   struct {
     TabUpdateCallbackEntry entries[CALLBACK_CAPACITY];
@@ -47,6 +63,6 @@ private:
 
 } // namespace SideBar
 
-} // namespace Layout
+} // namespace Widget
 
 #endif

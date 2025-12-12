@@ -4,7 +4,7 @@
 #include "nkengine/include/renderer.h"
 #include "runtime/layouts/core.hpp"
 #include "runtime/layouts/navbar.hpp"
-#include "runtime/layouts/sidebar.hpp"
+#include "runtime/widgets/sidebar/sidebar.hpp"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
@@ -124,9 +124,9 @@ private:
 
   Widget::Canvas::Component canvas;
   Widget::ToolBar::Component toolbar;
+  Widget::SideBar::Component sidebar;
   NavBar::Component navbar;
-  SideBar::Component sidebar;
-  
+
   UI::Frame heatmap_list_shape;
 
   void draw_heatmap_list();

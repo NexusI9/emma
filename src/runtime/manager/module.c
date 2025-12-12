@@ -9,35 +9,35 @@ const TextureAtlasRegion *get_module(const ModuleType type) {
   static const TextureAtlasRegion default_modules[ModuleType_COUNT] = {
       [ModuleType_News] =
           {
-              .label = "Module News",
+              .label = "News",
               .uv0 = {0.0f / 2048.0f, 0.0f / 2048.0f},
               .uv1 = {360.0f / 2048.0f, 460.0f / 2048.0f},
               .size = {360.0f, 460.0f},
           },
       [ModuleType_Rate] =
           {
-              .label = "Module Rate",
+              .label = "Rate",
               .uv0 = {360.0f / 2048.0f, 0.0f / 2048.0f},
               .uv1 = {(360.0f + 360.0f) / 2048.0f, 400.0f / 2048.0f},
               .size = {360.0f, 400.0f},
           },
       [ModuleType_SpinningWheel] =
           {
-              .label = "Module Spinning Wheel",
+              .label = "Spinning Wheel",
               .uv0 = {720.0f / 2048.0f, 0.0f / 2048.0f},
               .uv1 = {(720.0f + 360.0f) / 2048.0f, 660.0f / 2048.0f},
               .size = {360.0f, 660.0f},
           },
       [ModuleType_Ranking] =
           {
-              .label = "Module Ranking",
+              .label = "Ranking",
               .uv0 = {1080.0f / 2048.0f, 0.0f / 2048.0f},
               .uv1 = {(1080.0f + 360.0f) / 2048.0f, 320.0f / 2048.0f},
               .size = {360.0f, 320.0f},
           },
       [ModuleType_SurveyCheckbox] =
           {
-              .label = "Module Survey Checkbox A",
+              .label = "Survey Checkbox A",
               .uv0 = {1080.0f / 2048.0f, 320.0f / 2048.0f},
               .uv1 = {(1080.0f + 360.0f) / 2048.0f,
                       (320.0f + 200.0f) / 2048.0f},
@@ -45,7 +45,7 @@ const TextureAtlasRegion *get_module(const ModuleType type) {
           },
       [ModuleType_SurveySlider] =
           {
-              .label = "Module Survey Checkbox B",
+              .label = "Survey Checkbox B",
               .uv0 = {1080.0f / 2048.0f, 520.0f / 2048.0f},
               .uv1 = {(1080.0f + 360.0f) / 2048.0f,
                       (520.0f + 200.0f) / 2048.0f},
