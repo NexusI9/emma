@@ -138,7 +138,12 @@ FrameStatus frame_wrap(Frame *node) {
 
 FrameStatus frame_destroy(Frame *frame) {
 
-  frame->parent = ID_UNDEFINED;
+  if (frame->parent != ID_UNDEFINED) {
+    Frame *parent = allocator_frame_entry(frame->parent);
+    allocator_id_list_pop(parent->children.entries, &parent->children.length,
+                          frame->id);
+    frame->parent = ID_UNDEFINED;
+  }
 
   if (frame->factor_id != ID_UNDEFINED) {
     frame->factor_id = ID_UNDEFINED;
@@ -158,7 +163,7 @@ FrameStatus frame_destroy(Frame *frame) {
     if (handle)
       connector_handle_destroy(handle);
   }
-  
+
   for (size_t i = 0; i < frame->children.length; i++) {
     Frame *child = allocator_frame_entry(frame->children.entries[i]);
     child->parent = ID_UNDEFINED;

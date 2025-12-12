@@ -105,5 +105,5 @@ void Widget::Frame::Component::draw_highlight() {
       ImVec2(vpx(node->world_position[0]), vpy(node->world_position[1])),
       ImVec2(vpx(node->end_point[0]), vpy(node->end_point[1])),
       ImColor(im_color(emma_color(ThemeEmmaColor_Border_Brand_Base))), 0, 0,
-      8.0f);
+      5.0f);
 }
