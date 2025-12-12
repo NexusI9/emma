@@ -4,10 +4,10 @@
 #include "nkengine/include/renderer.h"
 #include "runtime/layouts/core.hpp"
 #include "runtime/layouts/navbar.hpp"
-#include "runtime/widgets/sidebar/sidebar.hpp"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
+#include "runtime/widgets/sidebar/sidebar.hpp"
 #include "runtime/widgets/toolbar.hpp"
 
 namespace Layout {
@@ -19,8 +19,13 @@ void set_octalysis_state(bool, void *);
 void set_heatmap_state(bool, void *);
 bool get_octalysis_state(void *);
 bool get_heatmap_state(void *);
+
 void on_toolbar_update(const uint8_t, void *);
 void on_sidebar_tab_update(const uint8_t, void *);
+
+void on_module_drag_begin(const TextureAtlasRegion *, void *);
+void on_module_drag(const TextureAtlasRegion *, const ImVec2, void *);
+void on_module_drag_end(const TextureAtlasRegion *, const ImVec2, void *);
 
 class Component : public Core {
 
@@ -97,13 +102,7 @@ public:
     }
   }
 
-  void canvas_enable_state(const Widget::Canvas::Component::State state) {
-    canvas.enable_state(state);
-  }
-
-  void canvas_disable_state(const Widget::Canvas::Component::State state) {
-    canvas.disable_state(state);
-  }
+  Frame *hovering_canvas_frame(const ImVec2);
 
   unsigned int get_display_state() { return display_state; }
 
@@ -111,9 +110,10 @@ public:
     return get_display_state() & state;
   }
 
-  void update_canvas_mode(const Widget::Canvas::Create::Mode mode) {
-    canvas.update_create_mode(mode);
-  }
+  Widget::Canvas::Component canvas;
+  Widget::ToolBar::Component toolbar;
+  Widget::SideBar::Component sidebar;
+  NavBar::Component navbar;
 
   Widget::Heatmap::Component heatmaps[HeatmapType_COUNT];
   HeatmapType active_heatmap = HeatmapType_Excitment;
@@ -121,11 +121,6 @@ public:
 
 private:
   unsigned int display_state = 0;
-
-  Widget::Canvas::Component canvas;
-  Widget::ToolBar::Component toolbar;
-  Widget::SideBar::Component sidebar;
-  NavBar::Component navbar;
 
   UI::Frame heatmap_list_shape;
 

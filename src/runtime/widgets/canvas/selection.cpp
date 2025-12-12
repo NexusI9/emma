@@ -14,15 +14,8 @@ void Widget::Canvas::Selection::frame_selection_listen(
     Frame::Component *frame) {
 
   if ((state & State_Freeze) == 0 && frame->boundbox_hovered()) {
-
-    ImDrawList *dl = ImGui::GetWindowDrawList();
     ::Frame *frame_node = frame->get_node();
-    dl->AddRect(
-        ImVec2(vpx(frame_node->world_position[0]),
-               vpy(frame_node->world_position[1])),
-        ImVec2(vpx(frame_node->end_point[0]), vpy(frame_node->end_point[1])),
-        ImColor(im_color(emma_color(ThemeEmmaColor_Border_Brand_Base))), 0, 0,
-        Transform::Box::stroke_width);
+    Frame::Component(frame_node).draw_highlight();
   }
 }
 

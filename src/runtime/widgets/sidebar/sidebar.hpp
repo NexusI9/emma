@@ -22,7 +22,7 @@ typedef struct {
 class Component : public Widget {
 
 public:
-  Component(Gui *, Canvas *);
+  Component(Gui *, ::Canvas *);
   void update();
   void render();
 
@@ -55,10 +55,7 @@ private:
       &content.modules,
   };
 
-  struct {
-    TabUpdateCallbackEntry entries[CALLBACK_CAPACITY];
-    size_t count;
-  } tab_update_callbacks;
+  STATIC_LIST(TabUpdateCallbackEntry, CALLBACK_CAPACITY) tab_update_callbacks;
 };
 
 } // namespace SideBar

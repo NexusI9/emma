@@ -4,6 +4,7 @@
 #include "nkengine/include/gui.hpp"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/atlas.h"
+#include "runtime/manager/theme.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/frame.h"
 #include "runtime/widgets/connector_handle.hpp"
@@ -94,4 +95,15 @@ void Widget::Frame::Component::draw_pod() {
     ::Frame *child = allocator_frame_entry(node->children.entries[i]);
     Frame::Component(child).draw_pod();
   }
+}
+
+void Widget::Frame::Component::draw_highlight() {
+
+  ImDrawList *dl = ImGui::GetForegroundDrawList();
+
+  dl->AddRect(
+      ImVec2(vpx(node->world_position[0]), vpy(node->world_position[1])),
+      ImVec2(vpx(node->end_point[0]), vpy(node->end_point[1])),
+      ImColor(im_color(emma_color(ThemeEmmaColor_Border_Brand_Base))), 0, 0,
+      8.0f);
 }

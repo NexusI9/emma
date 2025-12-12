@@ -16,6 +16,7 @@ public:
   void draw();
   void draw_fill(ImColor, const float);
   void draw_texture();
+  void draw_highlight();
   void draw_pod();
 
   ::Frame *get_node() { return node; }
@@ -24,6 +25,8 @@ public:
 
 private:
   ::Frame *node;
+
+  
 };
 } // namespace Frame
 

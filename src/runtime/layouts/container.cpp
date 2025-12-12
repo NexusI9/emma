@@ -1,10 +1,14 @@
 #include "container.hpp"
 #include "resources/theme.emma.h"
+#include "runtime/geometry/boundbox.h"
 #include "runtime/layouts/navbar.hpp"
+#include "runtime/manager/allocator.h"
+#include "runtime/manager/allocator_list.h"
 #include "runtime/manager/atlas.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
+#include "runtime/widgets/frame.hpp"
 #include "runtime/widgets/heatmap.hpp"
 #include "runtime/widgets/utils.hpp"
 #include "utils/input.h"
@@ -48,8 +52,12 @@ Layout::Container::Component::Component(Gui *gui, Canvas *canvas,
     heatmap_list_shape.size = ImVec2(0, 0);
   }
 
+  // Setup Interactions callbacks
   toolbar.add_callback(on_toolbar_update, this);
   sidebar.add_tab_update_callback(on_sidebar_tab_update, this);
+  sidebar.content.modules.add_drag_begin_callback(on_module_drag_begin, this);
+  sidebar.content.modules.add_drag_callback(on_module_drag, this);
+  sidebar.content.modules.add_drag_end_callback(on_module_drag_end, this);
 }
 
 void Layout::Container::Component::draw() {
@@ -176,8 +184,9 @@ bool Layout::Container::get_heatmap_state(void *data) {
 void Layout::Container::on_toolbar_update(const uint8_t active, void *data) {
   Layout::Container::Component *container =
       (Layout::Container::Component *)data;
-  container->update_canvas_mode((Widget::Canvas::Create::Mode)active);
-  container->canvas_enable_state(
+
+  container->canvas.update_create_mode((Widget::Canvas::Create::Mode)active);
+  container->canvas.enable_state(
       Widget::Canvas::Component::State::State_FreezeCreationSession);
 }
 
@@ -187,6 +196,65 @@ void Layout::Container::on_sidebar_tab_update(const uint8_t active,
   Layout::Container::Component *container =
       (Layout::Container::Component *)data;
 
-  container->canvas_enable_state(
+  container->canvas.enable_state(
       Widget::Canvas::Component::State::State_FreezeCreationSession);
+}
+
+void Layout::Container::on_module_drag_begin(const TextureAtlasRegion *sprite,
+                                             void *data) {
+
+  Layout::Container::Component *container =
+      (Layout::Container::Component *)data;
+
+  container->canvas.enable_state(
+      Widget::Canvas::Component::State::State_FreezeCreationSession);
+
+  container->canvas.enable_state(
+      Widget::Canvas::Component::State::State_FreezeSelection);
+
+  container->canvas.enable_state(
+      Widget::Canvas::Component::State::State_FreezeTransform);
+}
+
+void Layout::Container::on_module_drag_end(const TextureAtlasRegion *sprite,
+                                           const ImVec2 position, void *data) {
+
+  Layout::Container::Component *container =
+      (Layout::Container::Component *)data;
+
+  container->canvas.enable_state(
+      Widget::Canvas::Component::State::State_FreezeCreationSession);
+
+  container->canvas.disable_state(
+      Widget::Canvas::Component::State::State_FreezeSelection);
+
+  container->canvas.disable_state(
+      Widget::Canvas::Component::State::State_FreezeTransform);
+}
+
+/**
+   Check if the sprite hover one of the frame and highlight it according to
+   signal the module will be added to the hovered frame.
+ */
+void Layout::Container::on_module_drag(const TextureAtlasRegion *sprite,
+                                       const ImVec2 position, void *data) {
+
+  Layout::Container::Component *container =
+      (Layout::Container::Component *)data;
+
+  vec2 mouse_pos = {ImGui::GetMousePos().x, ImGui::GetMousePos().y};
+
+  ::Canvas *canvas = container->canvas.get_node();
+
+
+  // TODO: Frustrum frame
+  for (size_t i = 0; i < canvas->frames->length; i++) {
+
+    Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
+
+    if (boundbox_contain_point(&frame->boundbox, mouse_pos)) {
+      Widget::Frame::Component(frame).draw_highlight();
+      break;
+    }
+  }
 }

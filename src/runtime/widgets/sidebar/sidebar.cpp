@@ -34,8 +34,12 @@ void Widget::SideBar::Component::update() {
     }
   }
 
-  if (active_tab >= 0)
+  if (active_tab >= 0) {
+    // set the cursor to the panel position so the update function can access it
+    // with GetCursorPos() and have relative coordinate to panel content
+    ImGui::SetCursorPos(panel.content_inner_position);
     contents[active_tab]->update();
+  }
 }
 
 void Widget::SideBar::Component::render() {

@@ -9,6 +9,7 @@ class Module {
 
 public:
   Module(Gui *gui, ::Canvas *node) : gui(gui), node(node) {}
+  ::Canvas *get_node() { return node; }
 
 protected:
   Gui *gui;

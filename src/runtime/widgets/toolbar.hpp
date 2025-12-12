@@ -27,7 +27,6 @@ public:
   StaticListStatus add_callback(on_tool_change, void *);
 
 private:
-  
   ::Component::Sprite background, selector;
 
   static constexpr uint8_t TOOLS_COUNT = 5;
@@ -36,10 +35,7 @@ private:
   ImVec2 selector_positions[TOOLS_COUNT];
 
   static constexpr uint8_t TOOLBAR_CALLBACK_CAPACITY = 128;
-  struct {
-    UpdateCallback entries[TOOLBAR_CALLBACK_CAPACITY];
-    size_t count;
-  } callbacks;
+  STATIC_LIST(UpdateCallback, TOOLBAR_CALLBACK_CAPACITY) callbacks;
 };
 
 } // namespace ToolBar

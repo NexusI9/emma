@@ -60,7 +60,7 @@ void Widget::SideBar::Content::Modules::Component::layout() {
     labels_position[i] = ImVec2(frames_p0[i].x, frames_p1[i].y + label_gap);
 
     // trim text
-    if (strlen(region->label) >= label_len-3) {
+    if (strlen(region->label) >= label_len - 3) {
       name_t trim;
       snprintf(trim, label_len - 3, "%s", region->label);
       snprintf(labels[i], label_len, "%s...", trim);
@@ -70,13 +70,49 @@ void Widget::SideBar::Content::Modules::Component::layout() {
   }
 }
 
-void Widget::SideBar::Content::Modules::Component::update() {}
+void Widget::SideBar::Content::Modules::Component::update() {
+
+  ImVec2 win_pos = ImGui::GetCursorPos();
+
+  for (size_t i = 0; i < ModuleType_COUNT; i++) {
+
+    if (!active_thumbnail && ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
+        ImGui::IsMouseHoveringRect(
+            ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y),
+            ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y))) {
+
+      active_thumbnail = get_module((ModuleType)i);
+      thumbnail_index = i;
+      mouse_init_pos = ImGui::GetMousePos();
+
+      for (uint8_t j = 0; j < drag_begin_callbacks.count; j++)
+        drag_begin_callbacks.entries[j].callback(
+            active_thumbnail, drag_begin_callbacks.entries[j].data);
+    }
+  }
+
+  if (active_thumbnail)
+    for (uint8_t j = 0; j < drag_callbacks.count; j++)
+      drag_callbacks.entries[j].callback(active_thumbnail, ImGui::GetMousePos(),
+                                         drag_callbacks.entries[j].data);
+
+  if (active_thumbnail && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+    active_thumbnail = nullptr;
+
+    for (uint8_t j = 0; j < drag_end_callbacks.count; j++)
+      drag_end_callbacks.entries[j].callback(
+          active_thumbnail, ImGui::GetMousePos(),
+          drag_end_callbacks.entries[j].data);
+  }
+}
 
 void Widget::SideBar::Content::Modules::Component::render() {
 
+  ImGui::SetWindowFontScale(1.3);
   ImGui::Text("Modules");
+  ImGui::SetWindowFontScale(1);
   ImGui::Dummy(
-      ImVec2(0, gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_4))));
+      ImVec2(0, gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_3))));
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 win_pos = ImGui::GetWindowPos();
@@ -100,5 +136,26 @@ void Widget::SideBar::Content::Modules::Component::render() {
 
     ImGui::SetCursorPos(labels_position[i]);
     ImGui::Text("%s", labels[i]);
+  }
+
+  if (active_thumbnail) {
+
+    dl = ImGui::GetForegroundDrawList();
+    ImVec2 mouse = ImGui::GetMousePos();
+    ImVec2 drag_offset =
+        ImVec2(mouse.x - mouse_init_pos.x, mouse.y - mouse_init_pos.y);
+
+    dl->AddImage(
+        (ImTextureRef)module_view,
+        // p0
+        ImVec2(modules_position[thumbnail_index].x + win_pos.x + drag_offset.x,
+               modules_position[thumbnail_index].y + win_pos.y + drag_offset.y),
+        // p1
+        ImVec2(modules_position[thumbnail_index].x +
+                   modules_size[thumbnail_index].x + win_pos.x + drag_offset.x,
+               modules_position[thumbnail_index].y +
+                   modules_size[thumbnail_index].y + win_pos.y + drag_offset.y),
+        // uvs
+        im_vec2(active_thumbnail->uv0), im_vec2(active_thumbnail->uv1));
   }
 }
