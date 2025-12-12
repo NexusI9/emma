@@ -5,6 +5,7 @@
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/manager/atlas.h"
+#include "runtime/manager/unit.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
@@ -201,6 +202,7 @@ void Layout::Container::on_sidebar_tab_update(const uint8_t active,
 }
 
 void Layout::Container::on_module_drag_begin(const TextureAtlasRegion *sprite,
+                                             const ModuleType type,
                                              void *data) {
 
   Layout::Container::Component *container =
@@ -216,11 +218,53 @@ void Layout::Container::on_module_drag_begin(const TextureAtlasRegion *sprite,
       Widget::Canvas::Component::State::State_FreezeTransform);
 }
 
+/**
+   On module release: Add the module to the targeted frame (if any) and enable
+   back Selection and Transform states
+ */
 void Layout::Container::on_module_drag_end(const TextureAtlasRegion *sprite,
+                                           const ModuleType type,
                                            const ImVec2 position, void *data) {
 
   Layout::Container::Component *container =
       (Layout::Container::Component *)data;
+
+  ::Canvas *canvas = container->canvas.get_node();
+
+  vec2 pos = {position.x, position.y};
+
+  printf("position: %f | %f\n", pos[0], pos[1]);
+
+  // TODO: Frustrum frame in viewport for faster match
+  bool hit_frame = false;
+  for (size_t i = 0; i < canvas->frames->length; i++) {
+
+    Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
+
+    if (boundbox_contain_point(&frame->boundbox, pos)) {
+
+      // convert sprite scrren space to frame local space and center it
+      vec2 local_pos = {
+          unit_snap(pos[0] - frame->world_position[0] - sprite->size[0] / 2),
+          unit_snap(pos[1] - frame->world_position[1] - sprite->size[1] / 2),
+      };
+
+      canvas_add_module_to_frame(canvas, frame, type, local_pos);
+      hit_frame = true;
+      break;
+    }
+  }
+
+  if (!hit_frame) {
+    Frame *module = canvas_create_module(canvas, type);
+    if (module)
+      canvas_set_module_world_position(
+          canvas, module,
+          (vec2){
+              unit_snap(pos[0] - sprite->size[0] / 2),
+              unit_snap(pos[1] - sprite->size[1] / 2),
+          });
+  }
 
   container->canvas.enable_state(
       Widget::Canvas::Component::State::State_FreezeCreationSession);
@@ -237,22 +281,21 @@ void Layout::Container::on_module_drag_end(const TextureAtlasRegion *sprite,
    signal the module will be added to the hovered frame.
  */
 void Layout::Container::on_module_drag(const TextureAtlasRegion *sprite,
+                                       const ModuleType type,
                                        const ImVec2 position, void *data) {
 
   Layout::Container::Component *container =
       (Layout::Container::Component *)data;
 
-  vec2 mouse_pos = {ImGui::GetMousePos().x, ImGui::GetMousePos().y};
-
   ::Canvas *canvas = container->canvas.get_node();
-
 
   // TODO: Frustrum frame
   for (size_t i = 0; i < canvas->frames->length; i++) {
 
     Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
 
-    if (boundbox_contain_point(&frame->boundbox, mouse_pos)) {
+    if (boundbox_contain_point(&frame->boundbox,
+                               (vec2){position.x, position.y})) {
       Widget::Frame::Component(frame).draw_highlight();
       break;
     }

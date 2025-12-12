@@ -5,6 +5,7 @@
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/module.h"
 #include "runtime/manager/theme.h"
+#include "runtime/node/frame.h"
 #include "runtime/widgets/core.hpp"
 #include "runtime/widgets/sidebar/content/content.hpp"
 #include "utils/callback.h"
@@ -17,9 +18,14 @@ namespace Content {
 
 namespace Modules {
 
-typedef void (*on_drag_begin)(const TextureAtlasRegion *, void *);
-typedef void (*on_drag)(const TextureAtlasRegion *, const ImVec2, void *);
-typedef void (*on_drag_end)(const TextureAtlasRegion *, const ImVec2, void *);
+typedef void (*on_drag_begin)(const TextureAtlasRegion *, const ModuleType,
+                              void *);
+
+typedef void (*on_drag)(const TextureAtlasRegion *, const ModuleType,
+                        const ImVec2, void *);
+
+typedef void (*on_drag_end)(const TextureAtlasRegion *, const ModuleType,
+                            const ImVec2, void *);
 
 typedef CALLBACK_ENTRY(on_drag_begin) OnDragBeginCallback;
 typedef CALLBACK_ENTRY(on_drag) OnDragCallback;
@@ -77,7 +83,7 @@ private:
 
          labels_position[ModuleType_COUNT];
   // clang-format on
-  
+
   name_t labels[ModuleType_COUNT];
 
   static constexpr uint8_t DRAG_CALLBACK_CAPACITY = 32;
@@ -87,7 +93,7 @@ private:
 
   // Drag data
   const TextureAtlasRegion *active_thumbnail = nullptr;
-  size_t thumbnail_index = 0;
+  ModuleType thumbnail_index;
   ImVec2 mouse_init_pos;
 };
 

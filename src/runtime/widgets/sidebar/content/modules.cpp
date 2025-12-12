@@ -81,28 +81,31 @@ void Widget::SideBar::Content::Modules::Component::update() {
             ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y),
             ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y))) {
 
-      active_thumbnail = get_module((ModuleType)i);
-      thumbnail_index = i;
+      thumbnail_index = (ModuleType)i;
+      active_thumbnail = get_module(thumbnail_index);
       mouse_init_pos = ImGui::GetMousePos();
 
       for (uint8_t j = 0; j < drag_begin_callbacks.count; j++)
         drag_begin_callbacks.entries[j].callback(
-            active_thumbnail, drag_begin_callbacks.entries[j].data);
+            active_thumbnail, thumbnail_index,
+            drag_begin_callbacks.entries[j].data);
     }
   }
 
   if (active_thumbnail)
     for (uint8_t j = 0; j < drag_callbacks.count; j++)
-      drag_callbacks.entries[j].callback(active_thumbnail, ImGui::GetMousePos(),
+      drag_callbacks.entries[j].callback(active_thumbnail, thumbnail_index,
+                                         ImGui::GetMousePos(),
                                          drag_callbacks.entries[j].data);
 
   if (active_thumbnail && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-    active_thumbnail = nullptr;
 
     for (uint8_t j = 0; j < drag_end_callbacks.count; j++)
       drag_end_callbacks.entries[j].callback(
-          active_thumbnail, ImGui::GetMousePos(),
+          active_thumbnail, thumbnail_index, ImGui::GetMousePos(),
           drag_end_callbacks.entries[j].data);
+
+    active_thumbnail = nullptr;
   }
 }
 

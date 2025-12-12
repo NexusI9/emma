@@ -4,6 +4,7 @@
 #include "nkengine/include/renderer.h"
 #include "runtime/layouts/core.hpp"
 #include "runtime/layouts/navbar.hpp"
+#include "runtime/manager/module.h"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
@@ -23,9 +24,11 @@ bool get_heatmap_state(void *);
 void on_toolbar_update(const uint8_t, void *);
 void on_sidebar_tab_update(const uint8_t, void *);
 
-void on_module_drag_begin(const TextureAtlasRegion *, void *);
-void on_module_drag(const TextureAtlasRegion *, const ImVec2, void *);
-void on_module_drag_end(const TextureAtlasRegion *, const ImVec2, void *);
+void on_module_drag_begin(const TextureAtlasRegion *, const ModuleType, void *);
+void on_module_drag(const TextureAtlasRegion *, const ModuleType, const ImVec2,
+                    void *);
+void on_module_drag_end(const TextureAtlasRegion *, const ModuleType,
+                        const ImVec2, void *);
 
 class Component : public Core {
 
@@ -115,6 +118,7 @@ public:
   Widget::SideBar::Component sidebar;
   NavBar::Component navbar;
 
+  // TODO: move below attributes to a dedicated heatmap module
   Widget::Heatmap::Component heatmaps[HeatmapType_COUNT];
   HeatmapType active_heatmap = HeatmapType_Excitment;
   unsigned int heatmap_state = HeatmapState_None;
