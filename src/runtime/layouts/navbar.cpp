@@ -52,6 +52,8 @@ Layout::NavBar::Component::Component(Gui *gui, Canvas *canvas,
       // clang-format on
     }
   }
+
+  set_project_name("Gamification Userflow - V1");
 }
 
 void Layout::NavBar::Component::update() {
@@ -64,22 +66,34 @@ void Layout::NavBar::Component::render() {
   main_panel.Begin("Main Panel");
 
   const float base_y = ImGui::GetCursorPosY();
-  ImGui::SetCursorPosY(base_y + gui_scale(gui, 3));
-  ImGui::Text("EMMA [v0.15 - alpha]");
-  ImGui::SetCursorPosX(gui_scale(gui, margin.x));
-  ImGui::SetWindowFontScale(0.8f);
-  ImGui::PushStyleColor(
-      ImGuiCol_Text, (ImVec4)emma_im_color(ThemeEmmaColor_Text_Subtle_On_Dark));
-  ImGui::Text("Emotional Mapper");
-  ImGui::PopStyleColor();
-  ImGui::SetWindowFontScale(1.0f);
 
-  // display sitches
-  ImGui::SetCursorPosX(gui_scale(gui, 1160));
-  draw_switch(DisplaySwitch_Octagon, "Octalysis", base_y);
-  ImGui::SameLine(0.0f, gui_scale(gui, 16));
-  draw_switch(DisplaySwitch_Heatmap, "Heatmap", base_y);
+  {
+    ImGui::SetCursorPosY(base_y + gui_scale(gui, 3));
+    ImGui::Text("EMMA [v0.15 - alpha]");
+    ImGui::SetCursorPosX(gui_scale(gui, margin.x));
+    ImGui::SetWindowFontScale(0.8f);
+    ImGui::PushStyleColor(
+        ImGuiCol_Text,
+        (ImVec4)emma_im_color(ThemeEmmaColor_Text_Subtle_On_Dark));
+    ImGui::Text("Emotional Mapper");
+    ImGui::PopStyleColor();
+    ImGui::SetWindowFontScale(1.0f);
+  }
 
+  ImVec2 title_size = ImGui::CalcTextSize(project_name);
+  ImVec2 project_name_pos =
+      ImVec2(ImGui::GetMainViewport()->Size.x / 2 - title_size.x / 2,
+             base_y + gui_scale(gui, 12));
+  ImGui::SetCursorPos(project_name_pos);
+  ImGui::Text("%s", project_name);
+
+  {
+    // display sitches
+    ImGui::SetCursorPos(ImVec2(gui_scale(gui, 1160), base_y));
+    draw_switch(DisplaySwitch_Octagon, "Octalysis", base_y);
+    ImGui::SameLine(0.0f, gui_scale(gui, 16));
+    draw_switch(DisplaySwitch_Heatmap, "Heatmap", base_y);
+  }
   main_panel.End();
 }
 

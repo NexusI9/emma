@@ -34,9 +34,15 @@ public:
   const float bd_radius = emma_size(ThemeEmmaSize_Radius_Base);
   const ImVec2 padding = ImVec2(12, 6);
 
+  void set_project_name(const char *name) {
+    name_copy(name, project_name); 
+  }
+
 private:
   SwitchConfig octalysis_config;
   SwitchConfig heatmap_config;
+
+  name_t project_name;
 
   UI::Frame main_panel;
 
