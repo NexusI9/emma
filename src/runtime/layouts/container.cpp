@@ -1,11 +1,13 @@
 #include "container.hpp"
 #include "resources/theme.emma.h"
 #include "runtime/geometry/boundbox.h"
+#include "runtime/geometry/core.h"
 #include "runtime/layouts/navbar.hpp"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/unit.h"
+#include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
@@ -233,8 +235,6 @@ void Layout::Container::on_module_drag_end(const TextureAtlasRegion *sprite,
 
   vec2 pos = {position.x, position.y};
 
-  printf("position: %f | %f\n", pos[0], pos[1]);
-
   // TODO: Frustrum frame in viewport for faster match
   bool hit_frame = false;
   for (size_t i = 0; i < canvas->frames->length; i++) {
@@ -293,6 +293,10 @@ void Layout::Container::on_module_drag(const TextureAtlasRegion *sprite,
   for (size_t i = 0; i < canvas->frames->length; i++) {
 
     Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
+
+    RectCoordinate vp_boundbox;
+    vp2(frame->boundbox.p0, vp_boundbox.p0);
+    vp2(frame->boundbox.p1, vp_boundbox.p1);
 
     if (boundbox_contain_point(&frame->boundbox,
                                (vec2){position.x, position.y})) {
