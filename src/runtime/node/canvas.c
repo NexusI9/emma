@@ -617,10 +617,12 @@ CanvasStatus canvas_destroy_frame(Canvas *canvas, Frame *frame) {
                           frame->id);
 
   // For frames, we destroy all the inner modules as well
-  for (size_t i = 0; i < frame->children.length; i++) {
+  const size_t children_count = frame->children.length;
+  for (size_t i = 0; i < children_count; i++) {
     Frame *child = allocator_frame_entry(frame->children.entries[i]);
     canvas_destroy_module(canvas, child);
   }
+
   frame->children.length = 0;
 
   canvas_destroy_frame_core(canvas, frame, canvas->frames);

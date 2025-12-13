@@ -140,8 +140,9 @@ FrameStatus frame_destroy(Frame *frame) {
 
   if (frame->parent != ID_UNDEFINED) {
     Frame *parent = allocator_frame_entry(frame->parent);
-    allocator_id_list_pop(parent->children.entries, &parent->children.length,
-                          frame->id);
+    StaticListStatus pop = allocator_id_list_pop(
+        parent->children.entries, &parent->children.length, frame->id);
+
     frame->parent = ID_UNDEFINED;
   }
 
