@@ -46,7 +46,7 @@ public:
   void listen_active_connector_handle_release(::Connector *);
 
   void freeze() { flag_enable(State_Freeze, &state); };
-
+  void clear() { state = State_None; }
   void unfreeze() { flag_disable(State_Freeze, &state); };
 
 private:

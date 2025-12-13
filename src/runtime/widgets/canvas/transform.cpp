@@ -134,7 +134,7 @@ void Widget::Canvas::Transform::listen_frame(Frame::Component *frame,
       // if not CAP input or if the configuration's Transform Mode is
       // empty and different from the current one, we empty the selection.
       if (input_key(INPUT_KEY_SHIFT) == false) {
-        transform_box.empty();
+        transform_box.clear();
         allocator_id_list_empty(conf->selection_list->entries,
                                 &conf->selection_list->length);
       }

@@ -68,7 +68,7 @@ Widget::Transform::ObjectManager::remove_object(const void *target,
                               found_index, NULL);
 }
 
-StaticListStatus Widget::Transform::ObjectManager::empty() {
+StaticListStatus Widget::Transform::ObjectManager::clear() {
 
   return stli_empty(objects.entries, &objects.count, sizeof(Object),
                     "Transform ObjectManager Target List");

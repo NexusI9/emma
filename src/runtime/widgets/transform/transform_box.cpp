@@ -345,7 +345,7 @@ Widget::Transform::Box::Status Widget::Transform::Box::end() {
 
   if (object_manager.count() &&
       selection_status(&selection) == GuiSelectionStatus_Blank) {
-    object_manager.empty();
+    object_manager.clear();
     status = Transform::Box::Status_ClearSelection;
   }
 

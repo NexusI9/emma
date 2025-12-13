@@ -57,7 +57,7 @@ public:
   Status toggle_object(const ObjectDescriptor *);
   StaticListStatus add_object(const ObjectDescriptor *);
   StaticListStatus remove_object(const void *, size_t *);
-  StaticListStatus empty();
+  StaticListStatus clear();
   uint16_t count() { return objects.count; }
   Object *get_entry(const size_t id) { return &objects.entries[id]; }
 

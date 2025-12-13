@@ -61,15 +61,16 @@ void Widget::Canvas::Component::draw() {
   module.create.begin();
   module.create.end();
 
-  if (module.destroy.listen()) {
+  if (module.destroy.trigger()) {
     module.destroy.active_connector(&module.selection.active_connector);
     if (module.destroy.selected_frames() == CanvasStatus_Success)
-      module.transform.transform_box.empty();
+      module.transform.transform_box.clear();
+    module.selection.clear();
   }
 }
 
 void Widget::Canvas::Component::draw_frame_handle_connectors(::Frame *frame,
-                                                         const int side) {
+                                                             const int side) {
 
   for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
 
@@ -82,7 +83,7 @@ void Widget::Canvas::Component::draw_frame_handle_connectors(::Frame *frame,
         allocator_connector_handle_entry(frame->connector_handle_id[i]);
 
     ConnectorHandle::Component handle_shape =
-      ConnectorHandle::Component(handle, (ConnectorHandleSide)(1 << i));
+        ConnectorHandle::Component(handle, (ConnectorHandleSide)(1 << i));
 
     handle_shape.draw();
 
@@ -210,7 +211,7 @@ bool Widget::Canvas::Component::disable_creation() {
       (::Widget::Canvas::Selection::State::State_SelectConnector |
        ::Widget::Canvas::Selection::State::State_Deselect) &
       module.selection.get_state();
-  
+
   return heatmap_displayed || transform_box_dragging ||
          transform_module_active || selection_active;
 }

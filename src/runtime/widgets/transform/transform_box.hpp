@@ -79,8 +79,8 @@ public:
     return result;
   }
 
-  StaticListStatus empty() {
-    StaticListStatus result = object_manager.empty();
+  StaticListStatus clear() {
+    StaticListStatus result = object_manager.clear();
     update_visibility_state();
 
     return result;
