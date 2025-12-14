@@ -237,7 +237,7 @@ void Layout::Container::on_module_drag_end(const TextureAtlasRegion *sprite,
 
   // TODO: Frustrum frame in viewport for faster match
   bool hit_frame = false;
-  for (size_t i = 0; i < canvas->frames->length; i++) {
+  for (size_t i = 0; i < canvas->frames->count; i++) {
 
     Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
 
@@ -290,7 +290,7 @@ void Layout::Container::on_module_drag(const TextureAtlasRegion *sprite,
   ::Canvas *canvas = container->canvas.get_node();
 
   // TODO: Frustrum frame
-  for (size_t i = 0; i < canvas->frames->length; i++) {
+  for (size_t i = 0; i < canvas->frames->count; i++) {
 
     Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
 

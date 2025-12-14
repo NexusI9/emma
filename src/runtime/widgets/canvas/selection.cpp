@@ -71,7 +71,7 @@ void Widget::Canvas::Selection::listen_active_connector_handle_release(
     for (uint8_t i = 0; i < release_frames_count; i++) {
       if (connect_system_connect_handle_to_frame(
               active_connector_handle, connector, frames[i].list->entries,
-              frames[i].list->length,
+              frames[i].list->count,
               frames[i].sides) == ConnectSystemStatus_Success) {
         active_connector_handle = nullptr;
         flag_disable(State_SelectConnectorHandle, &state);
@@ -96,12 +96,12 @@ void Widget::Canvas::Selection::listen_connector_selection(
 
     allocator_id_list_empty(
         node->connectors[CanvasConnectorState_Selected].entries,
-        &node->connectors[CanvasConnectorState_Selected].length);
+        &node->connectors[CanvasConnectorState_Selected].count);
 
     allocator_id_list_push(
         node->connectors[CanvasConnectorState_Selected].entries,
         allocator_connector_capacity(),
-        &node->connectors[CanvasConnectorState_Selected].length, connector->id);
+        &node->connectors[CanvasConnectorState_Selected].count, connector->id);
 
     active_connector = connector;
     flag_enable(State_SelectConnector, &state);
@@ -128,7 +128,7 @@ void Widget::Canvas::Selection::connector_selection_end() {
 
     allocator_id_list_empty(
         node->connectors[CanvasConnectorState_Selected].entries,
-        &node->connectors[CanvasConnectorState_Selected].length);
+        &node->connectors[CanvasConnectorState_Selected].count);
 
     active_connector = nullptr;
     flag_disable(State_SelectConnector, &state);

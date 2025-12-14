@@ -69,10 +69,10 @@ void Widget::Heatmap::Component::compute_render_pass(WGPUCommandEncoder encoder)
   // dl->AddRectFilled(ImVec2(0, 0), vp->Size, ImColor(0, 0, 0, 255));
 
   // draw each modules
-  for (size_t i = 0; i < *node->frames.length; i++) {
+  for (size_t i = 0; i < *node->frames.count; i++) {
     ::Frame *parent_frame = allocator_frame_entry(node->frames.entries[i]);
 
-    for (size_t j = 0; j < parent_frame->children.length; j++) {
+    for (size_t j = 0; j < parent_frame->children.count; j++) {
       ::Frame *module = allocator_frame_entry(parent_frame->children.entries[j]);
 
       // float module_intensity = node->intensity_mapper(node, module, NULL);

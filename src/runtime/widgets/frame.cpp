@@ -91,7 +91,7 @@ void Widget::Frame::Component::draw_pod() {
       (ImTextureRef)texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
       p0, p1, im_vec2(node->uv0), im_vec2(node->uv1));
 
-  for (size_t i = 0; i < node->children.length; i++) {
+  for (size_t i = 0; i < node->children.count; i++) {
     ::Frame *child = allocator_frame_entry(node->children.entries[i]);
     Frame::Component(child).draw_pod();
   }

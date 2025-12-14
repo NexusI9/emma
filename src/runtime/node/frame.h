@@ -192,13 +192,13 @@ StaticListStatus frame_register_connector(Frame *node, const alloc_id id) {
 
   return allocator_id_list_push_unique(node->connectors_id.entries,
                                        FRAME_MAX_CONNECTORS,
-                                       &node->connectors_id.length, id);
+                                       &node->connectors_id.count, id);
 }
 
 StaticListStatus frame_unregister_connector(Frame *node, const alloc_id id) {
 
   return allocator_id_list_pop(node->connectors_id.entries,
-                               &node->connectors_id.length, id);
+                               &node->connectors_id.count, id);
 }
 
 bool frame_collide(const Frame *frame_a, const Frame *frame_b) {

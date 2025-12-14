@@ -108,7 +108,7 @@ void Widget::GridBackground::Component::create_mesh() {
     draw_packet.mesh = quad;
     draw_packet.attribute = quad->topology.base.attribute.buffer;
     draw_packet.index = quad->topology.base.index.buffer;
-    draw_packet.length = quad->topology.base.index.length;
+    draw_packet.count = quad->topology.base.index.count;
     draw_packet.bindgroup_list =
         &mesh_shader(quad, MeshShader_Texture)->bind_groups;
     draw_packet.shader_name = mesh_shader(quad, MeshShader_Texture)->name;

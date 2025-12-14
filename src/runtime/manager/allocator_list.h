@@ -7,20 +7,20 @@
 #define ALLOCATOR_ID_LIST(Capacity)                                            \
   struct {                                                                     \
     alloc_id entries[Capacity];                                                \
-    size_t length;                                                             \
+    size_t count;                                                             \
   }
 
 typedef struct {
   alloc_id *entries;
-  size_t *length;
+  size_t *count;
 } AllocIdRefList;
 
 EXTERN_C_BEGIN
 
-static inline alloc_id *allocator_id_list_find(alloc_id *entries, size_t length,
+static inline alloc_id *allocator_id_list_find(alloc_id *entries, size_t count,
                                                const alloc_id id) {
 
-  for (size_t i = 0; i < length; i++) {
+  for (size_t i = 0; i < count; i++) {
     if (entries[i] == id)
       return &entries[i];
   }

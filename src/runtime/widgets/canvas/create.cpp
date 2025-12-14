@@ -110,10 +110,10 @@ void Widget::Canvas::Create::frame_release() {
     return;
 
   if (new_frame->size[0] == FRAME_MIN_SIZE &&
-      new_frame->size[1] == FRAME_MIN_SIZE && node->frames->length > 1) {
+      new_frame->size[1] == FRAME_MIN_SIZE && node->frames->count > 1) {
 
     ::Frame *last_frame =
-        allocator_frame_entry(node->frames->entries[node->frames->length - 2]);
+        allocator_frame_entry(node->frames->entries[node->frames->count - 2]);
 
     canvas_set_frame_size(node, new_frame, last_frame->size);
   }

@@ -100,7 +100,7 @@ void Widget::Canvas::Component::draw_frames_octagon() {
   if (!(State_ShowOctagon & state))
     return;
 
-  for (size_t i = 0; i < node->frames[CanvasFrameState_Octagon].length; i++) {
+  for (size_t i = 0; i < node->frames[CanvasFrameState_Octagon].count; i++) {
     ::Frame *frame = allocator_frame_entry(
         node->frames[CanvasFrameState_Octagon].entries[i]);
     Octagon::Component(allocator_octagon_entry(frame->octagon_id)).draw();
@@ -108,7 +108,7 @@ void Widget::Canvas::Component::draw_frames_octagon() {
 }
 
 void Widget::Canvas::Component::draw_frames() {
-  for (size_t i = 0; i < node->frames->length; i++) {
+  for (size_t i = 0; i < node->frames->count; i++) {
     ::Frame *frame = allocator_frame_entry(node->frames->entries[i]);
     Frame::Component frame_shape = Frame::Component(frame);
     frame_shape.draw();
@@ -118,7 +118,7 @@ void Widget::Canvas::Component::draw_frames() {
 }
 void Widget::Canvas::Component::draw_pods() {
 
-  for (size_t i = 0; i < node->pods->length; i++) {
+  for (size_t i = 0; i < node->pods->count; i++) {
     ::Frame *pod = allocator_frame_entry(node->pods->entries[i]);
     Frame::Component frame_shape = Frame::Component(pod);
     frame_shape.draw_pod();
@@ -128,7 +128,7 @@ void Widget::Canvas::Component::draw_pods() {
   }
 }
 void Widget::Canvas::Component::draw_modules() {
-  for (size_t i = 0; i < node->modules->length; i++) {
+  for (size_t i = 0; i < node->modules->count; i++) {
     ::Frame *frame = allocator_frame_entry(node->modules->entries[i]);
     Frame::Component frame_shape = Frame::Component(frame);
     frame_shape.draw_texture();
@@ -141,7 +141,7 @@ void Widget::Canvas::Component::draw_modules() {
 void Widget::Canvas::Component::draw_connectors() {
 
   module.selection.connector_selection_begin();
-  for (size_t i = 0; i < node->connectors->length; i++) {
+  for (size_t i = 0; i < node->connectors->count; i++) {
     ::Connector *connector =
         allocator_connector_entry(node->connectors->entries[i]);
     Connector::Component connector_shape = Connector::Component(gui, connector);
@@ -168,7 +168,7 @@ void Widget::Canvas::Component::draw_connectors() {
 void Widget::Canvas::Component::draw_selected_items_connector_handles() {
 
   size_t i;
-  for (i = 0; i < node->frames[CanvasFrameState_Selected].length; i++) {
+  for (i = 0; i < node->frames[CanvasFrameState_Selected].count; i++) {
     ::Frame *frame = allocator_frame_entry(
         node->frames[CanvasFrameState_Selected].entries[i]);
 
@@ -176,13 +176,13 @@ void Widget::Canvas::Component::draw_selected_items_connector_handles() {
                                             ConnectorHandleSide_Right);
   }
 
-  for (i = 0; i < node->pods[CanvasPodState_Selected].length; i++) {
+  for (i = 0; i < node->pods[CanvasPodState_Selected].count; i++) {
     ::Frame *frame =
         allocator_frame_entry(node->pods[CanvasPodState_Selected].entries[i]);
     draw_frame_handle_connectors(frame, ConnectorHandleSide_Right);
   }
 
-  for (i = 0; i < node->connectors[CanvasConnectorState_Selected].length; i++) {
+  for (i = 0; i < node->connectors[CanvasConnectorState_Selected].count; i++) {
     ::Connector *connector = allocator_connector_entry(
         node->connectors[CanvasConnectorState_Selected].entries[i]);
 

@@ -13,7 +13,7 @@ FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
   node->clickbox.update_callback = desc->clickbox->update_callback;
   node->clickbox.padding = desc->clickbox->padding;
   node->clickbox.count = desc->clickbox->count;
-  node->children.length = 0;
+  node->children.count = 0;
 
   frame_set_size(node, desc->size);
   frame_set_world_position(node, desc->position);
@@ -29,13 +29,13 @@ FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
 
 StaticListStatus frame_add_child(Frame *parent, const alloc_id id) {
 
-  if (allocator_id_list_find(parent->children.entries, parent->children.length,
+  if (allocator_id_list_find(parent->children.entries, parent->children.count,
                              id) != NULL)
     return StaticListStatus_DuplicateEntry;
 
   StaticListStatus push =
       allocator_id_list_push(parent->children.entries, FRAME_MAX_CHILDREN,
-                             &parent->children.length, id);
+                             &parent->children.count, id);
 
   if (push != StaticListStatus_Success)
     return push;
@@ -52,7 +52,7 @@ StaticListStatus frame_add_child(Frame *parent, const alloc_id id) {
 StaticListStatus frame_remove_child(Frame *node, const alloc_id id) {
 
   StaticListStatus pop =
-      allocator_id_list_pop(node->children.entries, &node->children.length, id);
+      allocator_id_list_pop(node->children.entries, &node->children.count, id);
 
   if (pop == StaticListStatus_Success) {
     Frame *child = allocator_frame_entry(id);
@@ -74,7 +74,7 @@ FrameStatus frame_update_world_position(Frame *node) {
 
   glm_vec2_add(node->world_position, node->size, node->end_point);
 
-  for (size_t i = 0; i < node->children.length; i++) {
+  for (size_t i = 0; i < node->children.count; i++) {
     Frame *child = allocator_frame_entry(node->children.entries[i]);
     frame_update_world_position(child);
   }
@@ -98,7 +98,7 @@ FrameStatus frame_set_world_position(Frame *node, const vec2 value) {
                                  node->end_point, node->clickbox.padding);
   frame_update_boundbox(node);
 
-  for (size_t i = 0; i < node->children.length; i++) {
+  for (size_t i = 0; i < node->children.count; i++) {
     Frame *child = allocator_frame_entry(node->children.entries[i]);
     frame_update_world_position(child);
     child->clickbox.update_callback(child->clickbox.entries,
@@ -119,7 +119,7 @@ FrameStatus frame_wrap(Frame *node) {
   vec2 children_start = {INFINITY, INFINITY};
   vec2 children_end = {-INFINITY, -INFINITY};
 
-  for (size_t i = 0; i < node->children.length; i++) {
+  for (size_t i = 0; i < node->children.count; i++) {
     Frame *child = allocator_frame_entry(node->children.entries[i]);
 
     children_start[0] = fminf(children_start[0], child->world_position[0]);
@@ -141,7 +141,7 @@ FrameStatus frame_destroy(Frame *frame) {
   if (frame->parent != ID_UNDEFINED) {
     Frame *parent = allocator_frame_entry(frame->parent);
     StaticListStatus pop = allocator_id_list_pop(
-        parent->children.entries, &parent->children.length, frame->id);
+        parent->children.entries, &parent->children.count, frame->id);
 
     frame->parent = ID_UNDEFINED;
   }
@@ -155,7 +155,7 @@ FrameStatus frame_destroy(Frame *frame) {
     frame->octagon_id = ID_UNDEFINED;
   }
 
-  frame->connectors_id.length = 0;
+  frame->connectors_id.count = 0;
 
   // Remove the connectors handle
   for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {
@@ -165,7 +165,7 @@ FrameStatus frame_destroy(Frame *frame) {
       connector_handle_destroy(handle);
   }
 
-  for (size_t i = 0; i < frame->children.length; i++) {
+  for (size_t i = 0; i < frame->children.count; i++) {
     Frame *child = allocator_frame_entry(frame->children.entries[i]);
     child->parent = ID_UNDEFINED;
   }

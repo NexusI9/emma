@@ -49,7 +49,7 @@ static inline Frame *canvas_create_frame_core(Canvas *, const FrameDescriptor *,
 Frame *canvas_create_frame_core(Canvas *canvas,
                                 const FrameDescriptor *frame_desc,
                                 alloc_id *list_entries, const size_t capacity,
-                                size_t *list_length,
+                                size_t *list_count,
                                 const CanvasFrameCreateFlags flags) {
 
   if (*list_entries == capacity)
@@ -62,7 +62,7 @@ Frame *canvas_create_frame_core(Canvas *canvas,
 
   {
     // === Frame setup ===
-    allocator_id_list_push(list_entries, capacity, list_length, frame->id);
+    allocator_id_list_push(list_entries, capacity, list_count, frame->id);
     frame_create(frame, frame_desc);
   }
 
@@ -112,7 +112,7 @@ Frame *canvas_create_frame(Canvas *canvas) {
   return canvas_create_frame_core(
       canvas, &frame_desc, canvas->frames[CanvasFrameState_Default].entries,
       allocator_frame_capacity(),
-      &canvas->frames[CanvasFrameState_Default].length,
+      &canvas->frames[CanvasFrameState_Default].count,
       CanvasFrameCreateFlags_All);
 }
 
@@ -136,7 +136,7 @@ Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
   return canvas_create_frame_core(
       canvas, &frame_desc, canvas->modules[CanvasModuleState_Default].entries,
       allocator_frame_capacity(),
-      &canvas->modules[CanvasModuleState_Default].length,
+      &canvas->modules[CanvasModuleState_Default].count,
       CanvasFrameCreateFlags_CreateConnectorHandle);
 }
 
@@ -154,7 +154,7 @@ Frame *canvas_create_pod(Canvas *canvas) {
 
   Frame *pod = canvas_create_frame_core(
       canvas, &pod_desc, canvas->pods[CanvasPodState_Default].entries,
-      allocator_frame_capacity(), &canvas->pods[CanvasPodState_Default].length,
+      allocator_frame_capacity(), &canvas->pods[CanvasPodState_Default].count,
       CanvasFrameCreateFlags_CreateConnectorHandle);
 
   Frame *pod_window = new_frame();
@@ -182,7 +182,7 @@ Octagon *canvas_create_octagon(Canvas *canvas) {
 
   const size_t capacity = allocator_octagon_capacity();
 
-  if (canvas->octagons.length == capacity)
+  if (canvas->octagons.count == capacity)
     return NULL;
 
   Octagon *oct = new_octagon();
@@ -191,7 +191,7 @@ Octagon *canvas_create_octagon(Canvas *canvas) {
     return NULL;
 
   allocator_id_list_push(canvas->octagons.entries, capacity,
-                         &canvas->octagons.length, oct->id);
+                         &canvas->octagons.count, oct->id);
 
   OctagonDescriptor oct_desc = {
       .inner_color = {0.1f, 0.1, 0.1f, 1.0f},
@@ -215,7 +215,7 @@ ConnectorHandle *canvas_create_connector_handle(Canvas *canvas) {
 
   const size_t capacity = allocator_connector_handle_capacity();
 
-  if (canvas->connector_handles.length == capacity)
+  if (canvas->connector_handles.count == capacity)
     return NULL;
 
   ConnectorHandle *handle = new_connector_handle();
@@ -224,7 +224,7 @@ ConnectorHandle *canvas_create_connector_handle(Canvas *canvas) {
     return NULL;
 
   allocator_id_list_push(canvas->connector_handles.entries, capacity,
-                         &canvas->connector_handles.length, handle->id);
+                         &canvas->connector_handles.count, handle->id);
 
   ConnectorHandleDescriptor handle_desc = {
       .position = {0.0f, 0.0f},
@@ -297,7 +297,7 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
 void canvas_update_connectors_handle_to_frame(Canvas *canvas,
                                               const Frame *frame) {
 
-  for (size_t i = 0; i < frame->connectors_id.length; i++) {
+  for (size_t i = 0; i < frame->connectors_id.count; i++) {
     Connector *connector =
         allocator_connector_entry(frame->connectors_id.entries[i]);
 
@@ -369,7 +369,7 @@ StaticListStatus canvas_register_frame_state(Canvas *canvas, const Frame *frame,
 
   return allocator_id_list_push(canvas->frames[state].entries,
                                 allocator_frame_capacity(),
-                                &canvas->frames[state].length, frame->id);
+                                &canvas->frames[state].count, frame->id);
 }
 
 StaticListStatus canvas_unregister_frame_state(Canvas *canvas,
@@ -377,26 +377,26 @@ StaticListStatus canvas_unregister_frame_state(Canvas *canvas,
                                                const CanvasFrameState state) {
 
   return allocator_id_list_pop(canvas->frames[state].entries,
-                               &canvas->frames[state].length, frame->id);
+                               &canvas->frames[state].count, frame->id);
 }
 
 StaticListStatus canvas_empty_frame_state(Canvas *canvas,
                                           const CanvasFrameState state) {
   return stli_empty(canvas->frames[state].entries,
-                    &canvas->frames[state].length, sizeof(alloc_id),
+                    &canvas->frames[state].count, sizeof(alloc_id),
                     "Canvas Frame State list");
 }
 
 StaticListStatus canvas_empty_module_state(Canvas *canvas,
                                            const CanvasModuleState state) {
   return stli_empty(canvas->modules[state].entries,
-                    &canvas->modules[state].length, sizeof(alloc_id),
+                    &canvas->modules[state].count, sizeof(alloc_id),
                     "Canvas Module State list");
 }
 
 StaticListStatus canvas_empty_pod_state(Canvas *canvas,
                                         const CanvasPodState state) {
-  return stli_empty(canvas->pods[state].entries, &canvas->pods[state].length,
+  return stli_empty(canvas->pods[state].entries, &canvas->pods[state].count,
                     sizeof(alloc_id), "Canvas Pod State list");
 }
 
@@ -408,7 +408,7 @@ CanvasStatus canvas_add_pod_persona(Canvas *canvas, Frame *pod,
   if (!persona_frame) // ERRHANDLE
     return CanvasStatus_ResourceCreationFail;
 
-  const alloc_id window_id = pod->children.entries[pod->children.length - 1];
+  const alloc_id window_id = pod->children.entries[pod->children.count - 1];
   const TextureAtlasRegion *sprite = persona_get_sprite(type);
 
   vec2 position;
@@ -437,8 +437,8 @@ CanvasStatus canvas_add_pod_persona(Canvas *canvas, Frame *pod,
   For the pod, the last child is always the window, so we move it at the end of
   the children array
    */
-  pod->children.entries[pod->children.length - 2] = persona_frame->id;
-  pod->children.entries[pod->children.length - 1] = window_id;
+  pod->children.entries[pod->children.count - 2] = persona_frame->id;
+  pod->children.entries[pod->children.count - 1] = window_id;
 
   return CanvasStatus_Success;
 }
@@ -487,8 +487,8 @@ void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
     return;
 
   // make sure it's not connected yet
-  for (size_t i = 0; i < frame_a->connectors_id.length; i++) {
-    for (size_t j = 0; j < frame_b->connectors_id.length; j++) {
+  for (size_t i = 0; i < frame_a->connectors_id.count; i++) {
+    for (size_t j = 0; j < frame_b->connectors_id.count; j++) {
       if (frame_a->connectors_id.entries[i] ==
           frame_b->connectors_id.entries[j])
         return;
@@ -512,7 +512,7 @@ void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
 
   allocator_id_list_push(canvas->connectors->entries,
                          allocator_connector_capacity(),
-                         &canvas->connectors->length, connector->id);
+                         &canvas->connectors->count, connector->id);
 
   frame_register_connector(frame_a, connector->id);
   frame_register_connector(frame_b, connector->id);
@@ -530,7 +530,7 @@ Connector *canvas_create_connector(Canvas *canvas,
 
   if (allocator_id_list_push(canvas->connectors->entries,
                              allocator_connector_capacity(),
-                             &canvas->connectors->length,
+                             &canvas->connectors->count,
                              connector->id) != StaticListStatus_Success)
     return NULL;
 
@@ -546,7 +546,7 @@ void canvas_disconnect_frames(Canvas *canvas, const Frame *frame_a,
  */
 void canvas_update_frame_connectors(Canvas *canvas, const Frame *frame) {
 
-  for (size_t i = 0; i < frame->connectors_id.length; i++) {
+  for (size_t i = 0; i < frame->connectors_id.count; i++) {
     Connector *connector =
         allocator_connector_entry(frame->connectors_id.entries[i]);
 
@@ -582,10 +582,10 @@ CanvasStatus canvas_destroy_frame_core(Canvas *canvas, Frame *frame,
                                        FrameAllocList *list) {
 
   // remove it from the target canvas list (frame, pod, module...)
-  allocator_id_list_pop(list->entries, &list->length, frame->id);
+  allocator_id_list_pop(list->entries, &list->count, frame->id);
 
   // Unlink all frames connectors
-  for (size_t i = 0; i < frame->connectors_id.length; i++) {
+  for (size_t i = 0; i < frame->connectors_id.count; i++) {
     Connector *connector =
         allocator_connector_entry(frame->connectors_id.entries[i]);
     canvas_destroy_connector(canvas, connector);
@@ -598,7 +598,7 @@ CanvasStatus canvas_destroy_frame_core(Canvas *canvas, Frame *frame,
 
 CanvasStatus canvas_destroy_octagon(Canvas *canvas, Octagon *octagon) {
 
-  for (size_t i = 0; i < canvas->frames->length; i++) {
+  for (size_t i = 0; i < canvas->frames->count; i++) {
     Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
     if (frame->octagon_id == octagon->id)
       frame->octagon_id = ID_UNDEFINED;
@@ -613,17 +613,17 @@ CanvasStatus canvas_destroy_frame(Canvas *canvas, Frame *frame) {
 
   // unregister it from other state list
   for (uint8_t i = 1; i < CanvasFrameState_COUNT; i++)
-    allocator_id_list_pop(canvas->frames[i].entries, &canvas->frames[i].length,
+    allocator_id_list_pop(canvas->frames[i].entries, &canvas->frames[i].count,
                           frame->id);
 
   // For frames, we destroy all the inner modules as well
-  const size_t children_count = frame->children.length;
+  const size_t children_count = frame->children.count;
   for (size_t i = 0; i < children_count; i++) {
     Frame *child = allocator_frame_entry(frame->children.entries[i]);
     canvas_destroy_module(canvas, child);
   }
 
-  frame->children.length = 0;
+  frame->children.count = 0;
 
   canvas_destroy_frame_core(canvas, frame, canvas->frames);
 
@@ -635,7 +635,7 @@ CanvasStatus canvas_destroy_module(Canvas *canvas, Frame *frame) {
   // unregister it from other state list
   for (uint8_t i = 1; i < CanvasModuleState_COUNT; i++) {
     allocator_id_list_pop(canvas->modules[i].entries,
-                          &canvas->modules[i].length, frame->id);
+                          &canvas->modules[i].count, frame->id);
   }
 
   canvas_destroy_frame_core(canvas, frame, canvas->modules);
@@ -648,7 +648,7 @@ CanvasStatus canvas_destroy_pod(Canvas *canvas, Frame *frame) {
 
   // unregister it from other state list
   for (uint8_t i = 1; i < CanvasPodState_COUNT; i++)
-    allocator_id_list_pop(canvas->pods[i].entries, &canvas->pods[i].length,
+    allocator_id_list_pop(canvas->pods[i].entries, &canvas->pods[i].count,
                           frame->id);
 
   canvas_destroy_frame_core(canvas, frame, canvas->pods);
@@ -666,10 +666,10 @@ CanvasStatus canvas_destroy_connector(Canvas *canvas, Connector *connector) {
   // remove it from each frame that registered this connector
   for (uint8_t i = 0; i < select_count; i++) {
 
-    for (size_t j = 0; j < frame_type[i]->length; j++) {
+    for (size_t j = 0; j < frame_type[i]->count; j++) {
       Frame *frame = allocator_frame_entry(frame_type[i]->entries[j]);
 
-      for (size_t k = 0; k < frame->connectors_id.length; k++)
+      for (size_t k = 0; k < frame->connectors_id.count; k++)
         if (frame->connectors_id.entries[k] == connector->id)
           frame_unregister_connector(frame, connector->id);
     }
@@ -678,7 +678,7 @@ CanvasStatus canvas_destroy_connector(Canvas *canvas, Connector *connector) {
   // make sure to remove it from the state lists
   for (uint8_t i = 0; i < CanvasConnectorState_COUNT; i++)
     allocator_id_list_pop(canvas->connectors[i].entries,
-                          &canvas->connectors[i].length, connector->id);
+                          &canvas->connectors[i].count, connector->id);
 
   connector_destroy(connector);
 
@@ -697,17 +697,17 @@ CanvasStatus canvas_destroy_all_selected_frames(Canvas *canvas) {
 
       {
           canvas->frames[CanvasFrameState_Selected].entries,
-          &canvas->frames[CanvasFrameState_Selected].length,
+          &canvas->frames[CanvasFrameState_Selected].count,
           canvas_destroy_frame,
       },
       {
           canvas->modules[CanvasModuleState_Selected].entries,
-          &canvas->modules[CanvasModuleState_Selected].length,
+          &canvas->modules[CanvasModuleState_Selected].count,
           canvas_destroy_module,
       },
       {
           canvas->pods[CanvasPodState_Selected].entries,
-          &canvas->pods[CanvasPodState_Selected].length,
+          &canvas->pods[CanvasPodState_Selected].count,
           canvas_destroy_pod,
       }
 

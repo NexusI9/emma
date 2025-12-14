@@ -222,7 +222,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
 
     HeatmapDescriptor desc = {
         // fixed attributes
-        .frames = {canvas->frames->entries, &canvas->frames->length},
+        .frames = {canvas->frames->entries, &canvas->frames->count},
         .height = (int)(context_height() * context_dpi()),
         .width = (int)(context_width() * context_dpi()),
         .blur = 8,

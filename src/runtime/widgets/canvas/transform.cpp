@@ -106,7 +106,7 @@ void Widget::Canvas::Transform::listen_frame(Frame::Component *frame,
 
       // mark as unselected
       allocator_id_list_pop(conf->selection_list->entries,
-                            &conf->selection_list->length, frame_node->id);
+                            &conf->selection_list->count, frame_node->id);
 
       transform_box.remove_object(found_obj->handle, NULL);
 
@@ -136,13 +136,13 @@ void Widget::Canvas::Transform::listen_frame(Frame::Component *frame,
       if (input_key(INPUT_KEY_SHIFT) == false) {
         transform_box.clear();
         allocator_id_list_empty(conf->selection_list->entries,
-                                &conf->selection_list->length);
+                                &conf->selection_list->count);
       }
 
       // mark as selected
       allocator_id_list_push(conf->selection_list->entries,
                              ALLOCATOR_MAX_FRAMES,
-                             &conf->selection_list->length, frame_node->id);
+                             &conf->selection_list->count, frame_node->id);
 
       transform_box.add_object(&object);
     }
@@ -192,7 +192,7 @@ void Widget::Canvas::canvas_shape_on_module_session_end(void *data) {
 
   // check if the frame is within a parent frame scope
   if (frame_data->parent_list)
-    for (size_t i = 0; i < frame_data->parent_list->length; i++) {
+    for (size_t i = 0; i < frame_data->parent_list->count; i++) {
       ::Frame *parent =
           allocator_frame_entry(frame_data->parent_list->entries[i]);
       if (frame_collide(parent, frame)) {

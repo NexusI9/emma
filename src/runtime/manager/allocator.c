@@ -4,7 +4,7 @@
 #define _(Type, Label, Capacity)                                               \
   typedef struct {                                                             \
     Type entries[Capacity];                                                    \
-    size_t length;                                                             \
+    size_t count;                                                             \
   } AllocatorList##Type;                                                       \
                                                                                \
   static AllocatorList##Type allocator_list_##Label = {0};
@@ -26,7 +26,7 @@ ALLOCATOR_LIST(_)
       if (entry->id == ID_UNDEFINED) {                                         \
         id = i;                                                                \
         entry->id = id;                                                        \
-        allocator_list_##Label.length++;                                       \
+        allocator_list_##Label.count++;                                       \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
@@ -45,7 +45,7 @@ ALLOCATOR_LIST(_);
                                                                                \
     if (entry->id != ID_UNDEFINED) {                                           \
       entry->id = ID_UNDEFINED;                                                \
-      allocator_list_##Label.length--;                                         \
+      allocator_list_##Label.count--;                                         \
     }                                                                          \
                                                                                \
     return AllocatorStatus_Succes;                                             \
@@ -74,7 +74,7 @@ AllocatorStatus allocator_init() {
 #define _(Type, Label, Capacity)                                               \
   for (size_t i = 0; i < Capacity; i++)                                        \
     allocator_list_##Label.entries[i].id = ID_UNDEFINED;                       \
-  allocator_list_##Label.length = 0;
+  allocator_list_##Label.count = 0;
 
   ALLOCATOR_LIST(_);
 #undef _
