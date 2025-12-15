@@ -70,53 +70,7 @@ void Widget::SideBar::Content::Modules::Component::layout() {
   }
 }
 
-void Widget::SideBar::Content::Modules::Component::update() {
-
-  ImVec2 win_pos = ImGui::GetCursorPos();
-
-  for (size_t i = 0; i < ModuleType_COUNT; i++) {
-
-    if (!active_thumbnail && ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
-        ImGui::IsMouseHoveringRect(
-            ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y),
-            ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y))) {
-
-      thumbnail_index = (ModuleType)i;
-      active_thumbnail = get_module(thumbnail_index);
-      mouse_init_pos = ImGui::GetMousePos();
-
-      for (uint8_t j = 0; j < drag_begin_callbacks.count; j++)
-        drag_begin_callbacks.entries[j].callback(
-            active_thumbnail, thumbnail_index,
-            drag_begin_callbacks.entries[j].data);
-    }
-  }
-
-  if (active_thumbnail) {
-    ImVec2 mouse = ImGui::GetMousePos();
-    ImVec2 vp_mouse = ImVec2(vpx_scene(mouse.x), vpy_scene(mouse.y));
-
-    for (uint8_t j = 0; j < drag_callbacks.count; j++)
-      drag_callbacks.entries[j].callback(active_thumbnail, thumbnail_index,
-                                         vp_mouse,
-                                         drag_callbacks.entries[j].data);
-  }
-
-  if (active_thumbnail && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-
-    ImVec2 mouse = ImGui::GetMousePos();
-    ImVec2 vp_mouse = ImVec2(vpx_scene(mouse.x), vpy_scene(mouse.y));
-
-    for (uint8_t j = 0; j < drag_end_callbacks.count; j++)
-      drag_end_callbacks.entries[j].callback(
-          active_thumbnail, thumbnail_index, vp_mouse,
-          drag_end_callbacks.entries[j].data);
-
-    active_thumbnail = nullptr;
-  }
-}
-
-void Widget::SideBar::Content::Modules::Component::render() {
+void Widget::SideBar::Content::Modules::Component::draw() {
 
   ImGui::SetWindowFontScale(1.3);
   ImGui::Text("Modules");
@@ -128,6 +82,14 @@ void Widget::SideBar::Content::Modules::Component::render() {
   ImVec2 win_pos = ImGui::GetWindowPos();
 
   for (size_t i = 0; i < ModuleType_COUNT; i++) {
+
+    // ImVec2 win_pos = ImGui::GetCursorPos();
+
+    if (!active_thumbnail && ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
+        ImGui::IsMouseHoveringRect(
+            ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y),
+            ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y)))
+      drag_module_begin((ModuleType)i);
 
     const TextureAtlasRegion *region = get_module((ModuleType)i);
 
@@ -148,24 +110,62 @@ void Widget::SideBar::Content::Modules::Component::render() {
     ImGui::Text("%s", labels[i]);
   }
 
-  if (active_thumbnail) {
+  if (active_thumbnail)
+    drag_module();
 
-    dl = ImGui::GetForegroundDrawList();
-    ImVec2 mouse = ImGui::GetMousePos();
-    ImVec2 drag_offset =
-        ImVec2(mouse.x - mouse_init_pos.x, mouse.y - mouse_init_pos.y);
+  if (active_thumbnail && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+    drag_module_end();
+}
 
-    dl->AddImage(
-        (ImTextureRef)module_view,
-        // p0
-        ImVec2(modules_position[thumbnail_index].x + win_pos.x + drag_offset.x,
-               modules_position[thumbnail_index].y + win_pos.y + drag_offset.y),
-        // p1
-        ImVec2(modules_position[thumbnail_index].x +
-                   modules_size[thumbnail_index].x + win_pos.x + drag_offset.x,
-               modules_position[thumbnail_index].y +
-                   modules_size[thumbnail_index].y + win_pos.y + drag_offset.y),
-        // uvs
-        im_vec2(active_thumbnail->uv0), im_vec2(active_thumbnail->uv1));
-  }
+void Widget::SideBar::Content::Modules::Component::drag_module_begin(
+    const ModuleType module) {
+  thumbnail_index = (ModuleType)module;
+  active_thumbnail = get_module(thumbnail_index);
+  mouse_init_pos = ImGui::GetMousePos();
+
+  for (uint8_t j = 0; j < drag_begin_callbacks.count; j++)
+    drag_begin_callbacks.entries[j].callback(
+        active_thumbnail, thumbnail_index,
+        drag_begin_callbacks.entries[j].data);
+}
+
+void Widget::SideBar::Content::Modules::Component::drag_module() {
+
+  ImVec2 mouse = ImGui::GetMousePos();
+  ImVec2 vp_mouse = ImVec2(vpx_scene(mouse.x), vpy_scene(mouse.y));
+  ImVec2 win_pos = ImGui::GetWindowPos();
+
+  for (uint8_t j = 0; j < drag_callbacks.count; j++)
+    drag_callbacks.entries[j].callback(active_thumbnail, thumbnail_index,
+                                       vp_mouse,
+                                       drag_callbacks.entries[j].data);
+
+  ImDrawList *dl = ImGui::GetForegroundDrawList();
+  ImVec2 drag_offset =
+      ImVec2(mouse.x - mouse_init_pos.x, mouse.y - mouse_init_pos.y);
+
+  dl->AddImage(
+      (ImTextureRef)module_view,
+      // p0
+      ImVec2(modules_position[thumbnail_index].x + win_pos.x + drag_offset.x,
+             modules_position[thumbnail_index].y + win_pos.y + drag_offset.y),
+      // p1
+      ImVec2(modules_position[thumbnail_index].x +
+                 modules_size[thumbnail_index].x + win_pos.x + drag_offset.x,
+             modules_position[thumbnail_index].y +
+                 modules_size[thumbnail_index].y + win_pos.y + drag_offset.y),
+      // uvs
+      im_vec2(active_thumbnail->uv0), im_vec2(active_thumbnail->uv1));
+}
+
+void Widget::SideBar::Content::Modules::Component::drag_module_end() {
+  ImVec2 mouse = ImGui::GetMousePos();
+  ImVec2 vp_mouse = ImVec2(vpx_scene(mouse.x), vpy_scene(mouse.y));
+
+  for (uint8_t j = 0; j < drag_end_callbacks.count; j++)
+    drag_end_callbacks.entries[j].callback(active_thumbnail, thumbnail_index,
+                                           vp_mouse,
+                                           drag_end_callbacks.entries[j].data);
+
+  active_thumbnail = nullptr;
 }

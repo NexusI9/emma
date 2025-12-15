@@ -23,8 +23,7 @@ class Component : public Widget {
 
 public:
   Component(Gui *, ::Canvas *);
-  void update();
-  void render();
+  void draw();
 
   StaticListStatus add_tab_update_callback(on_tab_update callback, void *data) {
 
@@ -47,6 +46,8 @@ private:
   static constexpr uint8_t TABS_COUNT = 1;
   int8_t active_tab = -1;
 
+  ImVec2 position, size, default_size;
+  
   Panel::Component panel;
   TabButton::Component tabs[TABS_COUNT];
 

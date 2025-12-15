@@ -19,7 +19,7 @@
 Layout::Container::Component::Component(Gui *gui, Canvas *canvas,
                                         Heatmap hm[HeatmapType_COUNT])
     : Core(gui, canvas), canvas(gui, canvas),
-      toolbar(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI)),
+      toolbar(gui, texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI)),
       heatmaps{
           {gui, &hm[0]},
           {gui, &hm[1]},
@@ -88,26 +88,17 @@ void Layout::Container::Component::draw() {
   ImGui_ImplWGPU_NewFrame();
   ImGui::NewFrame();
 
-  UI::FullScreenWindow().Begin("Root container");
-  {
+  canvas.draw();
+  navbar.draw();
+  toolbar.draw();
+  sidebar.draw();
 
-    navbar.update();
-    toolbar.update();
-    sidebar.update();
-
-    canvas.draw();
-
-    toolbar.render();
-    sidebar.render();
-
-    if (display_state_enabled(DisplayState_Heatmap)) {
-      heatmaps[active_heatmap].draw();
-      draw_heatmap_list();
-    }
-
-    navbar.render();
-  }
-  UI::FullScreenWindow().End();
+  // if (display_state_enabled(DisplayState_Heatmap)) {
+  //   heatmaps[active_heatmap].draw();
+  //   draw_heatmap_list();
+  // }
+  //
+  //  navbar.render();
 
   ImGui::Render();
   ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), gui->pass_encoder);

@@ -8,7 +8,7 @@
 
 void Widget::Canvas::Create::begin() {
 
-  if ((state & SessionState_Freeze) == 0) {
+  if (ImGui::IsWindowHovered(ImGuiHoveredFlags_None) && (state & SessionState_Freeze) == 0) {
 
     // Clicked based creation
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {

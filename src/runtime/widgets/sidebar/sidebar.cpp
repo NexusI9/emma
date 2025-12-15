@@ -12,6 +12,10 @@ Widget::SideBar::Component::Component(Gui *gui, Canvas *canvas)
           {gui},
       } {
 
+  position = ImVec2(0, gui_scale(gui, 92));
+  default_size = ImVec2(gui_scale(gui, 54), gui_scale(gui, 776));
+  size = default_size;
+
   static const ImVec2 buttons_base_position = ImVec2(0, gui_scale(gui, 112));
   static const int gap = gui_scale(gui, emma_size(ThemeEmmaSize_Space_Medium));
 
@@ -22,35 +26,29 @@ Widget::SideBar::Component::Component(Gui *gui, Canvas *canvas)
   }
 }
 
-void Widget::SideBar::Component::update() {
+void Widget::SideBar::Component::draw() {
+
+  UI::DockedWindow().Begin("SideBar Window", position, size);
+
+  if (active_tab >= 0) {
+    panel.begin();
+    contents[active_tab]->draw();
+    panel.end();
+  }
 
   for (uint8_t i = 0; i < TABS_COUNT; i++) {
     if (tabs[i].update()) {
       active_tab = (active_tab == i) ? -1 : i;
+      // expand width on active
+      size.x = active_tab > -1 ? panel.size.x : default_size.x;
 
       for (uint8_t j = 0; j < tab_update_callbacks.count; j++)
         tab_update_callbacks.entries[j].callback(
             active_tab, tab_update_callbacks.entries[j].data);
     }
-  }
 
-  if (active_tab >= 0) {
-    // set the cursor to the panel position so the update function can access it
-    // with GetCursorPos() and have relative coordinate to panel content
-    ImGui::SetCursorPos(panel.content_inner_position);
-    contents[active_tab]->update();
-  }
-}
-
-void Widget::SideBar::Component::render() {
-
-  if (active_tab >= 0) {
-    panel.begin();
-    contents[active_tab]->render();
-    panel.end();
-  }
-
-  for (uint8_t i = 0; i < TABS_COUNT; i++) {
     tabs[i].render(active_tab == i);
   }
+
+  UI::DockedWindow().End();
 }

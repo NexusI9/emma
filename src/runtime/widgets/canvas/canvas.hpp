@@ -17,6 +17,7 @@
 #include "runtime/widgets/grid_background.hpp"
 #include "runtime/widgets/toolbar.hpp"
 #include "runtime/widgets/transform/transform_box.hpp"
+#include "nkengine/include/gui.hpp"
 #include "utils/id.h"
 
 namespace Widget {
@@ -69,6 +70,7 @@ public:
 
 private:
   GridBackground::Component grid_background;
+  ::Component::Sprite toolbar_glow;
   ImDrawList *dl;
 
   struct {

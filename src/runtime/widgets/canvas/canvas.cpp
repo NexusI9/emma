@@ -7,6 +7,7 @@
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/manager/atlas.h"
+#include "runtime/manager/ui_sprite.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/canvas.h"
 #include "runtime/node/connector.h"
@@ -35,14 +36,24 @@ Widget::Canvas::Component::Component(Gui *gui, ::Canvas *canvas)
           .destroy = {gui, canvas},
           .create = {gui, canvas},
       },
-      Module(gui, canvas) {}
+      toolbar_glow(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
+                   ui_sprite(UISprite_Toolbar_Glow)),
+      Module(gui, canvas) {
+
+  toolbar_glow.set_position(ImVec2((float)gui_scale(gui, context_width()) / 2,
+                                   gui_scale(gui, context_height())),
+                            GuiSpriteAnchor_BottomMiddle);
+}
 
 void Widget::Canvas::Component::draw() {
 
+  UI::FullScreenWindow().Begin("Canvas Window");
   dl = ImGui::GetWindowDrawList();
 
   grid_background.draw_texture(gui->pass_encoder);
-
+  toolbar_glow.draw();
+  
+  
   // Main Canvas Entities
   module.transform.begin();
   {
@@ -67,6 +78,8 @@ void Widget::Canvas::Component::draw() {
       module.transform.transform_box.clear();
     module.selection.clear();
   }
+
+  UI::FullScreenWindow().End();
 }
 
 void Widget::Canvas::Component::draw_frame_handle_connectors(::Frame *frame,

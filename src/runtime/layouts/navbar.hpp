@@ -26,22 +26,19 @@ class Component : public Core {
 
 public:
   Component(Gui *, Canvas *, SwitchConfig, SwitchConfig);
-  void update();
-  void render();
+  void draw();
 
-  const ImVec2 margin = ImVec2(50.0, 20.0);
+  const ImVec2 margin = ImVec2(gui_scale(gui, 50.0), gui_scale(gui, 20.0));
   const uint8_t height = 42;
   const float bd_radius = emma_size(ThemeEmmaSize_Radius_Base);
-  const ImVec2 padding = ImVec2(12, 6);
+  const ImVec2 padding = ImVec2(gui_scale(gui, 12), gui_scale(gui, 6));
+  const ImVec2 position = ImVec2(0, 0);
+  const ImVec2 size =
+      ImVec2(gui_scale(gui, context_width()), gui_scale(gui, 88));
 
-  void set_project_name(const char *name) {
-    name_copy(name, project_name); 
-  }
+  void set_project_name(const char *name) { name_copy(name, project_name); }
 
 private:
-  SwitchConfig octalysis_config;
-  SwitchConfig heatmap_config;
-
   name_t project_name;
 
   UI::Frame main_panel;
@@ -54,12 +51,11 @@ private:
 
   struct {
     UI::Switch component;
-    ImVec2 cached_position = ImVec2(0, 0);
+    SwitchConfig config;
   } switches[DisplaySwitch_COUNT];
 
-  void update_switch(const DisplaySwitch, const char *, SwitchConfig *);
-
-  void draw_switch(const DisplaySwitch, const char *, const float);
+  void draw_switch(const DisplaySwitch, const char *, const char *,
+                   const float);
 };
 } // namespace NavBar
 } // namespace Layout

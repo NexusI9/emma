@@ -34,7 +34,8 @@ void Widget::Heatmap::Component::compute_offline(WGPUCommandEncoder encoder) {
       &node->compute_passes[HeatmapComputePass_Colormap], encoder);
 }
 
-void Widget::Heatmap::Component::compute_render_pass(WGPUCommandEncoder encoder) {
+void Widget::Heatmap::Component::compute_render_pass(
+    WGPUCommandEncoder encoder) {
 
   WGPURenderPassColorAttachment color = {};
   color.clearValue = {0};
@@ -73,7 +74,8 @@ void Widget::Heatmap::Component::compute_render_pass(WGPUCommandEncoder encoder)
     ::Frame *parent_frame = allocator_frame_entry(node->frames.entries[i]);
 
     for (size_t j = 0; j < parent_frame->children.count; j++) {
-      ::Frame *module = allocator_frame_entry(parent_frame->children.entries[j]);
+      ::Frame *module =
+          allocator_frame_entry(parent_frame->children.entries[j]);
 
       // float module_intensity = node->intensity_mapper(node, module, NULL);
       int rd_r = ((float)rand() / RAND_MAX) * 255;
@@ -81,7 +83,7 @@ void Widget::Heatmap::Component::compute_render_pass(WGPUCommandEncoder encoder)
       int rd_b = ((float)rand() / RAND_MAX) * 255;
 
       Frame::Component(module).draw_fill(ImColor(rd_r, rd_g, rd_b, 255),
-                                    node->scale);
+                                         node->scale);
     }
   }
 
@@ -94,6 +96,8 @@ void Widget::Heatmap::Component::compute_render_pass(WGPUCommandEncoder encoder)
 }
 
 void Widget::Heatmap::Component::draw() {
+
+  UI::FullScreenWindow().Begin("Heatmap Window");
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
@@ -113,6 +117,8 @@ void Widget::Heatmap::Component::draw() {
                  vp->Pos, vp->Size, ImVec2(0, 0), ImVec2(1, 1));
 
   draw_gradient(dl);
+  
+  UI::FullScreenWindow().End();
 }
 
 void Widget::Heatmap::Component::draw_gradient(ImDrawList *dl) {
@@ -143,8 +149,9 @@ void Widget::Heatmap::Component::draw_gradient(ImDrawList *dl) {
   ImGui::EndGroup();
 }
 
-void Widget::Heatmap::Component::draw_gradient_legend(ImDrawList *dl, ImVec2 start,
-                                                ImVec2 end, const char *label) {
+void Widget::Heatmap::Component::draw_gradient_legend(ImDrawList *dl,
+                                                      ImVec2 start, ImVec2 end,
+                                                      const char *label) {
 
   static const int line_value = 140;
   dl->AddLine(gui_scale_im_vec2(gui, start), gui_scale_im_vec2(gui, end),

@@ -34,7 +34,7 @@ public:
   
   const ImVec2 content_inner_position = ImVec2(
 					 content_padding.x + padding_left,
-					 content_padding.y + position.y
+					 content_padding.y
 					 );
   
   const ImVec2 content_size = ImVec2(size.x - padding_left - content_padding.x, size.y - content_padding.y);

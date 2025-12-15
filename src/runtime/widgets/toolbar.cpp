@@ -3,8 +3,8 @@
 #include "runtime/manager/ui_sprite.h"
 #include "webgpu/webgpu.h"
 
-Widget::ToolBar::Component::Component(WGPUTextureView view)
-    : background(view, ui_sprite(UISprite_Toolbar)),
+Widget::ToolBar::Component::Component(Gui *gui, WGPUTextureView view)
+    : Widget(gui), background(view, ui_sprite(UISprite_Toolbar_Pad)),
       selector(view, ui_sprite(UISprite_Toolbar_Icon_Selector)),
       tools{
           Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Frame)),
@@ -14,11 +14,21 @@ Widget::ToolBar::Component::Component(WGPUTextureView view)
           Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Shape)),
       } {
 
-  const float scale = context_dpi();
+  // cache window dimension and position
+  size = ImVec2(gui_scale(gui, 513), gui_scale(gui, 88));
+  position = ImVec2((float)gui_scale(gui, context_width()) / 2 - size.x / 2,
+                    gui_scale(gui, context_height()) - size.y);
 
+  // cache content position
   background.set_position(
-      ImVec2(scale * context_width() / 2.0f, scale * context_height()),
+      ImVec2(position.x + size.x / 2.0f, position.y + size.y),
       GuiSpriteAnchor_BottomMiddle);
+
+  compute_sprite_position();
+  selector.set_position(selector_positions[0], GuiSpriteAnchor_BottomLeft);
+}
+
+void Widget::ToolBar::Component::compute_sprite_position() {
 
   const float tool_w = tools[0].sprite.region->size[0];
   const float sel_w = selector.region->size[0];
@@ -30,11 +40,11 @@ Widget::ToolBar::Component::Component(WGPUTextureView view)
   const float bottom_margin = 15.0f;
 
   for (uint8_t i = 0; i < TOOLS_COUNT; i++) {
-    float x = start_x + i * (tool_w + spacing);
-    float y = context_height() - bottom_margin;
+    float x = gui_scale(gui, start_x + i * (tool_w + spacing));
+    float y = gui_scale(gui, context_height() - bottom_margin);
 
     tools[i].sprite.set_position(
-        ImVec2(x * scale, y * scale),
+        ImVec2(x, y),
         GuiSpriteAnchor_BottomLeft // better for left-to-right alignment
     );
 
@@ -43,31 +53,31 @@ Widget::ToolBar::Component::Component(WGPUTextureView view)
         (selector.region->size[0] - tools[i].sprite.region->size[0]) / 2,
         (selector.region->size[1] - tools[i].sprite.region->size[1]) / 2);
 
-    selector_positions[i] = ImVec2(x * scale - diff.x, y * scale + diff.y);
+    selector_positions[i] = ImVec2(x - diff.x, y + diff.y);
   }
-
-  selector.set_position(selector_positions[0], GuiSpriteAnchor_BottomLeft);
 }
 
-void Widget::ToolBar::Component::update() {
+void Widget::ToolBar::Component::draw() {
 
-  for (uint8_t i = 0; i < TOOLS_COUNT; i++) {
-    if (tools[i].sprite.clicked(ImGuiMouseButton_Left)) {
-      active_tool = i;
-      selector.set_position(selector_positions[i], GuiSpriteAnchor_BottomLeft);
-      for (uint8_t j = 0; j < callbacks.count; j++)
-        callbacks.entries[j].callback(i, callbacks.entries[j].data);
+  UI::DockedWindow().Begin("ToolBar Window", position, size);
+  {
+    background.draw();
+    selector.draw();
+
+    for (uint8_t i = 0; i < TOOLS_COUNT; i++) {
+
+      if (tools[i].sprite.clicked(ImGuiMouseButton_Left)) {
+        active_tool = i;
+        selector.set_position(selector_positions[i],
+                              GuiSpriteAnchor_BottomLeft);
+        for (uint8_t j = 0; j < callbacks.count; j++)
+          callbacks.entries[j].callback(i, callbacks.entries[j].data);
+      }
+
+      tools[i].sprite.draw();
     }
   }
-}
-
-void Widget::ToolBar::Component::render() {
-
-  background.draw();
-  selector.draw();
-
-  for (uint8_t i = 0; i < TOOLS_COUNT; i++)
-    tools[i].sprite.draw();
+  UI::DockedWindow().End();
 }
 
 StaticListStatus

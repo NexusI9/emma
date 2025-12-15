@@ -17,8 +17,7 @@ public:
   Component(Gui *gui) : Widget(gui) {}
 
   virtual void layout(){};
-  virtual void update(){};
-  virtual void render(){};
+  virtual void draw(){};
 };
 
 } // namespace Content

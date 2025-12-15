@@ -4,7 +4,8 @@
 #include "nkengine/include/texture.h"
 
 typedef enum{
-	UISprite_Toolbar,
+	UISprite_Toolbar_Glow,
+	UISprite_Toolbar_Pad,
 	UISprite_Toolbar_Icon_Frame,
 	UISprite_Toolbar_Icon_Cursor,
 	UISprite_Toolbar_Icon_Shape,
@@ -24,11 +25,17 @@ typedef enum{
 
 
 static const TextureAtlasRegion sprites[] = {
-	[UISprite_Toolbar] = {
-		.label = "Toolbar",
+	[UISprite_Toolbar_Glow] = {
+		.label = "Toolbar Glow",
 		.uv0 = { 0.000f, 0.000f },
 		.uv1 = { 0.682f, 0.174f },
 		.size = { 1396, 356 },
+	},
+	[UISprite_Toolbar_Pad] = {
+		.label = "Toolbar Pad",
+		.uv0 = { 0.469f, 0.174f },
+		.uv1 = { 0.970f, 0.235f },
+		.size = { 1026, 126 },
 	},
 	[UISprite_Toolbar_Icon_Frame] = {
 		.label = "Toolbar Icon Frame",
@@ -80,38 +87,38 @@ static const TextureAtlasRegion sprites[] = {
 	},
 	[UISprite_Persona_Striver] = {
 		.label = "Persona Striver",
-		.uv0 = { 0.756f, 0.078f },
-		.uv1 = { 0.805f, 0.127f },
+		.uv0 = { 0.756f, 0.076f },
+		.uv1 = { 0.805f, 0.125f },
 		.size = { 100, 100 },
 	},
 	[UISprite_Persona_Giver] = {
 		.label = "Persona Giver",
-		.uv0 = { 0.805f, 0.078f },
-		.uv1 = { 0.854f, 0.127f },
+		.uv0 = { 0.805f, 0.076f },
+		.uv1 = { 0.854f, 0.125f },
 		.size = { 100, 100 },
 	},
 	[UISprite_Persona_Artisan] = {
 		.label = "Persona Artisan",
-		.uv0 = { 0.854f, 0.078f },
-		.uv1 = { 0.902f, 0.127f },
+		.uv0 = { 0.854f, 0.076f },
+		.uv1 = { 0.902f, 0.125f },
 		.size = { 100, 100 },
 	},
 	[UISprite_Persona_Operator] = {
 		.label = "Persona Operator",
-		.uv0 = { 0.902f, 0.078f },
-		.uv1 = { 0.951f, 0.127f },
+		.uv0 = { 0.902f, 0.076f },
+		.uv1 = { 0.951f, 0.125f },
 		.size = { 100, 100 },
 	},
 	[UISprite_Persona_Explorer] = {
 		.label = "Persona Explorer",
-		.uv0 = { 0.951f, 0.078f },
-		.uv1 = { 1.000f, 0.127f },
+		.uv0 = { 0.951f, 0.076f },
+		.uv1 = { 1.000f, 0.125f },
 		.size = { 100, 100 },
 	},
 	[UISprite_Persona_Pioneer] = {
 		.label = "Persona Pioneer",
-		.uv0 = { 0.756f, 0.127f },
-		.uv1 = { 0.805f, 0.176f },
+		.uv0 = { 0.756f, 0.125f },
+		.uv1 = { 0.805f, 0.174f },
 		.size = { 100, 100 },
 	},
 	[UISprite_Sidebar_Icon_Module] = {
@@ -121,6 +128,7 @@ static const TextureAtlasRegion sprites[] = {
 		.size = { 52, 52 },
 	},
 };
+
 
 EXTERN_C_BEGIN
 

@@ -37,8 +37,7 @@ public:
   Component(Gui *);
 
   void layout() override;
-  void update() override;
-  void render() override;
+  void draw() override;
 
   StaticListStatus add_drag_begin_callback(on_drag_begin cb, void *data) {
     OnDragBeginCallback entry = {cb, data};
@@ -95,6 +94,10 @@ private:
   const TextureAtlasRegion *active_thumbnail = nullptr;
   ModuleType thumbnail_index;
   ImVec2 mouse_init_pos;
+
+  void drag_module_begin(const ModuleType);
+  void drag_module();
+  void drag_module_end();
 };
 
 } // namespace Modules
