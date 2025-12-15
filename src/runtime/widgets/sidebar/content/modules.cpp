@@ -162,6 +162,11 @@ void Widget::SideBar::Content::Modules::Component::drag_module_end() {
   ImVec2 mouse = ImGui::GetMousePos();
   ImVec2 vp_mouse = ImVec2(vpx_scene(mouse.x), vpy_scene(mouse.y));
 
+  if (ImGui::IsWindowHovered()) {
+    active_thumbnail = nullptr;
+    return;
+  }
+
   for (uint8_t j = 0; j < drag_end_callbacks.count; j++)
     drag_end_callbacks.entries[j].callback(active_thumbnail, thumbnail_index,
                                            vp_mouse,

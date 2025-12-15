@@ -22,10 +22,10 @@ typedef struct {
   void *user_data;
 } SwitchConfig;
 
-class Component : public Core {
+class Component : public Core, public Window {
 
 public:
-  Component(Gui *, Canvas *, SwitchConfig, SwitchConfig);
+  Component(const char *, Gui *, Canvas *, SwitchConfig, SwitchConfig);
   void draw();
 
   const ImVec2 margin = ImVec2(gui_scale(gui, 50.0), gui_scale(gui, 20.0));

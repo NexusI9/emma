@@ -28,8 +28,10 @@
 #include <imgui/imconfig.h>
 #include <imgui/imgui_impl_wgpu.h>
 
-Widget::Canvas::Component::Component(Gui *gui, ::Canvas *canvas)
+Widget::Canvas::Component::Component(const char *label, Gui *gui,
+                                     ::Canvas *canvas)
     : grid_background("textures/dot-pattern.png", TextureResolution_64),
+      Window(label),
       module{
           .transform = {gui, canvas},
           .selection = {gui, canvas},
@@ -47,13 +49,17 @@ Widget::Canvas::Component::Component(Gui *gui, ::Canvas *canvas)
 
 void Widget::Canvas::Component::draw() {
 
-  UI::FullScreenWindow().Begin("Canvas Window");
+  UI::FullScreenWindow().Begin(label);
   dl = ImGui::GetWindowDrawList();
 
   grid_background.draw_texture(gui->pass_encoder);
   toolbar_glow.draw();
-  
-  
+
+  if (disable_selection())
+    module.selection.freeze();
+  else
+    module.selection.unfreeze();
+
   // Main Canvas Entities
   module.transform.begin();
   {
@@ -226,5 +232,10 @@ bool Widget::Canvas::Component::disable_creation() {
       module.selection.get_state();
 
   return heatmap_displayed || transform_box_dragging ||
-         transform_module_active || selection_active;
+         transform_module_active || selection_active ||
+         !ImGui::IsWindowHovered(ImGuiHoveredFlags_None);
+}
+
+bool Widget::Canvas::Component::disable_selection() {
+  return !ImGui::IsWindowHovered(ImGuiHoveredFlags_None);
 }

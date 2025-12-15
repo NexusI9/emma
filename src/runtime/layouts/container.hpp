@@ -8,6 +8,7 @@
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
 #include "runtime/widgets/heatmap.hpp"
+#include "runtime/widgets/heatmap_select.hpp"
 #include "runtime/widgets/sidebar/sidebar.hpp"
 #include "runtime/widgets/toolbar.hpp"
 
@@ -39,21 +40,7 @@ public:
     DisplayState_Heatmap = 1 << 1,
   } DisplayState;
 
-  typedef enum {
-    HeatmapType_Excitment,
-    HeatmapType_Reward,
-    HeatmapType_Social,
-    HeatmapType_Challenge,
-    HeatmapType_COUNT,
-  } HeatmapType;
-
-  typedef enum {
-    HeatmapState_None = 0,
-    HeatmapState_WheelMove = 1 << 0,
-    HeatmapState_RequireUpdate = 1 << 1,
-  } HeatmapState;
-
-  Component(Gui *, Canvas *, Heatmap[HeatmapType_COUNT]);
+  Component(Gui *, Canvas *, Heatmap * [Widget::Heatmap::Selector::Type_COUNT]);
   void draw();
 
   void enable_display_state(const DisplayState state) {
@@ -62,7 +49,7 @@ public:
     switch (state) {
 
     case DisplayState_Heatmap:
-
+      heatmap_selector.enable();
       canvas.enable_state(
           Widget::Canvas::Component::State_ShowHeatmap |
           Widget::Canvas::Component::State_FreezeSelection |
@@ -87,6 +74,7 @@ public:
     switch (state) {
 
     case DisplayState_Heatmap:
+      heatmap_selector.disable();
       canvas.enable_state(
           Widget::Canvas::Component::State_FreezeCreationSession);
       canvas.disable_state(Widget::Canvas::Component::State_ShowHeatmap |
@@ -116,19 +104,11 @@ public:
   Widget::Canvas::Component canvas;
   Widget::ToolBar::Component toolbar;
   Widget::SideBar::Component sidebar;
+  Widget::Heatmap::Selector::Component heatmap_selector;
   NavBar::Component navbar;
-
-  // TODO: move below attributes to a dedicated heatmap module
-  Widget::Heatmap::Component heatmaps[HeatmapType_COUNT];
-  HeatmapType active_heatmap = HeatmapType_Excitment;
-  unsigned int heatmap_state = HeatmapState_None;
 
 private:
   unsigned int display_state = 0;
-
-  UI::Frame heatmap_list_shape;
-
-  void draw_heatmap_list();
 };
 
 } // namespace Container

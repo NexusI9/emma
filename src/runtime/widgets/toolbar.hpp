@@ -3,6 +3,7 @@
 
 #include "nkengine/include/gui.hpp"
 #include "nkengine/include/texture.h"
+#include "runtime/layouts/core.hpp"
 #include "runtime/widgets/core.hpp"
 #include "runtime/widgets/toolbar_button.hpp"
 #include "webgpu/webgpu.h"
@@ -19,10 +20,10 @@ typedef struct {
   void *data;
 } UpdateCallback;
 
-class Component : public Widget {
+class Component : public Widget, public Layout::Window {
 
 public:
-  Component(Gui *gui, WGPUTextureView view);
+  Component(const char *, Gui *, WGPUTextureView);
   void draw();
   StaticListStatus add_callback(on_tool_change, void *);
 

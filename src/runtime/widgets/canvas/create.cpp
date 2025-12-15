@@ -8,7 +8,7 @@
 
 void Widget::Canvas::Create::begin() {
 
-  if (ImGui::IsWindowHovered(ImGuiHoveredFlags_None) && (state & SessionState_Freeze) == 0) {
+  if ((state & SessionState_Freeze) == 0) {
 
     // Clicked based creation
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
@@ -60,8 +60,8 @@ void Widget::Canvas::Create::begin() {
 }
 
 /**
-   Similarily to selection system, we reset the session state at the end of the loop.
-   Important to separate:
+   Similarily to selection system, we reset the session state at the end of the
+   loop. Important to separate:
    1. (Persistent) State : maintained between loops
    2. Session State: reset at the end of each loops
  */

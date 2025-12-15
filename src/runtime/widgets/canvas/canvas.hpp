@@ -1,7 +1,9 @@
 #ifndef _WIDGET_CANVAS_HPP_
 #define _WIDGET_CANVAS_HPP_
 
+#include "nkengine/include/gui.hpp"
 #include "runtime/geometry/core.h"
+#include "runtime/layouts/core.hpp"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/node/canvas.h"
@@ -17,15 +19,14 @@
 #include "runtime/widgets/grid_background.hpp"
 #include "runtime/widgets/toolbar.hpp"
 #include "runtime/widgets/transform/transform_box.hpp"
-#include "nkengine/include/gui.hpp"
 #include "utils/id.h"
 
 namespace Widget {
 namespace Canvas {
-class Component : public Module {
+class Component : public Module, public Layout::Window {
 
 public:
-  Component(Gui *, ::Canvas *);
+  Component(const char *, Gui *, ::Canvas *);
 
   void draw();
   void update_create_mode(const Create::Mode mode) {
@@ -91,6 +92,7 @@ private:
   void draw_connectors();
 
   bool disable_creation();
+  bool disable_selection();
 };
 
 } // namespace Canvas

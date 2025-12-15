@@ -282,10 +282,17 @@ int main() {
   Heatmap heatmaps[4];
   create_heatmaps(&canvas, heatmaps);
 
+  Heatmap *heatmap_ref[4] = {
+      &heatmaps[0],
+      &heatmaps[1],
+      &heatmaps[2],
+      &heatmaps[3],
+  };
+
   // need to allocate on the heap, may be too heavy for the stack (causes server
   // crash)
   Layout::Container::Component *container =
-      new Layout::Container::Component(gui, &canvas, heatmaps);
+      new Layout::Container::Component(gui, &canvas, heatmap_ref);
 
   renderer_add_draw_callback(renderer, Layout::Container::draw_callback,
                              container, RendererDrawMode_All);

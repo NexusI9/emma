@@ -3,8 +3,10 @@
 #include "runtime/manager/ui_sprite.h"
 #include "webgpu/webgpu.h"
 
-Widget::ToolBar::Component::Component(Gui *gui, WGPUTextureView view)
-    : Widget(gui), background(view, ui_sprite(UISprite_Toolbar_Pad)),
+Widget::ToolBar::Component::Component(const char *label, Gui *gui,
+                                      WGPUTextureView view)
+    : Widget(gui), Window(label),
+      background(view, ui_sprite(UISprite_Toolbar_Pad)),
       selector(view, ui_sprite(UISprite_Toolbar_Icon_Selector)),
       tools{
           Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Frame)),
@@ -59,7 +61,7 @@ void Widget::ToolBar::Component::compute_sprite_position() {
 
 void Widget::ToolBar::Component::draw() {
 
-  UI::DockedWindow().Begin("ToolBar Window", position, size);
+  UI::DockedWindow().Begin(label, position, size);
   {
     background.draw();
     selector.draw();

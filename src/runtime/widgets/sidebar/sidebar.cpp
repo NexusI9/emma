@@ -3,14 +3,16 @@
 #include "runtime/manager/theme.h"
 #include "runtime/manager/ui_sprite.h"
 
-Widget::SideBar::Component::Component(Gui *gui, Canvas *canvas)
-    : Widget(gui), panel(gui),
+Widget::SideBar::Component::Component(const char *label, Gui *gui,
+                                      Canvas *canvas)
+    : Widget(gui), panel(gui), Window(label),
       tabs{
           {gui, ui_sprite(UISprite_Sidebar_Icon_Module)},
       },
       content{
           {gui},
       } {
+
 
   position = ImVec2(0, gui_scale(gui, 92));
   default_size = ImVec2(gui_scale(gui, 54), gui_scale(gui, 776));
@@ -28,7 +30,7 @@ Widget::SideBar::Component::Component(Gui *gui, Canvas *canvas)
 
 void Widget::SideBar::Component::draw() {
 
-  UI::DockedWindow().Begin("SideBar Window", position, size);
+  UI::DockedWindow().Begin(label, position, size);
 
   if (active_tab >= 0) {
     panel.begin();

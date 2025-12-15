@@ -15,6 +15,13 @@ protected:
   Canvas *canvas;
 };
 
+class Window {
+
+public:
+  Window(const char *label) : label(label) {}
+  const char *label;
+};
+
 } // namespace Layout
 
 #endif

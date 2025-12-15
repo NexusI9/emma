@@ -19,10 +19,10 @@ typedef struct {
   void *data;
 } TabUpdateCallbackEntry;
 
-class Component : public Widget {
+class Component : public Widget, public Layout::Window {
 
 public:
-  Component(Gui *, ::Canvas *);
+  Component(const char *, Gui *, ::Canvas *);
   void draw();
 
   StaticListStatus add_tab_update_callback(on_tab_update callback, void *data) {
@@ -47,7 +47,7 @@ private:
   int8_t active_tab = -1;
 
   ImVec2 position, size, default_size;
-  
+
   Panel::Component panel;
   TabButton::Component tabs[TABS_COUNT];
 

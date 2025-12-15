@@ -4,19 +4,20 @@
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/utils.hpp"
 
-Layout::NavBar::Component::Component(Gui *gui, Canvas *canvas,
-                                     SwitchConfig octa_config,
+Layout::NavBar::Component::Component(const char *label, Gui *gui,
+                                     Canvas *canvas, SwitchConfig octa_config,
                                      SwitchConfig heatmap_config)
-    : Core(gui, canvas), switches{
-                             {
-                                 .component = {octa_config.init_state},
-                                 .config = octa_config,
-                             },
-                             {
-                                 .component = {heatmap_config.init_state},
-                                 .config = heatmap_config,
-                             },
-                         } {
+    : Core(gui, canvas),
+      Window(label), switches{
+                         {
+                             .component = {octa_config.init_state},
+                             .config = octa_config,
+                         },
+                         {
+                             .component = {heatmap_config.init_state},
+                             .config = heatmap_config,
+                         },
+                     } {
 
   {
     // === Setup main panel ===
@@ -56,7 +57,7 @@ Layout::NavBar::Component::Component(Gui *gui, Canvas *canvas,
 
 void Layout::NavBar::Component::draw() {
 
-  UI::DockedWindow().Begin("NarBar Window", position, size);
+  UI::DockedWindow().Begin(label, position, size);
   main_panel.Begin("Main Panel");
 
   const float base_y = ImGui::GetCursorPosY();

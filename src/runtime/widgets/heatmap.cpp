@@ -97,8 +97,6 @@ void Widget::Heatmap::Component::compute_render_pass(
 
 void Widget::Heatmap::Component::draw() {
 
-  UI::FullScreenWindow().Begin("Heatmap Window");
-
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
   // TODO: cache vp size ?
@@ -117,8 +115,6 @@ void Widget::Heatmap::Component::draw() {
                  vp->Pos, vp->Size, ImVec2(0, 0), ImVec2(1, 1));
 
   draw_gradient(dl);
-  
-  UI::FullScreenWindow().End();
 }
 
 void Widget::Heatmap::Component::draw_gradient(ImDrawList *dl) {

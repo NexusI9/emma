@@ -67,6 +67,7 @@ Frame *canvas_create_frame_core(Canvas *canvas,
   }
 
   if (flags & CanvasFrameCreateFlags_CreateOctagon) {
+
     // === Octagon ===
     Octagon *oct = canvas_create_octagon(canvas);
     octagon_update_vertices(oct);
@@ -77,6 +78,9 @@ Frame *canvas_create_frame_core(Canvas *canvas,
     // Link octagon to frame
     frame_set_octagon_id(frame, oct->id);
     canvas_align_octagon_to_frame(canvas, frame);
+
+    // add it to draw list
+    canvas_register_frame_state(canvas, frame, CanvasFrameState_Octagon);
   }
 
   if (flags & CanvasFrameCreateFlags_CreateConnectorHandle) {
@@ -382,9 +386,8 @@ StaticListStatus canvas_unregister_frame_state(Canvas *canvas,
 
 StaticListStatus canvas_empty_frame_state(Canvas *canvas,
                                           const CanvasFrameState state) {
-  return stli_empty(canvas->frames[state].entries,
-                    &canvas->frames[state].count, sizeof(alloc_id),
-                    "Canvas Frame State list");
+  return stli_empty(canvas->frames[state].entries, &canvas->frames[state].count,
+                    sizeof(alloc_id), "Canvas Frame State list");
 }
 
 StaticListStatus canvas_empty_module_state(Canvas *canvas,
@@ -634,8 +637,8 @@ CanvasStatus canvas_destroy_module(Canvas *canvas, Frame *frame) {
 
   // unregister it from other state list
   for (uint8_t i = 1; i < CanvasModuleState_COUNT; i++) {
-    allocator_id_list_pop(canvas->modules[i].entries,
-                          &canvas->modules[i].count, frame->id);
+    allocator_id_list_pop(canvas->modules[i].entries, &canvas->modules[i].count,
+                          frame->id);
   }
 
   canvas_destroy_frame_core(canvas, frame, canvas->modules);
