@@ -34,14 +34,29 @@ public:
   void listen_update();
   void draw();
   void require_update() { state |= State_RequireUpdate; };
-  
+
+  /*
+    Since we use a fixed window indexing using
+    ImGuiWindowflags_NoBringToFrontOnFocus, we need to always draw the heatmap
+    Window, case dynamically enabling Begin/End, push them at the back of the
+    order and always shows it in the background.
+
+    A solution to this is to call the Begin/End at all time, but only the
+    content when the state allows it (show/hidden).
+
+    However conditionally calling the content is not enough because since we
+    draw the fullscreen window all the time, although we don't call and draw the
+    child, the invisible window still blocks the input for the windows bellow
+    it.
+
+    As a result we need to set the window size to 0 we disabled so it make the
+    input available for below windows.
+   */
   void disable() {
-    printf("disable\n");
     size = ImVec2(0, 0);
     flag_enable(State_Hidden, &state);
   }
   void enable() {
-    printf("enable\n");
     size = init_size;
     flag_disable(State_Hidden, &state);
   }
