@@ -5,6 +5,7 @@
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/sidebar/content/content.hpp"
 #include "runtime/widgets/sidebar/content/modules.hpp"
+#include "runtime/widgets/sidebar/content/personas.hpp"
 #include "runtime/widgets/sidebar/panel.hpp"
 #include "runtime/widgets/sidebar/tab_button.hpp"
 
@@ -39,11 +40,12 @@ public:
   // NOTE: don't forget to sync with the 'contents' array bellow
   struct {
     Content::Modules::Component modules;
+    Content::Personas::Component personas;
   } content;
 
 private:
   static constexpr uint8_t CALLBACK_CAPACITY = 8;
-  static constexpr uint8_t TABS_COUNT = 1;
+  static constexpr uint8_t TABS_COUNT = 2;
   int8_t active_tab = -1;
 
   ImVec2 position, size, default_size;
@@ -54,6 +56,7 @@ private:
   // Used for draw/update auto call depending on active tab
   Content::Component *contents[TABS_COUNT] = {
       &content.modules,
+      &content.personas,
   };
 
   STATIC_LIST(TabUpdateCallbackEntry, CALLBACK_CAPACITY) tab_update_callbacks;

@@ -21,6 +21,7 @@ typedef enum{
 	UISprite_Persona_Explorer,
 	UISprite_Persona_Pioneer,
 	UISprite_Sidebar_Icon_Module,
+	UISprite_Sidebar_Icon_Persona,
 } UISprite;
 
 
@@ -125,6 +126,12 @@ static const TextureAtlasRegion sprites[] = {
 		.label = "Sidebar Icon Module",
 		.uv0 = { 0.682f, 0.148f },
 		.uv1 = { 0.707f, 0.174f },
+		.size = { 52, 52 },
+	},
+	[UISprite_Sidebar_Icon_Persona] = {
+		.label = "Sidebar Icon Persona",
+		.uv0 = { 0.707f, 0.148f },
+		.uv1 = { 0.732f, 0.174f },
 		.size = { 52, 52 },
 	},
 };

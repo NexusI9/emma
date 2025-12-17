@@ -8,11 +8,12 @@ Widget::SideBar::Component::Component(const char *label, Gui *gui,
     : Widget(gui), panel(gui), Window(label),
       tabs{
           {gui, ui_sprite(UISprite_Sidebar_Icon_Module)},
+          {gui, ui_sprite(UISprite_Sidebar_Icon_Persona)},
       },
       content{
           {gui},
+          {gui},
       } {
-
 
   position = ImVec2(0, gui_scale(gui, 92));
   default_size = ImVec2(gui_scale(gui, 54), gui_scale(gui, 776));
@@ -21,10 +22,10 @@ Widget::SideBar::Component::Component(const char *label, Gui *gui,
   static const ImVec2 buttons_base_position = ImVec2(0, gui_scale(gui, 112));
   static const int gap = gui_scale(gui, emma_size(ThemeEmmaSize_Space_Medium));
 
+  float y = buttons_base_position.y;
   for (uint8_t i = 0; i < TABS_COUNT; i++) {
-    tabs[i].set_position(
-        ImVec2(buttons_base_position.x,
-               (i + 1) * (buttons_base_position.y + gap + tabs[i].height)));
+    tabs[i].set_position(ImVec2(buttons_base_position.x, y));
+    y += (i + 1) * (gap + tabs[i].height);
   }
 }
 
