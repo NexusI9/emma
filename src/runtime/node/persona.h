@@ -3,7 +3,6 @@
 
 #include "nkengine/include/texture.h"
 
-static const uint8_t PERSONA_COUNT = 6;
 static const uint8_t PERSONA_PADDING = 100;
 static const uint8_t PERSONA_BASE_SIZE = 100;
 
@@ -19,6 +18,7 @@ typedef enum {
   PersonaType_Explorer,
   PersonaType_Striver,
   PersonaType_Pioneer,
+  PersonaType_COUNT,
 } PersonaType;
 
 const TextureAtlasRegion *persona_get_sprite(const PersonaType);

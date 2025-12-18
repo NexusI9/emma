@@ -7,6 +7,7 @@
 #include "runtime/node/frame.h"
 #include "runtime/node/octagon.h"
 #include "runtime/node/transform_handle.h"
+#include "runtime/solutions/module.h"
 #include "utils/id.h"
 
 #define ALLOCATOR_MAX_FRAMES 1024
@@ -17,7 +18,8 @@
   _(  TransformHandle,     transform_handle,      1024  )\
   _(  ConnectorHandle,     connector_handle,      1024  )\
   _(  Connector,           connector,             1024  )\
-  _(  Octagon,             octagon,               1024  )
+  _(  Octagon,             octagon,               1024  )\
+  _(  SolutionModule,      solution_module,       1024  )
 
 typedef enum{
   AllocatorStatus_Succes,

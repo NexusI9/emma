@@ -1,7 +1,7 @@
-#ifndef _EMMA_DATASET_REWARD_H_
-#define _EMMA_DATASET_REWARD_H_
+#ifndef _EMMA_MODULE_COMPOUND_REWARD_H_
+#define _EMMA_MODULE_COMPOUND_REWARD_H_
 
-#include "runtime/dataset/utils.h"
+#include "runtime/solutions/module/compounds/utils.h"
 #include <inttypes.h>
 #include <math.h>
 
@@ -32,8 +32,8 @@
 //       Label     |     Max Amount      |     Weight
 #define REWARD_TYPES(_)		                           \
     _(  Undefined,               0,              0.000     )\
-    _(  Point,           100000000,              0.100     )\
-    _(  Coin,            100000000,              0.200     )\
+    _(  Point,                5000,              0.100     )\
+    _(  Coin,                 1000,              0.200     )\
     _(  Boost,                   8,              0.400     )\
     _(  Badge,                  10,              0.450     )\
     _(  Privilege,               6,              0.500     )\
@@ -43,7 +43,7 @@
 
 
 /*
-  For the cycles max amount we use a step based value, as instance if the second in more that 60,
+  For the cycles max amount we use a clamp based value, as instance if the second is more that 60,
   it means that it should use a minute based time-limit.
   Such constrain will be enforced in front-end/GUI side making sure the values are clamped.
  */
@@ -62,54 +62,65 @@
 // clang-format on
 
 typedef enum {
-#define _(Label, Amount, Weight) DataSetRewardType_##Label,
+#define _(Label, Amount, Weight) CompoundRewardType_##Label,
   REWARD_TYPES(_)
 #undef _
-} DataSetRewardType;
+} CompoundRewardType;
 
 typedef enum {
-#define _(Label, Amount, Weight) DataSetRewardCycleUnit_##Label,
+#define _(Label, Amount, Weight) CompoundRewardCycleUnit_##Label,
   REWARD_CYCLES(_)
 #undef _
-} DataSetRewardCycleUnit;
+} CompoundRewardCycleUnit;
 
 typedef struct {
   uint64_t quantity;
-  DataSetRewardCycleUnit unit;
-} DataSetRewardCycle;
+  CompoundRewardCycleUnit unit;
+} CompoundRewardCycle;
 
 typedef enum {
-  DataSetRewardAmountType_Undefined,
-  DataSetRewardAmountType_Fixed,
-  DataSetRewardAmountType_Range,
-} DataSetRewardAmountType;
+  CompoundRewardAmountType_Undefined,
+  CompoundRewardAmountType_Fixed,
+  CompoundRewardAmountType_Range,
+} CompoundRewardAmountType;
 
 typedef struct {
 
-  DataSetRewardAmountType type;
+  CompoundRewardAmountType type;
 
   union {
-    uint64_t fixed;
+    uint64_t value;
     struct {
       uint64_t min, max;
+      // TODO: add rules (random, level based...)
     } range;
   };
 
-} DataSetRewardAmount;
+} CompoundRewardAmount;
 
 typedef struct {
   // amount of reward per cycle
   uint64_t amount_per_cycle;
-  DataSetRewardCycle cycle;
-} DataSetRewardAmountFrequency;
+  CompoundRewardCycle cycle;
+} CompoundRewardFrequency;
 
 typedef struct {
-  DataSetRewardType type;
-  DataSetRewardAmount amount;
-  DataSetRewardCycle time_limit;
-  DataSetRewardAmountFrequency frequency;
+  CompoundRewardType type;
+  CompoundRewardAmount amount;
+  CompoundRewardCycle time_limit;
+  CompoundRewardFrequency frequency;
   float probability;
-} DataSetReward;
+} CompoundReward;
+
+// Presets
+
+// 1N reward for 1 action, most common use case
+static const CompoundRewardFrequency COMPOUND_REWARD_FREQUENCY_BASE = {
+    1, {1, CompoundRewardCycleUnit_Action}};
+
+static const float COMPOUND_REWARD_PROBABILITY_ALWAYS = 1.0f;
+
+static const CompoundRewardCycle COMPOUND_REWARD_TIME_LIMIT_NONE = {0};
 
 /*
 
@@ -121,12 +132,33 @@ typedef struct {
  */
 
 /*
+   Return true if reward configuration actually has an amount > 0 or a valid
+   type (non-undefined)
+ */
+static inline bool compound_reward_null(const CompoundReward *set) {
+
+  if (CompoundRewardType_Undefined == set->type)
+    return true;
+
+  if (CompoundRewardAmountType_Fixed == set->amount.type &&
+      set->amount.value == 0)
+    return true;
+
+  if (CompoundRewardAmountType_Range == set->amount.type &&
+      set->amount.range.min == 0 && set->amount.range.max == 0)
+    return true;
+
+  return false;
+}
+
+/*
   For each reward type we set a different amount of max amount.
  */
-static inline uint64_t dataset_reward_get_max_amount(const DataSetReward *set) {
+static inline uint64_t
+compound_reward_get_max_amount(const CompoundReward *set) {
 
   static const uint64_t amounts[] = {
-#define _(Label, Amount, Weight) [DataSetRewardType_##Label] = Amount,
+#define _(Label, Amount, Weight) [CompoundRewardType_##Label] = Amount,
       REWARD_TYPES(_)
 #undef _
   };
@@ -138,10 +170,10 @@ static inline uint64_t dataset_reward_get_max_amount(const DataSetReward *set) {
   Depending on their worth, we set different weight for each reward type (1 TV
   is more valuable that 10 coins)
  */
-static inline float dataset_reward_get_type_weight(const DataSetReward *set) {
+static inline float compound_reward_get_type_weight(const CompoundReward *set) {
 
   static const float weights[] = {
-#define _(Label, Amount, Weight) [DataSetRewardType_##Label] = Weight,
+#define _(Label, Amount, Weight) [CompoundRewardType_##Label] = Weight,
       REWARD_TYPES(_)
 #undef _
   };
@@ -154,10 +186,11 @@ static inline float dataset_reward_get_type_weight(const DataSetReward *set) {
   action it will have a higher weight that a cycle based on a year as it's
   easier for a user to satisfy the cycle (3 actions vs 1 year).
  */
-static inline float dataset_reward_get_cycle_weight(const DataSetReward *set) {
+static inline float
+compound_reward_get_cycle_weight(const CompoundReward *set) {
 
   static const float weights[] = {
-#define _(Label, Amount, Weight) [DataSetRewardCycleUnit_##Label] = Weight,
+#define _(Label, Amount, Weight) [CompoundRewardCycleUnit_##Label] = Weight,
       REWARD_CYCLES(_)
 #undef _
   };
@@ -166,33 +199,33 @@ static inline float dataset_reward_get_cycle_weight(const DataSetReward *set) {
 }
 
 static inline float
-dataset_reward_cycle_unit_to_sec(const DataSetRewardCycle *cycle) {
+compound_reward_cycle_unit_to_sec(const CompoundRewardCycle *cycle) {
 
   switch (cycle->unit) {
 
-  case DataSetRewardCycleUnit_Undefined:
-  case DataSetRewardCycleUnit_Action:
+  case CompoundRewardCycleUnit_Undefined:
+  case CompoundRewardCycleUnit_Action:
     return 0.0f;
 
-  case DataSetRewardCycleUnit_Second:
+  case CompoundRewardCycleUnit_Second:
     return cycle->quantity;
 
-  case DataSetRewardCycleUnit_Minute:
+  case CompoundRewardCycleUnit_Minute:
     return cycle->quantity * 60.0f;
 
-  case DataSetRewardCycleUnit_Hour:
+  case CompoundRewardCycleUnit_Hour:
     return cycle->quantity * 60.0f * 60.0f;
 
-  case DataSetRewardCycleUnit_Day:
+  case CompoundRewardCycleUnit_Day:
     return cycle->quantity * 24.0f * 60.0f * 60.0f;
 
-  case DataSetRewardCycleUnit_Week:
+  case CompoundRewardCycleUnit_Week:
     return cycle->quantity * 7.0f * 24.0f * 60.0f * 60.0f;
 
-  case DataSetRewardCycleUnit_Month:
+  case CompoundRewardCycleUnit_Month:
     return cycle->quantity * 30.0f * 24.0f * 60.0f * 60.0f;
 
-  case DataSetRewardCycleUnit_Year:
+  case CompoundRewardCycleUnit_Year:
     return cycle->quantity * 365.0f * 24.0f * 60.0f * 60.0f;
   }
 
@@ -204,32 +237,33 @@ dataset_reward_cycle_unit_to_sec(const DataSetRewardCycle *cycle) {
   get the reward.
 
  */
-static inline float dataset_reward_compute_frequency(const DataSetReward *set) {
+static inline float
+compound_reward_compute_frequency(const CompoundReward *set) {
 
-  if (DataSetRewardCycleUnit_Undefined == set->frequency.cycle.unit)
+  if (CompoundRewardCycleUnit_Undefined == set->frequency.cycle.unit)
     return 0.0;
 
   float denom = 1.0f;
 
   // convert to seconds if unit is not Action based but time based
-  if (DataSetRewardCycleUnit_Action != set->frequency.cycle.unit)
-    denom = dataset_reward_cycle_unit_to_sec(&set->frequency.cycle);
+  if (CompoundRewardCycleUnit_Action != set->frequency.cycle.unit)
+    denom = compound_reward_cycle_unit_to_sec(&set->frequency.cycle);
 
   return (float)set->frequency.amount_per_cycle /
          set->frequency.cycle.quantity * denom;
 }
 
 static inline float
-dataset_reward_compute_time_limit(const DataSetReward *set) {
+compound_reward_compute_time_limit(const CompoundReward *set) {
 
-  if (DataSetRewardCycleUnit_Undefined == set->frequency.cycle.unit)
+  if (CompoundRewardCycleUnit_Undefined == set->frequency.cycle.unit)
     return 0.0;
 
   float factor = 1.0f;
 
   // convert to seconds if unit is not Action based but time based
-  if (DataSetRewardCycleUnit_Action != set->frequency.cycle.unit)
-    factor = dataset_reward_cycle_unit_to_sec(&set->frequency.cycle);
+  if (CompoundRewardCycleUnit_Action != set->frequency.cycle.unit)
+    factor = compound_reward_cycle_unit_to_sec(&set->frequency.cycle);
 
   return set->time_limit.quantity * factor;
 }
@@ -238,10 +272,10 @@ dataset_reward_compute_time_limit(const DataSetReward *set) {
   For each reward type we set a different amount of max amount.
  */
 static inline uint64_t
-dataset_reward_get_max_time_limit(const DataSetReward *set) {
+compound_reward_get_max_time_limit(const CompoundReward *set) {
 
   static const uint64_t amounts[] = {
-#define _(Label, Amount, Weight) [DataSetRewardCycleUnit_##Label] = Amount,
+#define _(Label, Amount, Weight) [CompoundRewardCycleUnit_##Label] = Amount,
       REWARD_CYCLES(_)
 #undef _
   };
@@ -267,7 +301,10 @@ dataset_reward_get_max_time_limit(const DataSetReward *set) {
   - how many time a cycle we get it
   - finally, the limit of time we can get it
  */
-static inline float dataset_reward_get_scarcity(const DataSetReward *set) {
+static inline float compound_reward_get_scarcity(const CompoundReward *set) {
+
+  if (compound_reward_null(set))
+    return 0.0;
 
   // Weights for scarcity components
   static const float w_amount = 0.35f;
@@ -278,31 +315,31 @@ static inline float dataset_reward_get_scarcity(const DataSetReward *set) {
   // Often invert the factor (fq, proba) cause high fq/proba // means low
   // scarcity
 
-  const uint64_t max_amount = dataset_reward_get_max_amount(set);
+  const uint64_t max_amount = compound_reward_get_max_amount(set);
 
   // use average if range
   const uint64_t amount =
-      (set->amount.type == DataSetRewardAmountType_Fixed)
-          ? set->amount.fixed
+      (set->amount.type == CompoundRewardAmountType_Fixed)
+          ? set->amount.value
           : range_avg(set->amount.range.min, set->amount.range.max);
 
   const float s_amount = 1.0f - ((float)amount / max_amount);
 
-  const float f = dataset_reward_compute_frequency(set);
+  const float f = compound_reward_compute_frequency(set);
   const float s_frequency = inv_norm(f, 1.0f);
 
   const float s_probability = 1.0f - set->probability;
 
   // time limit
-  const float L = dataset_reward_compute_time_limit(set);
+  const float L = compound_reward_compute_time_limit(set);
   const float s_time_limit =
-      inv_norm(L, dataset_reward_get_max_time_limit(set));
+      inv_norm(L, compound_reward_get_max_time_limit(set));
 
   // Only add the type weight with the amount, cause 200 points < 1 TV (physical
   // gift)
 
   // clang-format off
-  return   w_amount * s_amount * dataset_reward_get_type_weight(set)
+  return   w_amount * s_amount * compound_reward_get_type_weight(set)
          + w_frequency * s_frequency
          + w_proba * s_probability 
          + w_time * s_time_limit;
@@ -314,23 +351,23 @@ static inline float dataset_reward_get_scarcity(const DataSetReward *set) {
   It’s 0 if the reward is below Badges as Coins or Points don’t produce any
   ownership.
  */
-static inline float dataset_reward_get_ownership(const DataSetReward *set) {
+static inline float compound_reward_get_ownership(const CompoundReward *set) {
 
-  if (DataSetRewardType_Badge != set->type &&
-      DataSetRewardType_Bundle != set->type &&
-      DataSetRewardType_Skin != set->type &&
-      DataSetRewardType_Gift != set->type)
+  if (compound_reward_null(set) || (CompoundRewardType_Badge != set->type &&
+                                    CompoundRewardType_Bundle != set->type &&
+                                    CompoundRewardType_Skin != set->type &&
+                                    CompoundRewardType_Gift != set->type))
     return 0.0f;
 
-  const uint64_t max_amount = dataset_reward_get_max_amount(set);
+  const uint64_t max_amount = compound_reward_get_max_amount(set);
 
   // use average if range
   const uint64_t amount =
-      (set->amount.type == DataSetRewardAmountType_Fixed)
-          ? set->amount.fixed
+      (set->amount.type == CompoundRewardAmountType_Fixed)
+          ? set->amount.value
           : range_avg(set->amount.range.min, set->amount.range.max);
 
-  return norm(amount, max_amount) * dataset_reward_get_type_weight(set);
+  return norm(amount, max_amount) * compound_reward_get_type_weight(set);
 }
 
 /*
@@ -338,25 +375,28 @@ static inline float dataset_reward_get_ownership(const DataSetReward *set) {
   Meaning a TV available for 1 day will generate more avoidance that 200 points
   for 2 weeks.
  */
-static inline float dataset_reward_get_avoidance(const DataSetReward *set) {
+static inline float compound_reward_get_avoidance(const CompoundReward *set) {
+
+  if (compound_reward_null(set))
+    return 0.0;
 
   static const float w_amount = 0.6f;
   static const float w_time = 0.4f;
 
-  const uint64_t max_amount = dataset_reward_get_max_amount(set);
+  const uint64_t max_amount = compound_reward_get_max_amount(set);
 
   // use average if range
   const uint64_t amount =
-      (set->amount.type == DataSetRewardAmountType_Fixed)
-          ? set->amount.fixed
+      (set->amount.type == CompoundRewardAmountType_Fixed)
+          ? set->amount.value
           : range_avg(set->amount.range.min, set->amount.range.max);
 
   // time limit
-  const float L = dataset_reward_compute_time_limit(set);
-  const float time_limit = inv_norm(L, dataset_reward_get_max_time_limit(set));
+  const float L = compound_reward_compute_time_limit(set);
+  const float time_limit = inv_norm(L, compound_reward_get_max_time_limit(set));
 
   // clang-format off
-  return   w_amount * norm(amount, max_amount) * dataset_reward_get_type_weight(set)
+  return   w_amount * norm(amount, max_amount) * compound_reward_get_type_weight(set)
          + w_time * time_limit;
   // clang-format on
 }
@@ -367,30 +407,33 @@ static inline float dataset_reward_get_avoidance(const DataSetReward *set) {
   indulge thrill and stress to get the reward and make the experience more
   thrilling.
  */
-static inline float dataset_reward_get_excitement(const DataSetReward *set) {
+static inline float compound_reward_get_excitement(const CompoundReward *set) {
+
+  if (compound_reward_null(set))
+    return 0.0;
 
   static const float w_amount = 0.4f;
   static const float w_time = 0.3f;
   static const float w_freq = 0.2f;
 
-  const uint64_t max_amount = dataset_reward_get_max_amount(set);
+  const uint64_t max_amount = compound_reward_get_max_amount(set);
 
   // use average if range
   const uint64_t amount =
-      (set->amount.type == DataSetRewardAmountType_Fixed)
-          ? set->amount.fixed
+      (set->amount.type == CompoundRewardAmountType_Fixed)
+          ? set->amount.value
           : range_avg(set->amount.range.min, set->amount.range.max);
 
   // fq
-  const float f = dataset_reward_compute_frequency(set);
+  const float f = compound_reward_compute_frequency(set);
   const float frequency = inv_norm(f, 1.0f);
 
   // time limit
-  const float L = dataset_reward_compute_time_limit(set);
-  const float time_limit = inv_norm(L, dataset_reward_get_max_time_limit(set));
+  const float L = compound_reward_compute_time_limit(set);
+  const float time_limit = inv_norm(L, compound_reward_get_max_time_limit(set));
 
   // clang-format off
-  return   w_amount * norm(amount, max_amount) * dataset_reward_get_type_weight(set)
+  return   w_amount * norm(amount, max_amount) * compound_reward_get_type_weight(set)
 	 + w_freq * frequency
          + w_time * time_limit;
   // clang-format on
@@ -402,25 +445,28 @@ static inline float dataset_reward_get_excitement(const DataSetReward *set) {
    accomplishment.
  */
 static inline float
-dataset_reward_get_accomplishment(const DataSetReward *set) {
+compound_reward_get_accomplishment(const CompoundReward *set) {
+
+  if (compound_reward_null(set))
+    return 0.0;
 
   static const float w_amount = 0.6f;
   static const float w_freq = 0.4f;
 
-  const uint64_t max_amount = dataset_reward_get_max_amount(set);
+  const uint64_t max_amount = compound_reward_get_max_amount(set);
 
   // use average if range
   const uint64_t amount =
-      (set->amount.type == DataSetRewardAmountType_Fixed)
-          ? set->amount.fixed
+      (set->amount.type == CompoundRewardAmountType_Fixed)
+          ? set->amount.value
           : range_avg(set->amount.range.min, set->amount.range.max);
 
   // fq
-  const float f = dataset_reward_compute_frequency(set);
+  const float f = compound_reward_compute_frequency(set);
   const float frequency = inv_norm(f, 1.0f);
 
   // clang-format off
-  return     w_amount * norm(amount, max_amount) * dataset_reward_get_type_weight(set)
+  return     w_amount * norm(amount, max_amount) * compound_reward_get_type_weight(set)
 	   + w_freq * frequency;
   // clang-format on
 }
@@ -431,20 +477,38 @@ dataset_reward_get_accomplishment(const DataSetReward *set) {
   instead of sheer probability, however it's not integrated yet in the system.
  */
 static inline float
-dataset_reward_get_unpredictability(const DataSetReward *set) {
+compound_reward_get_unpredictability(const CompoundReward *set) {
+
+  if (compound_reward_null(set))
+    return 0.0;
 
   static const float w_proba = 0.5f;
   static const float w_freq = 0.5f;
 
   const float probability = 1 - set->probability;
 
-  const float f = dataset_reward_compute_frequency(set);
+  const float f = compound_reward_compute_frequency(set);
   const float frequency = inv_norm(f, 1.0f);
 
   // clang-format off
   return   w_proba * probability
 	 + w_freq * frequency;
   // clang-format on
+}
+
+static inline float compound_reward_get_reward(const CompoundReward *set) {
+
+  if (compound_reward_null(set))
+    return 0.0;
+
+  // use average if range
+  const uint64_t amount =
+      (set->amount.type == CompoundRewardAmountType_Fixed)
+          ? set->amount.value
+          : range_avg(set->amount.range.min, set->amount.range.max);
+
+  return norm(amount, compound_reward_get_max_amount(set)) *
+         compound_reward_get_type_weight(set);
 }
 
 #endif

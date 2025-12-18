@@ -41,7 +41,9 @@ typedef struct {
 
   const char *label;
 
-  alloc_id id, octagon_id, factor_id, parent;
+  alloc_id id;
+  alloc_id parent;
+  alloc_id octagon_id, factor_id, solution_id;
   alloc_id connector_handle_id[FRAME_CONNECTOR_HANDLE_COUNT];
 
   ALLOCATOR_ID_LIST(FRAME_MAX_CONNECTORS) connectors_id;

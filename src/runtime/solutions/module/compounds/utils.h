@@ -1,5 +1,5 @@
-#ifndef _EMMA_DATASET_UTILS_H_
-#define _EMMA_DATASET_UTILS_H_
+#ifndef _EMMA_MODULE_COMPOUND_UTILS_H_
+#define _EMMA_MODULE_COMPOUND_UTILS_H_
 
 #include <inttypes.h>
 #include <math.h>
