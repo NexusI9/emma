@@ -3,25 +3,26 @@
 
 #include <inttypes.h>
 
-static const uint8_t COMPOUND_ACTION_CAPACITY = 6;
+static const uint8_t COMPOUND_MODULE_ACTION_CAPACITY = 6;
 
 typedef enum {
-  CompoundActionRole_Primary,
-  CompoundActionRole_Secondary,
-  CompoundActionRole_Tertiary,
-} CompoundActionRole;
+  CompoundModuleActionRole_Primary,
+  CompoundModuleActionRole_Secondary,
+  CompoundModuleActionRole_Tertiary,
+} CompoundModuleActionRole;
 
 typedef struct {
   const char *label;
-  CompoundActionRole role;
-} CompoundAction;
+  CompoundModuleActionRole role;
+} CompoundModuleAction;
 
-static inline float compound_action_get_role_weight(const CompoundAction *action) {
+static inline float
+compound_module_action_get_role_weight(const CompoundModuleAction *action) {
 
   static const float role_weight[] = {
-      [CompoundActionRole_Primary] = 1,
-      [CompoundActionRole_Secondary] = 0.5,
-      [CompoundActionRole_Tertiary] = 0.15,
+      [CompoundModuleActionRole_Primary] = 1,
+      [CompoundModuleActionRole_Secondary] = 0.5,
+      [CompoundModuleActionRole_Tertiary] = 0.15,
   };
 
   return role_weight[action->role];

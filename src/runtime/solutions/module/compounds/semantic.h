@@ -3,24 +3,24 @@
 
 #include <inttypes.h>
 
-static const uint8_t COMPOUND_SEMANTIC_EPIC_MEANING_MIN = 0;
-static const uint8_t COMPOUND_SEMANTIC_EPIC_MEANING_MAX = 5;
+static const uint8_t COMPOUND_MODULE_SEMANTIC_EPIC_MEANING_MIN = 0;
+static const uint8_t COMPOUND_MODULE_SEMANTIC_EPIC_MEANING_MAX = 5;
 
-static const uint8_t COMPOUND_SEMANTIC_EMPOWERMENT_MIN = 0;
-static const uint8_t COMPOUND_SEMANTIC_EMPOWERMENT_MAX = 5;
+static const uint8_t COMPOUND_MODULE_SEMANTIC_EMPOWERMENT_MIN = 0;
+static const uint8_t COMPOUND_MODULE_SEMANTIC_EMPOWERMENT_MAX = 5;
 
 typedef struct {
   uint8_t epic_meaning;
   uint8_t empowerment;
-} CompoundSemantic;
+} CompoundModuleSemantic;
 
 /*
    Based on designer subjective assessment, Epic Meaning should be high if user
    feels their action fulfil greater purpose.
  */
 static inline float
-compound_semantic_get_epic_meaning(const CompoundSemantic *set) {
-  return (float)set->epic_meaning / COMPOUND_SEMANTIC_EPIC_MEANING_MAX;
+compound_module_semantic_get_epic_meaning(const CompoundModuleSemantic *set) {
+  return (float)set->epic_meaning / COMPOUND_MODULE_SEMANTIC_EPIC_MEANING_MAX;
 }
 
 /*
@@ -28,8 +28,8 @@ compound_semantic_get_epic_meaning(const CompoundSemantic *set) {
    allows user self reflection and meaningful or strategic choices.
  */
 static inline float
-compound_semantic_get_empowerment(const CompoundSemantic *set) {
-  return (float)set->empowerment / COMPOUND_SEMANTIC_EMPOWERMENT_MAX;
+compound_module_semantic_get_empowerment(const CompoundModuleSemantic *set) {
+  return (float)set->empowerment / COMPOUND_MODULE_SEMANTIC_EMPOWERMENT_MAX;
 }
 
 #endif

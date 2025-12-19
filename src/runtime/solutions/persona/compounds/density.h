@@ -9,10 +9,10 @@ typedef struct {
    */
   float value;
 
-} CompoundDensity;
+} CompoundPersonaDensity;
 
 static inline float
-compound_density_get_value(const CompoundDensity *compound) {
+compound_persona_density_get_value(const CompoundPersonaDensity *compound) {
   return compound->value;
 }
 

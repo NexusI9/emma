@@ -1,10 +1,10 @@
 #ifndef _EMMA_SOLUTION_MODULE_CONFIG_H_
 #define _EMMA_SOLUTION_MODULE_CONFIG_H_
 
+#include "runtime/manager/module.h"
 #include "runtime/solutions/module/compounds/action.h"
 #include "runtime/solutions/module/compounds/experience.h"
 #include "runtime/solutions/module/compounds/reward.h"
-#include "runtime/manager/module.h"
 #include "runtime/solutions/module/module.h"
 
 static const SolutionModuleCompounds SOLUTION_MODULES[] = {
@@ -200,7 +200,8 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
                                         .type = CompoundRewardType_Coin,
                                         .amount =
                                             {
-                                                .type = CompoundRewardAmountType_Fixed,
+                                                .type =
+                                                    CompoundRewardAmountType_Fixed,
                                                 .range = -10,
                                             },
                                         .time_limit =
@@ -209,11 +210,13 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
                                             COMPOUND_REWARD_PROBABILITY_ALWAYS,
                                         .frequency =
                                             {
-                                                // 3 times every 2 day
-                                                .amount_per_cycle = 3,
-                                                .cycle =
-                                                    {2,
-                                                     CompoundRewardCycleUnit_Day},
+                                                // 3 times every 2 day, forever
+                                                .quota = 3,
+                                                .interval = 2,
+                                                .unit =
+                                                    CompoundRewardTimeUnit_Day,
+                                                .repeat =
+                                                    COMPOUNT_REWARD_FREQUENCY_REPEAT_ALWAYS,
                                             },
                                     },
                             },
@@ -388,7 +391,6 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
                     .count = 2,
                 },
         },
-
 };
 
 #endif

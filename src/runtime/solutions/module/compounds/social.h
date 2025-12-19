@@ -10,14 +10,14 @@ typedef struct {
   bool competitive;
   // showcase outcome on user profile or leaderboard (status, score, badges...)
   bool published;
-} CompoundSocial;
+} CompoundModuleSocial;
 
 /*
   Higher if the module publish others results and outcome, may
   influence user to follow the movement. Also considers user’s ability to share,
   as it may encourage them to show their best outcome to others.
  */
-static inline float compound_social_get_influence(const CompoundSocial *set) {
+static inline float compound_module_social_get_influence(const CompoundModuleSocial *set) {
 
   static const float w_publish = 0.7;
   static const float w_share = 0.3;
@@ -29,7 +29,7 @@ static inline float compound_social_get_influence(const CompoundSocial *set) {
   Mostly based on module’s collaborative nature. With a strong malus if
   competitive.
  */
-static inline float compound_social_get_bounding(const CompoundSocial *set) {
+static inline float compound_module_social_get_bounding(const CompoundModuleSocial *set) {
 
   static const float w_compet = 0.7;
   static const float w_collab = 0.3;
@@ -44,7 +44,7 @@ static inline float compound_social_get_bounding(const CompoundSocial *set) {
   user’s outcome to public. Some competitiveness might be involved as well, for
   higher competition means higher fear of loss.
  */
-static inline float compound_social_get_avoidance(const CompoundSocial *set) {
+static inline float compound_module_social_get_avoidance(const CompoundModuleSocial *set) {
 
   static const float w_publish = 0.8;
   static const float w_compet = 0.2;
@@ -59,7 +59,7 @@ static inline float compound_social_get_avoidance(const CompoundSocial *set) {
   hence the shareable and public also plays a lighter role in it.
  */
 static inline float
-compound_social_get_accomplishment(const CompoundSocial *set) {
+compound_module_social_get_accomplishment(const CompoundModuleSocial *set) {
 
   static const float w_publish = 0.15;
   static const float w_share = 0.15;
@@ -83,7 +83,7 @@ compound_social_get_accomplishment(const CompoundSocial *set) {
   also induce some kind of excitement as we know we may get recognition from it
   (comment, like, exposure)
  */
-static inline float compound_social_get_excitement(const CompoundSocial *set) {
+static inline float compound_module_social_get_excitement(const CompoundModuleSocial *set) {
 
   static const float w_publish = 0.15;
   static const float w_collab = 0.35;

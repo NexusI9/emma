@@ -16,4 +16,6 @@ static inline uint64_t range_avg(const uint64_t min, const uint64_t max) {
   return (min + max) / 2;
 }
 
+static inline uint64_t polarize(const float v) { return 2 * v - 1; }
+
 #endif

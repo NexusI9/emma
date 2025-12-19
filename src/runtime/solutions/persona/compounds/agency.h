@@ -3,29 +3,29 @@
 
 // Temporality Preference: Short vs Longer response time to see result
 typedef enum {
-  CompoundAgencyFeebackSpan_Short,
-  CompoundAgencyFeebackSpan_Long,
-} CompoundAgencyFeebackSpan;
+  CompoundPersonaAgencyFeebackSpan_Short,
+  CompoundPersonaAgencyFeebackSpan_Long,
+} CompoundPersonaAgencyFeebackSpan;
 
 typedef enum {
-  CompoundAgencyLearningCurve_Gradual,
-  CompoundAgencyLearningCurve_Instant,
-} CompoundAgencyLearningCurve;
+  CompoundPersonaAgencyLearningCurve_Gradual,
+  CompoundPersonaAgencyLearningCurve_Instant,
+} CompoundPersonaAgencyLearningCurve;
 
 typedef struct {
 
-  CompoundAgencyFeebackSpan feedback_span;
-  CompoundAgencyLearningCurve learning_curve;
+  CompoundPersonaAgencyFeebackSpan feedback_span;
+  CompoundPersonaAgencyLearningCurve learning_curve;
   float risk_tolerance;
 
-} CompoundAgency;
+} CompoundPersonaAgency;
 
 /*
   Persona with a short feedback span preference and high risk tolerance will be
   thrilled by unpredictable events.
 */
-static inline float
-compound_agency_get_unpredictability(const CompoundAgency *compound) {
+static inline float compound_persona_agency_get_unpredictability(
+    const CompoundPersonaAgency *compound) {
 
   static const float w_feedback = 0.7;
   static const float w_risk = 0.3;
@@ -41,7 +41,7 @@ compound_agency_get_unpredictability(const CompoundAgency *compound) {
  receptive to avoidance and immediate pulse with feelings like “FOMO”
 */
 static inline float
-compound_agency_get_avoidance(const CompoundAgency *compound) {
+compound_persona_agency_get_avoidance(const CompoundPersonaAgency *compound) {
 
   static const float w_feedback = 0.7;
   static const float w_risk = 0.3;
@@ -66,8 +66,8 @@ compound_agency_get_avoidance(const CompoundAgency *compound) {
   to reach a goal. As oppose to short span persona seeking instant learning who
   act based of short-term reward only.
 */
-static inline float
-compound_agency_get_accomplishment(const CompoundAgency *compound) {
+static inline float compound_persona_agency_get_accomplishment(
+    const CompoundPersonaAgency *compound) {
 
   static const float w_feedback = 0.6;
   static const float w_learn = 0.4;
@@ -83,7 +83,7 @@ compound_agency_get_accomplishment(const CompoundAgency *compound) {
   to empowerment for their motivation to explore and have full control up-front.
 */
 static inline float
-compound_agency_get_empowerment(const CompoundAgency *compound) {
+compound_persona_agency_get_empowerment(const CompoundPersonaAgency *compound) {
 
   static const float w_risk = 0.6;
   static const float w_learn = 0.4;
@@ -91,6 +91,41 @@ compound_agency_get_empowerment(const CompoundAgency *compound) {
   // clang-format off
   return   w_risk * compound->risk_tolerance
          + w_learn * compound->learning_curve;
+  // clang-format on
+}
+
+/*
+  Persona with instant learning curve and short feedback span have a lower
+  threshold to friction
+*/
+static inline float
+compound_persona_agency_get_friction(const CompoundPersonaAgency *compound) {
+
+  static const float w_feed = 0.6;
+  static const float w_learn = 0.4;
+
+  // clang-format off
+  return   w_feed * (1 - compound->feedback_span)
+         + w_learn * compound->learning_curve;
+  // clang-format on
+}
+
+/*
+  Persona with instant short feedback span, medium high risk tolerance and
+  instant learning expectation are user with extrinsic purpose, meaning they are
+  more interested in the outcome (and reward) rather than the experience itself.
+*/
+static inline float
+compound_persona_agency_get_reward(const CompoundPersonaAgency *compound) {
+
+  static const float w_feed = 0.6;
+  static const float w_learn = 0.3;
+  static const float w_risk = 0.1;
+
+  // clang-format off
+  return   w_feed * (1 - compound->feedback_span)
+         + w_learn * compound->learning_curve
+         + w_risk * compound->risk_tolerance;
   // clang-format on
 }
 

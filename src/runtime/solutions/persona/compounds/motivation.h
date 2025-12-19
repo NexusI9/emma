@@ -74,11 +74,11 @@ typedef struct {
 #define _(Label) float Label;
   MOTIVATIONS(_)
 #undef _
-} CompoundMotivation;
+} CompoundPersonaMotivation;
 
 #define _(Label)                                                               \
-  static inline float compound_motivation_get_##Label(                         \
-      const CompoundMotivation *compound) {                                    \
+  static inline float compound_persona_motivation_get_##Label(                 \
+      const CompoundPersonaMotivation *compound) {                             \
     return compound->Label;                                                    \
   }
 MOTIVATIONS(_)
