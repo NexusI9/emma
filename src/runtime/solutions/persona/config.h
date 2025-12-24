@@ -2,16 +2,15 @@
 #define _EMMA_SOLUTION_PERSONA_CONFIG_H_
 
 #include "runtime/node/persona.h"
-#include "runtime/solutions/persona/persona.h"
+#include "runtime/solutions/persona/core.h"
 
-static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
+static const SolutionPersona SOLUTION_PERSONAS[] = {
 
     [PersonaType_Operator] =
         {
             .social =
                 {
                     .collaborative = 0.6f,
-                    .collective = 0.7f,
                     .visibility = 0.2f,
                 },
             .motivation =
@@ -31,8 +30,9 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
                 },
             .agency =
                 {
-                    .feedback_span = CompoundAgencyFeebackSpan_Short,
-                    .learning_curve = CompoundAgencyLearningCurve_Gradual,
+                    .feedback_span = CompoundPersonaAgencyFeebackSpan_Short,
+                    .learning_curve =
+                        CompoundPersonaAgencyLearningCurve_Gradual,
                     .risk_tolerance = 0.2f,
                 },
             .density = {(float)1 / PersonaType_COUNT},
@@ -43,7 +43,6 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
             .social =
                 {
                     .collaborative = 0.4f,
-                    .collective = 0.2f,
                     .visibility = 0.3f,
                 },
             .motivation =
@@ -63,8 +62,9 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
                 },
             .agency =
                 {
-                    .feedback_span = CompoundAgencyFeebackSpan_Long,
-                    .learning_curve = CompoundAgencyLearningCurve_Instant,
+                    .feedback_span = CompoundPersonaAgencyFeebackSpan_Long,
+                    .learning_curve =
+                        CompoundPersonaAgencyLearningCurve_Instant,
                     .risk_tolerance = 0.45f,
                 },
             .density = {(float)1 / PersonaType_COUNT},
@@ -75,7 +75,6 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
             .social =
                 {
                     .collaborative = 0.8f,
-                    .collective = 0.9f,
                     .visibility = 0.4f,
                 },
             .motivation =
@@ -95,8 +94,9 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
                 },
             .agency =
                 {
-                    .feedback_span = CompoundAgencyFeebackSpan_Long,
-                    .learning_curve = CompoundAgencyLearningCurve_Gradual,
+                    .feedback_span = CompoundPersonaAgencyFeebackSpan_Long,
+                    .learning_curve =
+                        CompoundPersonaAgencyLearningCurve_Gradual,
                     .risk_tolerance = 0.3f,
                 },
             .density = {(float)1 / PersonaType_COUNT},
@@ -107,7 +107,6 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
             .social =
                 {
                     .collaborative = 0.5f,
-                    .collective = 0.3f,
                     .visibility = 0.6f,
                 },
             .motivation =
@@ -127,8 +126,9 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
                 },
             .agency =
                 {
-                    .feedback_span = CompoundAgencyFeebackSpan_Short,
-                    .learning_curve = CompoundAgencyLearningCurve_Instant,
+                    .feedback_span = CompoundPersonaAgencyFeebackSpan_Short,
+                    .learning_curve =
+                        CompoundPersonaAgencyLearningCurve_Instant,
                     .risk_tolerance = 0.85f,
                 },
             .density = {(float)1 / PersonaType_COUNT},
@@ -139,7 +139,6 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
             .social =
                 {
                     .collaborative = 0.3f,
-                    .collective = 0.4f,
                     .visibility = 0.8f,
                 },
             .motivation =
@@ -159,8 +158,9 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
                 },
             .agency =
                 {
-                    .feedback_span = CompoundAgencyFeebackSpan_Short,
-                    .learning_curve = CompoundAgencyLearningCurve_Gradual,
+                    .feedback_span = CompoundPersonaAgencyFeebackSpan_Short,
+                    .learning_curve =
+                        CompoundPersonaAgencyLearningCurve_Gradual,
                     .risk_tolerance = 0.35f,
                 },
             .density = {(float)1 / PersonaType_COUNT},
@@ -171,7 +171,6 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
             .social =
                 {
                     .collaborative = 0.6f,
-                    .collective = 0.5f,
                     .visibility = 0.9f,
                 },
             .motivation =
@@ -191,8 +190,9 @@ static const SolutionPersonaCompounds SOLUTION_PERSONAS[] = {
                 },
             .agency =
                 {
-                    .feedback_span = CompoundAgencyFeebackSpan_Long,
-                    .learning_curve = CompoundAgencyLearningCurve_Instant,
+                    .feedback_span = CompoundPersonaAgencyFeebackSpan_Long,
+                    .learning_curve =
+                        CompoundPersonaAgencyLearningCurve_Instant,
                     .risk_tolerance = 0.9f,
                 },
             .density = {(float)1 / PersonaType_COUNT},

@@ -59,6 +59,9 @@ public:
   void enable() {
     size = init_size;
     flag_disable(State_Hidden, &state);
+    
+    for (uint8_t i = 0; i < Type_COUNT; i++)
+      heatmaps[i].update_relative_motivations();
   }
 
 private:

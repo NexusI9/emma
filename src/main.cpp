@@ -11,12 +11,10 @@
 #include "runtime/node/canvas.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/heatmap.h"
+#include "runtime/node/motivation.h"
 #include "runtime/node/octagon.h"
 #include "runtime/node/persona.h"
 #include <emscripten/emscripten.h>
-
-
-
 
 void create_pod(Canvas *canvas) {
   Frame *pod = canvas_create_pod(canvas);
@@ -103,7 +101,7 @@ void create_frames(Canvas *canvas) {
     canvas_register_frame_state(canvas, frame, CanvasFrameState_Octagon);
 
     // add octagons
-    Octagon *oct = allocator_octagon_entry(frame->octagon_id);
+    Octagon *oct = allocator_octagon_entry(frame->octagon);
     for (uint8_t j = 0; j < 3; j++) {
       octagon_set_outer_offset(oct, cframes[i].octagon_data[j].index,
                                cframes[i].octagon_data[j].value);
@@ -138,6 +136,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
                   .label = "Excitment",
                   .axes = {"Boredom", "Thrill"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
+                  .motivation = MotivationType_Excitment,
               },
           .color_map =
               {
@@ -145,7 +144,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
                   .count = 4,
                   .colors =
                       {
-                          {0.0f, 0.0f, 1.0f, 1.0f}, // blue
+                          {0.0f, 0.0f, 1.0f, 1.0f}, // Blue
                           {0.0f, 1.0f, 0.0f, 1.0f}, // green
                           {1.0f, 1.0f, 0.0f, 1.0f}, // yellow
                           {1.0f, 0.0f, 0.0f, 1.0f}, // red
@@ -159,6 +158,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
                   .label = "Reward",
                   .axes = {"Pointless", "Valuable"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
+                  .motivation = MotivationType_Reward,
               },
           .color_map =
               {
@@ -180,6 +180,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
                   .label = "Social Bounding",
                   .axes = {"Isolation", "Belonging"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
+                  .motivation = MotivationType_SocialBounding,
               },
           .color_map =
               {
@@ -201,6 +202,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
                   .label = "Friction",
                   .axes = {"Smooth", "Painful"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
+                  .motivation = MotivationType_Friction,
               },
           .color_map =
               {
@@ -225,7 +227,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
 
     HeatmapDescriptor desc = {
         // fixed attributes
-        .frames = {canvas->frames->entries, &canvas->frames->count},
+        .frames = canvas->modules,
         .height = (int)(context_height() * context_dpi()),
         .width = (int)(context_width() * context_dpi()),
         .blur = 8,
@@ -234,6 +236,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
         .label = maps[i].heatmap.label,
         .axes = {maps[i].heatmap.axes[0], maps[i].heatmap.axes[1]},
         .color_map = &maps[i].color_map,
+        .motivation = maps[i].heatmap.motivation,
         .background =
             {
                 maps[i].heatmap.background[0],

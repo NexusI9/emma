@@ -2,9 +2,9 @@
 #define _EMMA_MODULE_COMPOUND_REWARD_H_
 
 #include "runtime/solutions/utils.h"
-#include <cstdint>
 #include <inttypes.h>
 #include <math.h>
+#include <stdio.h>
 
 // clang-format off
 /*
@@ -48,7 +48,7 @@
  */
 //       Label     |     Max Amount      |    Weight
 #define REWARD_CYCLES(_)                                \
-    _(  Undefined,              0,              0.000   )\
+    _(  Undefined,              1,              0.000   )\
     _(  Action,                 5,              1.000   )\
     _(  Second,                60,              0.900   )\
     _(  Minute,                60,              0.750   )\
@@ -114,18 +114,22 @@ typedef struct {
 
 // Presets
 
+static const uint32_t COMPOUND_MODULE_QUOTA_UNLIMITED = INT32_MAX;
+static const uint32_t COMPOUND_MODULE_REPEAT_ALWAYS = INT32_MAX;
+static const float COMPOUND_MODULE_PROBABILITY_ALWAYS = 1.0f;
+
 // 1N reward for 1 action, most common use case
-static const uint32_t COMPOUNT_MODULE_REWARD_FREQUENCY_REPEAT_ALWAYS =
-    INT32_MAX;
-static const float COMPOUND_MODULE_REWARD_PROBABILITY_ALWAYS = 1.0f;
+static const CompoundModuleRewardFrequency COMPOUND_MODULE_FREQUENCY_BASE = {
+    .repeat = COMPOUND_MODULE_REPEAT_ALWAYS,
+    .interval = 1,
+    .quota = 1,
+    .unit = CompoundModuleRewardTimeUnit_Action,
+};
 
-static const CompoundModuleRewardFrequency
-    COMPOUND_MODULE_REWARD_FREQUENCY_BASE = {
-        COMPOUNT_MODULE_REWARD_FREQUENCY_REPEAT_ALWAYS, 1,
-        CompoundModuleRewardTimeUnit_Action};
+static const CompoundModuleRewardTimeLimit COMPOUND_MODULE_TIME_LIMIT_NONE = {
+    0};
 
-static const CompoundModuleRewardTimeLimit
-    COMPOUND_MODULE_REWARD_TIME_LIMIT_NONE = {0};
+static const float COMPOUNT_MODULE_AMOUNT_SATURATION = 0.2f;
 
 /*
 
@@ -175,9 +179,15 @@ compound_module_reward_get_max_amount(const CompoundModuleReward *set) {
 /*
   Depending on their worth, we set different weight for each reward type (1 TV
   is more valuable that 10 coins)
+
+  However to align with observe distribution and real case scenario we use power
+  to reduce distance between weights.
+
  */
 static inline float
 compound_module_reward_get_type_weight(const CompoundModuleReward *set) {
+
+  static const float SATURATION = 0.225;
 
   static const float weights[] = {
 #define _(Label, Amount, Weight) [CompoundModuleRewardType_##Label] = Weight,
@@ -185,7 +195,7 @@ compound_module_reward_get_type_weight(const CompoundModuleReward *set) {
 #undef _
   };
 
-  return weights[set->amount.type];
+  return powf(weights[set->amount.type], SATURATION);
 }
 
 /*
@@ -244,12 +254,21 @@ static inline float compound_module_reward_cycle_unit_to_sec(
   return 1.0f;
 }
 
+static inline float
+compound_module_norm_amount(const CompoundModuleReward *set) {
+
+  const uint64_t amount =
+      (set->amount.type == CompoundModuleRewardAmountType_Fixed)
+          ? set->amount.value
+          : range_avg(set->amount.range.min, set->amount.range.max);
+
+  return log_norm(amount, compound_module_reward_get_max_amount(set),
+                  COMPOUNT_MODULE_AMOUNT_SATURATION);
+}
+
 /*
   The reward frequency is the result of how many time in a given cycle we can
   get the reward.
-
-
-
  */
 static inline float
 compound_module_reward_compute_frequency(const CompoundModuleReward *set) {
@@ -259,7 +278,7 @@ compound_module_reward_compute_frequency(const CompoundModuleReward *set) {
 
   const float repeat_factor =
       (set->frequency.repeat == 0 ||
-       set->frequency.repeat == COMPOUNT_MODULE_REWARD_FREQUENCY_REPEAT_ALWAYS)
+       set->frequency.repeat == COMPOUND_MODULE_REPEAT_ALWAYS)
           ? 1.0f
           : logf(set->frequency.repeat);
 
@@ -320,12 +339,8 @@ compound_module_reward_get_scarcity(const CompoundModuleReward *set) {
   const uint64_t max_amount = compound_module_reward_get_max_amount(set);
 
   // use average if range
-  const uint64_t amount =
-      (set->amount.type == CompoundModuleRewardAmountType_Fixed)
-          ? set->amount.value
-          : range_avg(set->amount.range.min, set->amount.range.max);
-
-  const float s_amount = 1.0f - ((float)amount / max_amount);
+  const float amount = compound_module_norm_amount(set);
+  const float s_amount = 1.0f - amount;
 
   const float f = compound_module_reward_compute_frequency(set);
   const float s_frequency = inv_norm(f, 1.0f);
@@ -364,15 +379,9 @@ compound_module_reward_get_ownership(const CompoundModuleReward *set) {
        CompoundModuleRewardType_Gift != set->type))
     return 0.0f;
 
-  const uint64_t max_amount = compound_module_reward_get_max_amount(set);
+  const float amount = compound_module_norm_amount(set);
 
-  // use average if range
-  const uint64_t amount =
-      (set->amount.type == CompoundModuleRewardAmountType_Fixed)
-          ? set->amount.value
-          : range_avg(set->amount.range.min, set->amount.range.max);
-
-  return norm(amount, max_amount) * compound_module_reward_get_type_weight(set);
+  return amount * compound_module_reward_get_type_weight(set);
 }
 
 /*
@@ -392,10 +401,7 @@ compound_module_reward_get_avoidance(const CompoundModuleReward *set) {
   const uint64_t max_amount = compound_module_reward_get_max_amount(set);
 
   // use average if range
-  const uint64_t amount =
-      (set->amount.type == CompoundModuleRewardAmountType_Fixed)
-          ? set->amount.value
-          : range_avg(set->amount.range.min, set->amount.range.max);
+  const float amount = compound_module_norm_amount(set);
 
   // time limit
   const float L = compound_module_reward_cycle_unit_to_sec(
@@ -404,7 +410,7 @@ compound_module_reward_get_avoidance(const CompoundModuleReward *set) {
       inv_norm(L, compound_module_reward_get_max_time_limit(set));
 
   // clang-format off
-  return   w_amount * norm(amount, max_amount) * compound_module_reward_get_type_weight(set)
+  return   w_amount * amount * compound_module_reward_get_type_weight(set)
          + w_time * time_limit;
   // clang-format on
 }
@@ -428,11 +434,7 @@ compound_module_reward_get_excitement(const CompoundModuleReward *set) {
   const uint64_t max_amount = compound_module_reward_get_max_amount(set);
 
   // use average if range
-  const uint64_t amount =
-      (set->amount.type == CompoundModuleRewardAmountType_Fixed)
-          ? set->amount.value
-          : range_avg(set->amount.range.min, set->amount.range.max);
-
+  const float amount = compound_module_norm_amount(set);
   // fq
   const float f = compound_module_reward_compute_frequency(set);
   const float frequency = inv_norm(f, 1.0f);
@@ -444,7 +446,7 @@ compound_module_reward_get_excitement(const CompoundModuleReward *set) {
       inv_norm(L, compound_module_reward_get_max_time_limit(set));
 
   // clang-format off
-  return   w_amount * norm(amount, max_amount) * compound_module_reward_get_type_weight(set)
+  return   w_amount * amount * compound_module_reward_get_type_weight(set)
 	 + w_freq * frequency
          + w_time * time_limit;
   // clang-format on
@@ -464,21 +466,15 @@ compound_module_reward_get_accomplishment(const CompoundModuleReward *set) {
   static const float w_amount = 0.6f;
   static const float w_freq = 0.4f;
 
-  const uint64_t max_amount = compound_module_reward_get_max_amount(set);
-
   // use average if range
-  const uint64_t amount =
-      (set->amount.type == CompoundModuleRewardAmountType_Fixed)
-          ? set->amount.value
-          : range_avg(set->amount.range.min, set->amount.range.max);
-
+  const float amount = compound_module_norm_amount(set);
   // fq
   const float f = compound_module_reward_compute_frequency(set);
   const float frequency = inv_norm(f, 1.0f);
 
   // clang-format off
-  return     w_amount * norm(amount, max_amount) * compound_module_reward_get_type_weight(set)
-	   + w_freq * frequency;
+  return  w_amount * amount * compound_module_reward_get_type_weight(set)
+	+ w_freq * frequency;
   // clang-format on
 }
 
@@ -507,6 +503,23 @@ compound_module_reward_get_unpredictability(const CompoundModuleReward *set) {
   // clang-format on
 }
 
+/*
+  To get the reward factor we need to use a normalized amount, as a result each
+  reward type has their respective max amount according to theoretical ceiling:
+  coins can go up to 10000, however scarcer reward like gift or badges should
+  remain low to preserve their value.
+
+  Nonetheless, using theoretical ceiling is not enough as this contradict
+  Observed Distribution. Meaning although theoretically we want the max coins to
+  be 10000, 99% of the time the amount of coin will be between 1 and 40.
+
+  Using a linear normalization completely breaks the reward output by making the
+  number extremely unisgnificant if using commons values (1-40).
+
+  As a result we need to use a Logarithmic Normalization in order to still make
+  the reward factor significant and valuable although the reward is relatively
+  small compared to the max amount.
+ */
 static inline float
 compound_module_reward_get_reward(const CompoundModuleReward *set) {
 
@@ -514,13 +527,9 @@ compound_module_reward_get_reward(const CompoundModuleReward *set) {
     return 0.0;
 
   // use average if range
-  const uint64_t amount =
-      (set->amount.type == CompoundModuleRewardAmountType_Fixed)
-          ? set->amount.value
-          : range_avg(set->amount.range.min, set->amount.range.max);
+  const float amount = compound_module_norm_amount(set);
 
-  return norm(amount, compound_module_reward_get_max_amount(set)) *
-         compound_module_reward_get_type_weight(set);
+  return amount * compound_module_reward_get_type_weight(set);
 }
 
 #endif

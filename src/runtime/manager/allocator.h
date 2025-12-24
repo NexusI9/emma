@@ -5,13 +5,13 @@
 #include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
+#include "runtime/node/motivation.h"
 #include "runtime/node/octagon.h"
 #include "runtime/node/transform_handle.h"
-#include "runtime/solutions/module/module.h"
-#include "runtime/solutions/persona/persona.h"
+#include "runtime/solutions/solution.h"
 #include "utils/id.h"
 
-#define ALLOCATOR_MAX_FRAMES 1024
+static const size_t ALLOCATOR_FRAME_CAPACITY = 1024;
 
 // clang-format off
 #define ALLOCATOR_LIST(_) \
@@ -20,8 +20,8 @@
   _(  ConnectorHandle,     connector_handle,      1024  )\
   _(  Connector,           connector,             1024  )\
   _(  Octagon,             octagon,               1024  )\
-  _(  SolutionModule,      solution_module,       1024  )\
-  _(  SolutionPersona,     solution_persona,      1024  )
+  _(  Motivation,          motivation,            1024  )\
+  _(  Solution,            solution,              1024  )
 // clang-format on
 
 typedef enum {

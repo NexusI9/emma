@@ -10,9 +10,10 @@
 #include "utils/id.h"
 #include <cglm/cglm.h>
 
-#define FRAME_MAX_CONNECTORS 64
-#define FRAME_MAX_CHILDREN 64
-static const int FRAME_CONNECTOR_HANDLE_COUNT = 4;
+static const uint8_t FRAME_MAX_CONNECTORS = 64;
+static const uint8_t FRAME_MAX_CHILDREN = 64;
+static const uint8_t FRAME_MAX_SOLUTIONS = 16;
+static const uint8_t FRAME_CONNECTOR_HANDLE_COUNT = 4;
 
 static const float FRAME_CLICKBOX_THICKNESS = 40.0f;
 static const float FRAME_MIN_SIZE = 20.0f;
@@ -41,13 +42,22 @@ typedef struct {
 
   const char *label;
 
+  // Attachments
+
+  // Frame ID provided by the allocator, should not be changed manually
   alloc_id id;
+  // ID of the frame parent, is ID_UNDEFINED if not parent
   alloc_id parent;
-  alloc_id octagon_id, factor_id, solution_id;
+  alloc_id octagon;
   alloc_id connector_handle_id[FRAME_CONNECTOR_HANDLE_COUNT];
 
-  ALLOCATOR_ID_LIST(FRAME_MAX_CONNECTORS) connectors_id;
-  ALLOCATOR_ID_LIST(FRAME_MAX_CHILDREN) children;
+  STATIC_LIST(alloc_id, FRAME_MAX_SOLUTIONS) solutions;
+  STATIC_LIST(alloc_id, FRAME_MAX_SOLUTIONS) motivations;
+
+  STATIC_LIST(alloc_id, FRAME_MAX_CONNECTORS) connectors;
+  STATIC_LIST(alloc_id, FRAME_MAX_CHILDREN) children;
+
+  // Coordinates
 
   vec2 local_position, world_position;
   vec2 size;
@@ -116,10 +126,18 @@ const alloc_id frame_get_connector_handle(const Frame *node,
 // Mutators
 // clang-format off
 FrameStatus frame_wrap(Frame *node);
+
 FrameStatus frame_update_world_position(Frame *node);
 FrameStatus frame_set_world_position(Frame *node, const vec2 value);
+
 StaticListStatus frame_add_child(Frame *node, const alloc_id id);
 StaticListStatus frame_remove_child(Frame *node, const alloc_id id);
+
+StaticListStatus frame_add_solution(Frame *node, const alloc_id id);
+StaticListStatus frame_remove_solution(Frame *node, const alloc_id id);
+
+StaticListStatus frame_add_motivation(Frame *node, const alloc_id id);
+StaticListStatus frame_remove_motivation(Frame *node, const alloc_id id);
 
 static inline void frame_update_boundbox(Frame *);
 static inline FrameStatus frame_set_size(Frame *, const vec2);
@@ -179,7 +197,7 @@ FrameStatus frame_set_parent(Frame *node, const alloc_id value) {
 }
 
 static inline FrameStatus frame_set_octagon_id(Frame *node, const alloc_id id) {
-  node->octagon_id = id;
+  node->octagon = id;
   return FrameStatus_Success;
 }
 
@@ -192,15 +210,15 @@ FrameStatus frame_set_connector_handle_id(Frame *node,
 
 StaticListStatus frame_register_connector(Frame *node, const alloc_id id) {
 
-  return allocator_id_list_push_unique(node->connectors_id.entries,
+  return allocator_id_list_push_unique(node->connectors.entries,
                                        FRAME_MAX_CONNECTORS,
-                                       &node->connectors_id.count, id);
+                                       &node->connectors.count, id);
 }
 
 StaticListStatus frame_unregister_connector(Frame *node, const alloc_id id) {
 
-  return allocator_id_list_pop(node->connectors_id.entries,
-                               &node->connectors_id.count, id);
+  return allocator_id_list_pop(node->connectors.entries,
+                               &node->connectors.count, id);
 }
 
 bool frame_collide(const Frame *frame_a, const Frame *frame_b) {

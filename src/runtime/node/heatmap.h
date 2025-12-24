@@ -6,6 +6,9 @@
 #include "nkengine/include/utils.h"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
+#include "runtime/node/canvas.h"
+#include "runtime/node/motivation.h"
+#include "utils/id.h"
 
 typedef struct Heatmap Heatmap;
 
@@ -39,10 +42,12 @@ struct Heatmap {
   const char *label;
 
   color background;
-  AllocIdRefList frames;
+  FrameAllocList* frames;
   uint8_t blur;
   float scale;
 
+  MotivationType motivation_type;
+  STATIC_LIST(alloc_id, ALLOCATOR_FRAME_CAPACITY) relative_motivations;
   ColormapUniform color_map;
 
   WGPUTexture textures[HeatmapTexture_COUNT];
@@ -54,7 +59,8 @@ struct Heatmap {
 
 typedef struct {
   color background;
-  AllocIdRefList frames;
+  MotivationType motivation;
+  FrameAllocList* frames;
   int width, height;
   heatmap_intensity_map_callback intensity_mapper;
   uint8_t blur;
@@ -67,6 +73,7 @@ typedef struct {
 EXTERN_C_BEGIN
 
 HeatmapStatus heatmap_create(Heatmap *, const HeatmapDescriptor *);
+HeatmapStatus heatmap_update_relative_motivations(Heatmap *);
 
 EXTERN_C_END
 

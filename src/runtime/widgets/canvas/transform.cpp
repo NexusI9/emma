@@ -1,5 +1,6 @@
 #include "transform.hpp"
 #include "nkengine/include/gui.hpp"
+#include "runtime/manager/allocator.h"
 #include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/transform/object_manager.hpp"
 #include "runtime/widgets/transform/transform_box.hpp"
@@ -84,7 +85,7 @@ void Widget::Canvas::Transform::listen_frame(Frame::Component *frame,
     data.parent_list = conf->parent_list;
 
     // register the frame for transform callbacks
-    if (stli_insert(transform_frame_data.entries, ALLOCATOR_MAX_FRAMES,
+    if (stli_insert(transform_frame_data.entries, ALLOCATOR_FRAME_CAPACITY,
                     &transform_frame_data.count, sizeof(FrameData), &data,
                     "Canvas Transform Frame Data") != StaticListStatus_Success)
       return;
@@ -141,7 +142,7 @@ void Widget::Canvas::Transform::listen_frame(Frame::Component *frame,
 
       // mark as selected
       allocator_id_list_push(conf->selection_list->entries,
-                             ALLOCATOR_MAX_FRAMES,
+                             ALLOCATOR_FRAME_CAPACITY,
                              &conf->selection_list->count, frame_node->id);
 
       transform_box.add_object(&object);

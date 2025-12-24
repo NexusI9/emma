@@ -21,8 +21,7 @@ FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
   frame_set_uvs(node, desc->uv0, desc->uv1);
   frame_set_parent(node, ID_UNDEFINED);
 
-  node->factor_id = ID_UNDEFINED;
-  node->octagon_id = ID_UNDEFINED;
+  node->octagon = ID_UNDEFINED;
 
   return FrameStatus_Success;
 }
@@ -60,6 +59,30 @@ StaticListStatus frame_remove_child(Frame *node, const alloc_id id) {
   }
 
   return pop;
+}
+
+StaticListStatus frame_add_solution(Frame *frame, const alloc_id id) {
+
+  return allocator_id_list_push(frame->solutions.entries, FRAME_MAX_SOLUTIONS,
+                                &frame->solutions.count, id);
+}
+
+StaticListStatus frame_remove_solution(Frame *frame, const alloc_id id) {
+
+  return allocator_id_list_pop(frame->solutions.entries,
+                               &frame->solutions.count, id);
+}
+
+StaticListStatus frame_add_motivation(Frame *frame, const alloc_id id) {
+
+  return allocator_id_list_push(frame->motivations.entries, FRAME_MAX_SOLUTIONS,
+                                &frame->motivations.count, id);
+}
+
+StaticListStatus frame_remove_motivation(Frame *frame, const alloc_id id) {
+
+  return allocator_id_list_pop(frame->motivations.entries,
+                               &frame->motivations.count, id);
 }
 
 FrameStatus frame_update_world_position(Frame *node) {
@@ -144,18 +167,24 @@ FrameStatus frame_destroy(Frame *frame) {
         parent->children.entries, &parent->children.count, frame->id);
 
     frame->parent = ID_UNDEFINED;
+  } 
+
+  for (uint8_t i = 0; i < frame->solutions.count; i++) {
+    frame_remove_solution(frame, frame->solutions.entries[i]);
+    destroy_solution(frame->solutions.entries[i]);
   }
 
-  if (frame->factor_id != ID_UNDEFINED) {
-    frame->factor_id = ID_UNDEFINED;
+  for (uint8_t i = 0; i < frame->motivations.count; i++) {
+    frame_remove_motivation(frame, frame->motivations.entries[i]);
+    destroy_motivation(frame->motivations.entries[i]);
   }
 
-  if (frame->octagon_id != ID_UNDEFINED) {
-    destroy_octagon(frame->octagon_id);
-    frame->octagon_id = ID_UNDEFINED;
+  if (frame->octagon != ID_UNDEFINED) {
+    destroy_octagon(frame->octagon);
+    frame->octagon = ID_UNDEFINED;
   }
 
-  frame->connectors_id.count = 0;
+  frame->connectors.count = 0;
 
   // Remove the connectors handle
   for (uint8_t i = 0; i < FRAME_CONNECTOR_HANDLE_COUNT; i++) {

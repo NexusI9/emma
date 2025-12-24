@@ -6,6 +6,8 @@
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/viewport.h"
 #include "runtime/node/heatmap.h"
+#include "runtime/node/motivation.h"
+#include "runtime/solutions/solution.h"
 #include "runtime/widgets/frame.hpp"
 #include "utils/input.h"
 #include "webgpu/webgpu.h"
@@ -67,24 +69,21 @@ void Widget::Heatmap::Component::compute_render_pass(
 
   ImGuiViewport *vp = ImGui::GetMainViewport();
 
-  // dl->AddRectFilled(ImVec2(0, 0), vp->Size, ImColor(0, 0, 0, 255));
-
   // draw each modules
-  for (size_t i = 0; i < *node->frames.count; i++) {
-    ::Frame *parent_frame = allocator_frame_entry(node->frames.entries[i]);
+  for (size_t i = 0; i < node->frames->count; i++) {
+    ::Frame *module = allocator_frame_entry(node->frames->entries[i]);
 
-    for (size_t j = 0; j < parent_frame->children.count; j++) {
-      ::Frame *module =
-          allocator_frame_entry(parent_frame->children.entries[j]);
+    Motivation *mt =
+        allocator_motivation_entry(node->relative_motivations.entries[i]);
 
-      // float module_intensity = node->intensity_mapper(node, module, NULL);
-      int rd_r = ((float)rand() / RAND_MAX) * 255;
-      int rd_g = ((float)rand() / RAND_MAX) * 255;
-      int rd_b = ((float)rand() / RAND_MAX) * 255;
+    printf("module: [ %s ] (%llu) => %f (%llu)\n", module->label, module->id,
+           motivation_get_element(mt, node->motivation_type), mt->id);
 
-      Frame::Component(module).draw_fill(ImColor(rd_r, rd_g, rd_b, 255),
-                                         node->scale);
-    }
+    int value =
+        ((float)motivation_get_element(mt, node->motivation_type)) * 255;
+
+    Frame::Component(module).draw_fill(ImColor(value, value, value, 255),
+                                       node->scale);
   }
 
   UI::FullScreenWindow().End();

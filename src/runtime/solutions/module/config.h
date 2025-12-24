@@ -5,28 +5,28 @@
 #include "runtime/solutions/module/compounds/action.h"
 #include "runtime/solutions/module/compounds/experience.h"
 #include "runtime/solutions/module/compounds/reward.h"
-#include "runtime/solutions/module/module.h"
+#include "runtime/solutions/module/core.h"
 
-static const SolutionModuleCompounds SOLUTION_MODULES[] = {
+static const SolutionModule SOLUTION_MODULES[] = {
 
     [ModuleType_News] =
         {
             .experience =
                 {
-                    .impact = CompoundExperienceImpact_Routine,
-                    .learnability = CompoundExperienceLearnability_Medium,
+                    .impact = CompoundModuleExperienceImpact_Routine,
+                    .learnability = CompoundModuleExperienceLearnability_Medium,
                 },
             .semantic =
                 {
                     .empowerment = 0,
-                    .epic_meaning = 0,
+                    .epic_meaning = 3,
                 },
             .social =
                 {
                     .collaborative = false,
                     .competitive = false,
                     .published = false,
-                    .shareable = false,
+                    .shareable = true,
                 },
             .actions =
                 {
@@ -34,13 +34,13 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
                         {
                             {
                                 .action = {"See Article",
-                                           CompoundActionRole_Primary},
-                                .reward = {CompoundRewardType_Undefined},
+                                           CompoundModuleActionRole_Primary},
+                                .reward = {CompoundModuleRewardType_Undefined},
                             },
                             {
                                 .action = {"See All",
-                                           CompoundActionRole_Secondary},
-                                .reward = {CompoundRewardType_Undefined},
+                                           CompoundModuleActionRole_Secondary},
+                                .reward = {CompoundModuleRewardType_Undefined},
                             },
 
                         },
@@ -53,8 +53,8 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
         {
             .experience =
                 {
-                    .impact = CompoundExperienceImpact_Important,
-                    .learnability = CompoundExperienceLearnability_Easy,
+                    .impact = CompoundModuleExperienceImpact_Important,
+                    .learnability = CompoundModuleExperienceLearnability_Easy,
                 },
             .semantic =
                 {
@@ -74,8 +74,8 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
                         {
                             {
                                 .action = {"See Profile",
-                                           CompoundActionRole_Tertiary},
-                                .reward = {CompoundRewardType_Undefined},
+                                           CompoundModuleActionRole_Tertiary},
+                                .reward = {CompoundModuleRewardType_Undefined},
                             },
                         },
                     .count = 1,
@@ -86,8 +86,8 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
         {
             .experience =
                 {
-                    .impact = CompoundExperienceImpact_Routine,
-                    .learnability = CompoundExperienceLearnability_Medium,
+                    .impact = CompoundModuleExperienceImpact_Routine,
+                    .learnability = CompoundModuleExperienceLearnability_Medium,
                 },
             .semantic =
                 {
@@ -107,61 +107,62 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
                         {
                             {
                                 .action = {"Comment",
-                                           CompoundActionRole_Primary},
+                                           CompoundModuleActionRole_Primary},
                                 .reward =
                                     {
-                                        .type = CompoundRewardType_Coin,
+                                        .type = CompoundModuleRewardType_Coin,
                                         .amount =
                                             {
                                                 .type =
-                                                    CompoundRewardAmountType_Range,
+                                                    CompoundModuleRewardAmountType_Range,
                                                 .range = {10, 20},
                                             },
                                         .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
+                                            COMPOUND_MODULE_TIME_LIMIT_NONE,
                                         .probability =
-                                            COMPOUND_REWARD_PROBABILITY_ALWAYS,
+                                            COMPOUND_MODULE_PROBABILITY_ALWAYS,
                                         .frequency =
-                                            COMPOUND_REWARD_FREQUENCY_BASE,
+                                            COMPOUND_MODULE_FREQUENCY_BASE,
                                     },
                             },
                             {
                                 .action = {"Like",
-                                           CompoundActionRole_Secondary},
+                                           CompoundModuleActionRole_Secondary},
                                 .reward =
                                     {
-                                        .type = CompoundRewardType_Point,
+                                        .type = CompoundModuleRewardType_Point,
                                         .amount =
                                             {
                                                 .type =
-                                                    CompoundRewardAmountType_Fixed,
+                                                    CompoundModuleRewardAmountType_Fixed,
                                                 .value = 5,
                                             },
                                         .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
+                                            COMPOUND_MODULE_TIME_LIMIT_NONE,
                                         .probability =
-                                            COMPOUND_REWARD_PROBABILITY_ALWAYS,
+                                            COMPOUND_MODULE_PROBABILITY_ALWAYS,
                                         .frequency =
-                                            COMPOUND_REWARD_FREQUENCY_BASE,
+                                            COMPOUND_MODULE_FREQUENCY_BASE,
                                     },
                             },
                             {
-                                .action = {"Rate", CompoundActionRole_Tertiary},
+                                .action = {"Rate",
+                                           CompoundModuleActionRole_Tertiary},
                                 .reward =
                                     {
-                                        .type = CompoundRewardType_Point,
+                                        .type = CompoundModuleRewardType_Point,
                                         .amount =
                                             {
                                                 .type =
-                                                    CompoundRewardAmountType_Fixed,
+                                                    CompoundModuleRewardAmountType_Fixed,
                                                 .value = 1,
                                             },
                                         .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
+                                            COMPOUND_MODULE_TIME_LIMIT_NONE,
                                         .probability =
-                                            COMPOUND_REWARD_PROBABILITY_ALWAYS,
+                                            COMPOUND_MODULE_PROBABILITY_ALWAYS,
                                         .frequency =
-                                            COMPOUND_REWARD_FREQUENCY_BASE,
+                                            COMPOUND_MODULE_FREQUENCY_BASE,
                                     },
                             },
                         },
@@ -173,8 +174,8 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
         {
             .experience =
                 {
-                    .impact = CompoundExperienceImpact_Trivial,
-                    .learnability = CompoundExperienceLearnability_Easy,
+                    .impact = CompoundModuleExperienceImpact_Trivial,
+                    .learnability = CompoundModuleExperienceLearnability_Easy,
                 },
             .semantic =
                 {
@@ -194,71 +195,50 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
                         {
                             {
                                 .action = {"Spin the wheel",
-                                           CompoundActionRole_Primary},
+                                           CompoundModuleActionRole_Primary},
                                 .reward =
                                     {
-                                        .type = CompoundRewardType_Coin,
+                                        .type = CompoundModuleRewardType_Coin,
                                         .amount =
                                             {
-                                                .type =
-                                                    CompoundRewardAmountType_Fixed,
-                                                .range = -10,
+                                                .type = CompoundModuleRewardAmountType_Fixed,
+                                                .value = 1000,
                                             },
                                         .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
-                                        .probability =
-                                            COMPOUND_REWARD_PROBABILITY_ALWAYS,
+                                            COMPOUND_MODULE_TIME_LIMIT_NONE,
+                                        .probability = (float)1 / 200,
                                         .frequency =
                                             {
                                                 // 3 times every 2 day, forever
                                                 .quota = 3,
-                                                .interval = 2,
-                                                .unit =
-                                                    CompoundRewardTimeUnit_Day,
+                                                .interval = 1,
+                                                .unit = CompoundModuleRewardTimeUnit_Day,
                                                 .repeat =
-                                                    COMPOUNT_REWARD_FREQUENCY_REPEAT_ALWAYS,
+                                                    COMPOUND_MODULE_REPEAT_ALWAYS,
                                             },
-                                    },
-                            },
-                            {
-                                .action =
-                                    {"Collect", CompoundActionRole_Secondary},
-                                .reward =
-                                    {
-                                        .type = CompoundRewardType_Bundle,
-                                        .amount =
-                                            {
-                                                .type = CompoundRewardAmountType_Fixed,
-                                                .value = 1,
-                                            },
-                                        .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
-                                        .probability = (float)1 / 200,
-                                        .frequency =
-                                            COMPOUND_REWARD_FREQUENCY_BASE,
                                     },
                             },
                             {
                                 .action = {"Invite",
-                                           CompoundActionRole_Tertiary},
+                                           CompoundModuleActionRole_Secondary},
                                 .reward =
                                     {
-                                        .type = CompoundRewardType_Coin,
+                                        .type = CompoundModuleRewardType_Coin,
                                         .amount =
                                             {
-                                                .type = CompoundRewardAmountType_Fixed,
+                                                .type = CompoundModuleRewardAmountType_Fixed,
                                                 .value = 150,
                                             },
                                         .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
+                                            COMPOUND_MODULE_TIME_LIMIT_NONE,
                                         .probability =
-                                            COMPOUND_REWARD_PROBABILITY_ALWAYS,
+                                            COMPOUND_MODULE_PROBABILITY_ALWAYS,
                                         .frequency =
-                                            COMPOUND_REWARD_FREQUENCY_BASE,
+                                            COMPOUND_MODULE_FREQUENCY_BASE,
                                     },
                             },
                         },
-                    .count = 3,
+                    .count = 2,
                 },
         },
 
@@ -266,8 +246,8 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
         {
             .experience =
                 {
-                    .impact = CompoundExperienceImpact_Important,
-                    .learnability = CompoundExperienceLearnability_Medium,
+                    .impact = CompoundModuleExperienceImpact_Important,
+                    .learnability = CompoundModuleExperienceLearnability_Medium,
                 },
             .semantic =
                 {
@@ -286,40 +266,41 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
                     .entries =
                         {
                             {
-                                .action = {"Tick", CompoundActionRole_Primary},
+                                .action = {"Tick",
+                                           CompoundModuleActionRole_Primary},
                                 .reward =
                                     {
-                                        .type = CompoundRewardType_Coin,
+                                        .type = CompoundModuleRewardType_Coin,
                                         .amount =
                                             {
-                                                .type = CompoundRewardAmountType_Fixed,
+                                                .type = CompoundModuleRewardAmountType_Fixed,
                                                 .value = 1,
                                             },
                                         .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
+                                            COMPOUND_MODULE_TIME_LIMIT_NONE,
                                         .probability =
-                                            COMPOUND_REWARD_PROBABILITY_ALWAYS,
+                                            COMPOUND_MODULE_PROBABILITY_ALWAYS,
                                         .frequency =
-                                            COMPOUND_REWARD_FREQUENCY_BASE,
+                                            COMPOUND_MODULE_FREQUENCY_BASE,
                                     },
                             },
                             {
                                 .action = {"Share",
-                                           CompoundActionRole_Tertiary},
+                                           CompoundModuleActionRole_Tertiary},
                                 .reward =
                                     {
-                                        .type = CompoundRewardType_Point,
+                                        .type = CompoundModuleRewardType_Point,
                                         .amount =
                                             {
-                                                .type = CompoundRewardAmountType_Fixed,
+                                                .type = CompoundModuleRewardAmountType_Fixed,
                                                 .value = 1,
                                             },
                                         .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
+                                            COMPOUND_MODULE_TIME_LIMIT_NONE,
                                         .probability =
-                                            COMPOUND_REWARD_PROBABILITY_ALWAYS,
+                                            COMPOUND_MODULE_PROBABILITY_ALWAYS,
                                         .frequency =
-                                            COMPOUND_REWARD_FREQUENCY_BASE,
+                                            COMPOUND_MODULE_FREQUENCY_BASE,
                                     },
                             },
                         },
@@ -331,8 +312,8 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
         {
             .experience =
                 {
-                    .impact = CompoundExperienceImpact_Important,
-                    .learnability = CompoundExperienceLearnability_Medium,
+                    .impact = CompoundModuleExperienceImpact_Important,
+                    .learnability = CompoundModuleExperienceLearnability_Medium,
                 },
             .semantic =
                 {
@@ -351,40 +332,41 @@ static const SolutionModuleCompounds SOLUTION_MODULES[] = {
                     .entries =
                         {
                             {
-                                .action = {"Tick", CompoundActionRole_Primary},
+                                .action = {"Tick",
+                                           CompoundModuleActionRole_Primary},
                                 .reward =
                                     {
-                                        .type = CompoundRewardType_Coin,
+                                        .type = CompoundModuleRewardType_Coin,
                                         .amount =
                                             {
-                                                .type = CompoundRewardAmountType_Fixed,
+                                                .type = CompoundModuleRewardAmountType_Fixed,
                                                 .value = 1,
                                             },
                                         .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
+                                            COMPOUND_MODULE_TIME_LIMIT_NONE,
                                         .probability =
-                                            COMPOUND_REWARD_PROBABILITY_ALWAYS,
+                                            COMPOUND_MODULE_PROBABILITY_ALWAYS,
                                         .frequency =
-                                            COMPOUND_REWARD_FREQUENCY_BASE,
+                                            COMPOUND_MODULE_FREQUENCY_BASE,
                                     },
                             },
                             {
                                 .action = {"Share",
-                                           CompoundActionRole_Tertiary},
+                                           CompoundModuleActionRole_Tertiary},
                                 .reward =
                                     {
-                                        .type = CompoundRewardType_Point,
+                                        .type = CompoundModuleRewardType_Point,
                                         .amount =
                                             {
-                                                .type = CompoundRewardAmountType_Fixed,
+                                                .type = CompoundModuleRewardAmountType_Fixed,
                                                 .value = 1,
                                             },
                                         .time_limit =
-                                            COMPOUND_REWARD_TIME_LIMIT_NONE,
+                                            COMPOUND_MODULE_TIME_LIMIT_NONE,
                                         .probability =
-                                            COMPOUND_REWARD_PROBABILITY_ALWAYS,
+                                            COMPOUND_MODULE_PROBABILITY_ALWAYS,
                                         .frequency =
-                                            COMPOUND_REWARD_FREQUENCY_BASE,
+                                            COMPOUND_MODULE_FREQUENCY_BASE,
                                     },
                             },
                         },

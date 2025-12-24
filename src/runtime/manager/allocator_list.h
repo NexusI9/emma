@@ -4,11 +4,6 @@
 #include "nkengine/include/list.h"
 #include "utils/id.h"
 
-#define ALLOCATOR_ID_LIST(Capacity)                                            \
-  struct {                                                                     \
-    alloc_id entries[Capacity];                                                \
-    size_t count;                                                             \
-  }
 
 typedef struct {
   alloc_id *entries;

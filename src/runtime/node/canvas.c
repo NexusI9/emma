@@ -10,8 +10,16 @@
 #include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"
+#include "runtime/node/motivation.h"
 #include "runtime/node/octagon.h"
 #include "runtime/node/persona.h"
+#include "runtime/solutions/module/config.h"
+#include "runtime/solutions/module/core.h"
+#include "runtime/solutions/module/formulas.h"
+#include "runtime/solutions/persona/config.h"
+#include "runtime/solutions/persona/formulas.h"
+#include "runtime/solutions/solution.h"
+#include "runtime/systems/solution_system.h"
 #include "utils/id.h"
 #include <stdint.h>
 #include <string.h>
@@ -25,6 +33,7 @@ typedef enum {
   CanvasFrameCreateFlags_None = 0,
   CanvasFrameCreateFlags_CreateOctagon = 1 << 0,
   CanvasFrameCreateFlags_CreateConnectorHandle = 1 << 1,
+  CanvasFrameCreateFlags_CreateSolution = 1 << 2,
   CanvasFrameCreateFlags_All = ~0,
 } CanvasFrameCreateFlags;
 
@@ -93,6 +102,14 @@ Frame *canvas_create_frame_core(Canvas *canvas,
 
     canvas_align_connector_handle_group_to_frame(canvas, frame);
   }
+
+  if (flags & CanvasFrameCreateFlags_CreateSolution) {
+
+    Solution *solution = new_solution();
+
+    if (solution)
+      frame_add_solution(frame, solution->id);
+  }
   return frame;
 }
 
@@ -113,11 +130,16 @@ Frame *canvas_create_frame(Canvas *canvas) {
           },
   };
 
-  return canvas_create_frame_core(
+  Frame *frame = canvas_create_frame_core(
       canvas, &frame_desc, canvas->frames[CanvasFrameState_Default].entries,
       allocator_frame_capacity(),
       &canvas->frames[CanvasFrameState_Default].count,
       CanvasFrameCreateFlags_All);
+
+  if (!frame) // ERRHANDLE
+    return frame;
+
+  return frame;
 }
 
 Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
@@ -137,11 +159,36 @@ Frame *canvas_create_module(Canvas *canvas, const ModuleType module) {
           },
   };
 
-  return canvas_create_frame_core(
+  Frame *frame = canvas_create_frame_core(
       canvas, &frame_desc, canvas->modules[CanvasModuleState_Default].entries,
       allocator_frame_capacity(),
       &canvas->modules[CanvasModuleState_Default].count,
-      CanvasFrameCreateFlags_CreateConnectorHandle);
+      CanvasFrameCreateFlags_CreateConnectorHandle |
+          CanvasFrameCreateFlags_CreateSolution);
+
+  // === create motivation ===
+  if (frame) {
+
+    Motivation *motivation = new_motivation();
+
+    if (motivation)
+      frame_add_motivation(frame, motivation->id);
+
+    Solution *solution = allocator_solution_entry(
+        frame->solutions.entries[frame->solutions.count - 1]);
+
+    if (motivation && solution) {
+      solution_module_init(solution, &SOLUTION_MODULES[module]);
+      solution_system_update_motivation(solution, motivation);
+    }
+
+    // DEBUG
+    printf("[ %s ] (%llu): motivation id: %llu\n", frame->label, frame->id,
+           motivation->id);
+    motivation_print(motivation);
+  }
+
+  return frame;
 }
 
 Frame *canvas_create_pod(Canvas *canvas) {
@@ -159,7 +206,8 @@ Frame *canvas_create_pod(Canvas *canvas) {
   Frame *pod = canvas_create_frame_core(
       canvas, &pod_desc, canvas->pods[CanvasPodState_Default].entries,
       allocator_frame_capacity(), &canvas->pods[CanvasPodState_Default].count,
-      CanvasFrameCreateFlags_CreateConnectorHandle);
+      CanvasFrameCreateFlags_CreateConnectorHandle |
+          CanvasFrameCreateFlags_CreateSolution);
 
   Frame *pod_window = new_frame();
 
@@ -257,7 +305,7 @@ void canvas_align_octagon_to_frame(Canvas *canvas, const Frame *frame) {
 
   glm_vec2_sub(oct_position, (vec2){0, OCTAGON_BASE_SCALE + gap}, oct_position);
 
-  Octagon *octagon = allocator_octagon_entry(frame->octagon_id);
+  Octagon *octagon = allocator_octagon_entry(frame->octagon);
   octagon_set_position(octagon, oct_position);
 }
 
@@ -301,9 +349,9 @@ void canvas_align_connector_handle_group_to_frame(Canvas *canvas,
 void canvas_update_connectors_handle_to_frame(Canvas *canvas,
                                               const Frame *frame) {
 
-  for (size_t i = 0; i < frame->connectors_id.count; i++) {
+  for (size_t i = 0; i < frame->connectors.count; i++) {
     Connector *connector =
-        allocator_connector_entry(frame->connectors_id.entries[i]);
+        allocator_connector_entry(frame->connectors.entries[i]);
 
     connector_update_handle_position(connector);
   }
@@ -406,10 +454,22 @@ StaticListStatus canvas_empty_pod_state(Canvas *canvas,
 CanvasStatus canvas_add_pod_persona(Canvas *canvas, Frame *pod,
                                     const PersonaType type) {
 
-  Frame *persona_frame = new_frame();
+  Frame *frame = new_frame();
 
-  if (!persona_frame) // ERRHANDLE
+  if (!frame) // ERRHANDLE
     return CanvasStatus_ResourceCreationFail;
+
+  Solution *solution = new_solution();
+  Motivation *motivation = new_motivation();
+
+  if (solution)
+    frame_add_solution(frame, solution->id);
+
+  if (motivation)
+    frame_add_motivation(frame, motivation->id);
+
+  if (motivation && solution)
+    solution_persona_init(solution, &SOLUTION_PERSONAS[type]);
 
   const alloc_id window_id = pod->children.entries[pod->children.count - 1];
   const TextureAtlasRegion *sprite = persona_get_sprite(type);
@@ -423,24 +483,23 @@ CanvasStatus canvas_add_pod_persona(Canvas *canvas, Frame *pod,
              PERSONA_BASE_SIZE * PERSONA_MAX_RADIUS},
       (vec2){PERSONA_MIN_ANGLE, PERSONA_MAX_RADIUS}, position, &size, &rot);
 
-  frame_create(persona_frame, &(FrameDescriptor){
-                                  .uv0 = {sprite->uv0[0], sprite->uv0[1]},
-                                  .uv1 = {sprite->uv1[0], sprite->uv1[1]},
-                                  .label = sprite->label,
-                                  .clickbox = &FRAME_CLICKBOX_TYPE_DEFAULT,
-                                  .position = {position[0], position[1]},
-                                  .size = {size, size},
-                              });
+  frame_create(frame, &(FrameDescriptor){
+                          .uv0 = {sprite->uv0[0], sprite->uv0[1]},
+                          .uv1 = {sprite->uv1[0], sprite->uv1[1]},
+                          .label = sprite->label,
+                          .clickbox = &FRAME_CLICKBOX_TYPE_DEFAULT,
+                          .position = {position[0], position[1]},
+                          .size = {size, size},
+                      });
 
-  if (frame_add_child(pod, persona_frame->id) !=
-      StaticListStatus_Success) // ERRHANDLE
+  if (frame_add_child(pod, frame->id) != StaticListStatus_Success) // ERRHANDLE
     return CanvasStatus_ResourceCreationFail;
 
   /*
   For the pod, the last child is always the window, so we move it at the end of
   the children array
    */
-  pod->children.entries[pod->children.count - 2] = persona_frame->id;
+  pod->children.entries[pod->children.count - 2] = frame->id;
   pod->children.entries[pod->children.count - 1] = window_id;
 
   return CanvasStatus_Success;
@@ -490,10 +549,9 @@ void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
     return;
 
   // make sure it's not connected yet
-  for (size_t i = 0; i < frame_a->connectors_id.count; i++) {
-    for (size_t j = 0; j < frame_b->connectors_id.count; j++) {
-      if (frame_a->connectors_id.entries[i] ==
-          frame_b->connectors_id.entries[j])
+  for (size_t i = 0; i < frame_a->connectors.count; i++) {
+    for (size_t j = 0; j < frame_b->connectors.count; j++) {
+      if (frame_a->connectors.entries[i] == frame_b->connectors.entries[j])
         return;
     }
   }
@@ -549,9 +607,9 @@ void canvas_disconnect_frames(Canvas *canvas, const Frame *frame_a,
  */
 void canvas_update_frame_connectors(Canvas *canvas, const Frame *frame) {
 
-  for (size_t i = 0; i < frame->connectors_id.count; i++) {
+  for (size_t i = 0; i < frame->connectors.count; i++) {
     Connector *connector =
-        allocator_connector_entry(frame->connectors_id.entries[i]);
+        allocator_connector_entry(frame->connectors.entries[i]);
 
     connector_update_corners(connector);
     connector_update_clickboxes(connector, CONNECTOR_CLICKBOX_THICKNESS);
@@ -588,9 +646,9 @@ CanvasStatus canvas_destroy_frame_core(Canvas *canvas, Frame *frame,
   allocator_id_list_pop(list->entries, &list->count, frame->id);
 
   // Unlink all frames connectors
-  for (size_t i = 0; i < frame->connectors_id.count; i++) {
+  for (size_t i = 0; i < frame->connectors.count; i++) {
     Connector *connector =
-        allocator_connector_entry(frame->connectors_id.entries[i]);
+        allocator_connector_entry(frame->connectors.entries[i]);
     canvas_destroy_connector(canvas, connector);
   }
 
@@ -603,8 +661,8 @@ CanvasStatus canvas_destroy_octagon(Canvas *canvas, Octagon *octagon) {
 
   for (size_t i = 0; i < canvas->frames->count; i++) {
     Frame *frame = allocator_frame_entry(canvas->frames->entries[i]);
-    if (frame->octagon_id == octagon->id)
-      frame->octagon_id = ID_UNDEFINED;
+    if (frame->octagon == octagon->id)
+      frame->octagon = ID_UNDEFINED;
   }
 
   destroy_octagon(octagon->id);
@@ -636,10 +694,9 @@ CanvasStatus canvas_destroy_frame(Canvas *canvas, Frame *frame) {
 CanvasStatus canvas_destroy_module(Canvas *canvas, Frame *frame) {
 
   // unregister it from other state list
-  for (uint8_t i = 1; i < CanvasModuleState_COUNT; i++) {
+  for (uint8_t i = 1; i < CanvasModuleState_COUNT; i++)
     allocator_id_list_pop(canvas->modules[i].entries, &canvas->modules[i].count,
                           frame->id);
-  }
 
   canvas_destroy_frame_core(canvas, frame, canvas->modules);
 
@@ -672,8 +729,8 @@ CanvasStatus canvas_destroy_connector(Canvas *canvas, Connector *connector) {
     for (size_t j = 0; j < frame_type[i]->count; j++) {
       Frame *frame = allocator_frame_entry(frame_type[i]->entries[j]);
 
-      for (size_t k = 0; k < frame->connectors_id.count; k++)
-        if (frame->connectors_id.entries[k] == connector->id)
+      for (size_t k = 0; k < frame->connectors.count; k++)
+        if (frame->connectors.entries[k] == connector->id)
           frame_unregister_connector(frame, connector->id);
     }
   }

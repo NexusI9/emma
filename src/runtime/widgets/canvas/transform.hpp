@@ -1,6 +1,7 @@
 #ifndef _WIDGET_CANVAS_TRANSFORM_H_
 #define _WIDGET_CANVAS_TRANSFORM_H_
 
+#include "runtime/manager/allocator.h"
 #include "runtime/node/canvas.h"
 #include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/frame.hpp"
@@ -103,7 +104,7 @@ public:
 
 private:
   struct {
-    FrameData entries[ALLOCATOR_MAX_FRAMES];
+    FrameData entries[ALLOCATOR_FRAME_CAPACITY];
     size_t count;
   } transform_frame_data;
 

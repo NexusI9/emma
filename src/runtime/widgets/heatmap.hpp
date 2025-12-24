@@ -4,6 +4,8 @@
 #include "nkengine/include/gui.h"
 #include "nkengine/include/gui.hpp"
 #include "runtime/node/heatmap.h"
+#include "runtime/node/motivation.h"
+#include "runtime/solutions/solution.h"
 #include <imgui/imgui.h>
 #include <webgpu/webgpu.h>
 
@@ -23,6 +25,10 @@ public:
 
   void draw();
   void compute_offline(WGPUCommandEncoder);
+  void update_relative_motivations() {
+    heatmap_update_relative_motivations(node);
+  }
+  ::Heatmap *get_node() { return node; }
   const char *get_label() { return node->label; }
   const char *get_axis_0() { return node->axes[0]; }
   const char *get_axis_1() { return node->axes[1]; }

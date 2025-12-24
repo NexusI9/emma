@@ -18,4 +18,8 @@ static inline uint64_t range_avg(const uint64_t min, const uint64_t max) {
 
 static inline uint64_t polarize(const float v) { return 2 * v - 1; }
 
+static inline float log_norm(float value, float max, float saturation) {
+  return logf(1 + powf(value, saturation)) / logf(1 + powf(max, saturation));
+}
+
 #endif

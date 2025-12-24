@@ -43,7 +43,7 @@ typedef enum {
   CanvasStatus_UndefError,
 } CanvasStatus;
 
-typedef ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES) FrameAllocList;
+typedef STATIC_LIST(alloc_id, ALLOCATOR_FRAME_CAPACITY) FrameAllocList;
 
 typedef struct {
 
@@ -53,7 +53,7 @@ typedef struct {
   FrameAllocList connectors[CanvasConnectorState_COUNT];
   FrameAllocList octagons;
 
-  ALLOCATOR_ID_LIST(ALLOCATOR_MAX_FRAMES *FRAME_CONNECTOR_HANDLE_COUNT)
+  STATIC_LIST(alloc_id, ALLOCATOR_FRAME_CAPACITY *FRAME_CONNECTOR_HANDLE_COUNT)
   connector_handles;
 
 } Canvas;

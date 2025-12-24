@@ -122,7 +122,7 @@ void Widget::Canvas::Component::draw_frames_octagon() {
   for (size_t i = 0; i < node->frames[CanvasFrameState_Octagon].count; i++) {
     ::Frame *frame = allocator_frame_entry(
         node->frames[CanvasFrameState_Octagon].entries[i]);
-    Octagon::Component(allocator_octagon_entry(frame->octagon_id)).draw();
+    Octagon::Component(allocator_octagon_entry(frame->octagon)).draw();
   }
 }
 
