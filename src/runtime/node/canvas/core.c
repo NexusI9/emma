@@ -1,7 +1,41 @@
 #include "core.h"
-#include "runtime/solutions/persona/config.h"
 
-CanvasStatus canvas_create(Canvas *canvas) { return CanvasStatus_Success; }
+#include "runtime/manager/allocator.h"
+#include "runtime/manager/allocator_list.h"
+#include "runtime/solutions/persona/config.h"
+#include <stdint.h>
+
+CanvasStatus canvas_create(Canvas *canvas) {
+
+  {
+    const struct {
+      FrameAllocList *lists;
+      int state_count;
+      size_t capacity;
+    } state_lists[] = {
+        // clang-format off
+      { canvas->frames,      CanvasFrameState_COUNT,      ALLOCATOR_FRAME_CAPACITY },
+      { canvas->modules,     CanvasModuleState_COUNT,     ALLOCATOR_FRAME_CAPACITY },
+      { canvas->pods,        CanvasPodState_COUNT,        ALLOCATOR_FRAME_CAPACITY },
+      { canvas->connectors,  CanvasConnectorState_COUNT,  ALLOCATOR_FRAME_CAPACITY },
+        // clang-format on
+    };
+
+    static const uint8_t list_count =
+        sizeof(state_lists) / sizeof(state_lists[0]);
+
+    for (uint8_t i = 0; i < list_count; i++)
+      for (int state = 0; state < state_lists[i].state_count; state++)
+        allocator_id_list_init(state_lists[i].lists[state].entries,
+                               state_lists[i].capacity,
+                               &state_lists[i].lists[state].count);
+  }
+  
+  allocator_id_list_init(canvas->octagons.entries, ALLOCATOR_FRAME_CAPACITY,
+                         &canvas->octagons.count);
+
+  return CanvasStatus_Success;
+}
 
 static inline void canvas_get_closest_connector_handles(const Frame *,
                                                         const Frame *,

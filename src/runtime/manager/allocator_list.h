@@ -4,13 +4,19 @@
 #include "nkengine/include/list.h"
 #include "utils/id.h"
 
-
 typedef struct {
   alloc_id *entries;
   size_t *count;
 } AllocIdRefList;
 
 EXTERN_C_BEGIN
+static inline void allocator_id_list_init(alloc_id *entries, size_t capacity,
+                                          size_t *count) {
+  *count = 0;
+  
+  for (size_t i = 0; i < capacity; i++)
+    entries[i] = ID_UNDEFINED;
+}
 
 static inline alloc_id *allocator_id_list_find(alloc_id *entries, size_t count,
                                                const alloc_id id) {
