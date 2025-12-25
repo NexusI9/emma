@@ -50,6 +50,7 @@ public:
 
     case DisplayState_Heatmap:
       heatmap_selector.enable();
+      sidebar.close();
       canvas.enable_state(
           Widget::Canvas::Component::State_ShowHeatmap |
           Widget::Canvas::Component::State_FreezeSelection |

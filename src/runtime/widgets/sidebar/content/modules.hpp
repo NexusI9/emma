@@ -67,6 +67,9 @@ private:
   const float frame_rounding =
       gui_scale(gui, emma_size(ThemeEmmaSize_Width_Border_Large));
 
+  const float thickness =
+      gui_scale(gui, emma_size(ThemeEmmaSize_Width_Border_Base));
+
   const float cell_base_width = 90;
   const ImVec2 cell_size = ImVec2(gui_scale(gui, cell_base_width),
                                   gui_scale(gui, cell_base_width * 3 / 4));

@@ -25,6 +25,7 @@ class Component : public Widget, public Layout::Window {
 public:
   Component(const char *, Gui *, ::Canvas *);
   void draw();
+  void close() { active_tab = -1; }
 
   StaticListStatus add_tab_update_callback(on_tab_update callback, void *data) {
 

@@ -72,18 +72,12 @@ void Widget::SideBar::Content::Modules::Component::layout() {
 
 void Widget::SideBar::Content::Modules::Component::draw() {
 
-  ImGui::SetWindowFontScale(1.3);
-  ImGui::Text("Modules");
-  ImGui::SetWindowFontScale(1);
-  ImGui::Dummy(
-      ImVec2(0, gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_3))));
+  draw_header("Modules");
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 win_pos = ImGui::GetWindowPos();
 
   for (size_t i = 0; i < ModuleType_COUNT; i++) {
-
-    // ImVec2 win_pos = ImGui::GetCursorPos();
 
     if (!active_thumbnail && ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
         ImGui::IsMouseHoveringRect(
@@ -99,7 +93,12 @@ void Widget::SideBar::Content::Modules::Component::draw() {
     dl->AddRectFilled(
         ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y),
         ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y),
-        emma_im_color(ThemeEmmaColor_Surface_Base), frame_rounding);
+        im_color(emma_color(ThemeEmmaColor_Surface_Low)), frame_rounding);
+
+    dl->AddRect(ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y),
+                ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y),
+                im_color(emma_color(ThemeEmmaColor_Border_Subtle_On_Dark)),
+                frame_rounding, 0, thickness);
 
     // thumbnail
     ImGui::SetCursorPos(modules_position[i]);
@@ -119,9 +118,9 @@ void Widget::SideBar::Content::Modules::Component::draw() {
 
 void Widget::SideBar::Content::Modules::Component::drag_module_begin(
     const ModuleType module) {
+
   thumbnail_index = (ModuleType)module;
   active_thumbnail = get_module(thumbnail_index);
-  mouse_init_pos = ImGui::GetMousePos();
 
   for (uint8_t j = 0; j < drag_begin_callbacks.count; j++)
     drag_begin_callbacks.entries[j].callback(

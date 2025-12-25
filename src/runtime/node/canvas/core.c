@@ -30,7 +30,7 @@ CanvasStatus canvas_create(Canvas *canvas) {
                                state_lists[i].capacity,
                                &state_lists[i].lists[state].count);
   }
-  
+
   allocator_id_list_init(canvas->octagons.entries, ALLOCATOR_FRAME_CAPACITY,
                          &canvas->octagons.count);
 
@@ -171,8 +171,8 @@ void canvas_connect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {
   frame_register_connector(frame_b, connector->id);
 }
 
-void canvas_disconnect_frames(Canvas *canvas, const Frame *frame_a,
-                              const Frame *frame_b) {}
+// TODO
+void canvas_disconnect_frames(Canvas *canvas, Frame *frame_a, Frame *frame_b) {}
 
 /**
    Add an EXISTING module to a frame

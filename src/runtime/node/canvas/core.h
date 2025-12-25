@@ -69,7 +69,7 @@ CanvasStatus canvas_remove_module_from_frame(Canvas *, Frame *, Frame *);
 CanvasStatus canvas_add_pod_persona(Canvas *, Frame *, const PersonaType);
 
 void canvas_connect_frames(Canvas *, Frame *, Frame *);
-void canvas_disconnect_frames(Canvas *, const Frame *, const Frame *);
+void canvas_disconnect_frames(Canvas *, Frame *, Frame *);
 
 EXTERN_C_END
 #endif
