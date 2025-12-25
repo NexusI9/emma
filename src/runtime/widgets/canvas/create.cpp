@@ -3,7 +3,8 @@
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/unit.h"
 #include "runtime/manager/viewport.h"
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/create.h"
+#include "runtime/node/canvas/transform.h"
 #include "runtime/node/frame.h"
 
 void Widget::Canvas::Create::begin() {
@@ -70,6 +71,7 @@ void Widget::Canvas::Create::end() { unfreeze(); }
 void Widget::Canvas::Create::get_mouse_position(vec2 dest) {
   glm_vec2(ImGui::GetIO().MousePos, dest);
   vp2_scene(dest, dest);
+  unit_snap_vec2(dest);
 }
 
 void Widget::Canvas::Create::frame_create() {

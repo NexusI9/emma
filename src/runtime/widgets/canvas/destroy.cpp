@@ -1,4 +1,5 @@
 #include "destroy.hpp"
+#include "runtime/node/canvas/destroy.h"
 
 void Widget::Canvas::Destroy::active_connector(::Connector **connector) {
   if (*connector)

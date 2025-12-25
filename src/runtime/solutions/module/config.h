@@ -7,7 +7,7 @@
 #include "runtime/solutions/module/compounds/reward.h"
 #include "runtime/solutions/module/core.h"
 
-static const SolutionModule SOLUTION_MODULES[] = {
+static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
 
     [ModuleType_News] =
         {
@@ -201,7 +201,8 @@ static const SolutionModule SOLUTION_MODULES[] = {
                                         .type = CompoundModuleRewardType_Coin,
                                         .amount =
                                             {
-                                                .type = CompoundModuleRewardAmountType_Fixed,
+                                                .type =
+                                                    CompoundModuleRewardAmountType_Fixed,
                                                 .value = 1000,
                                             },
                                         .time_limit =

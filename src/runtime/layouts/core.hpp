@@ -1,7 +1,7 @@
 #ifndef _LAYOUT_CORE_H_
 #define _LAYOUT_CORE_H_
 
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/core.h"
 
 namespace Layout {
 

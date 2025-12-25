@@ -1,4 +1,5 @@
 #include "octagon.h"
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -110,10 +111,13 @@ OctagonStatus octagon_update_vertices_color(Octagon *oct) {
   };
 
   // lerp
-  for (uint8_t i = 0; i < OCTAGON_VERTEX_COUNT; i++)
-    glm_vec4_copy(oct->outer_offsets[i] > 0.0f ? (float *)colors[i]
-                                               : (float *)OCTAGON_COLOR_OFF,
-                  oct->vertices_colors[i]);
+  for (uint8_t i = 0; i < OCTAGON_VERTEX_COUNT; i++) {
+
+    color lerp_color;
+    color_lerp(OCTAGON_COLOR_OFF, colors[i], roundf(oct->outer_offsets[i]),
+               lerp_color);
+    glm_vec4_copy(lerp_color, oct->vertices_colors[i]);
+  }
 
   return OctagonStatus_Success;
 }

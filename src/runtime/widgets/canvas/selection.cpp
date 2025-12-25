@@ -2,7 +2,7 @@
 #include "nkengine/include/gui.hpp"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/manager/viewport.h"
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/create.h"
 #include "runtime/systems/connect_system.h"
 #include "runtime/widgets/connector.hpp"
 #include "runtime/widgets/connector_handle.hpp"

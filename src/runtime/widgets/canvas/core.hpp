@@ -1,7 +1,7 @@
 #ifndef _WIDGET_CANVAS_CORE_H_
 #define _WIDGET_CANVAS_CORE_H_
 
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/core.h"
 
 namespace Widget {
 namespace Canvas {

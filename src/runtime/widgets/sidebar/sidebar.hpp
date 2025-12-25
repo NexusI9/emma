@@ -2,7 +2,7 @@
 #define _WIDGET_SIDEBAR_H_
 
 #include "runtime/layouts/core.hpp"
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/core.h"
 #include "runtime/widgets/sidebar/content/content.hpp"
 #include "runtime/widgets/sidebar/content/modules.hpp"
 #include "runtime/widgets/sidebar/content/personas.hpp"

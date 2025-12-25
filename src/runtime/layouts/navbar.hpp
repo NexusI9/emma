@@ -5,7 +5,7 @@
 #include "resources/theme.emma.h"
 #include "runtime/layouts/core.hpp"
 #include "runtime/manager/theme.h"
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/core.h"
 #include "runtime/widgets/utils.hpp"
 #include <imgui/imgui.h>
 

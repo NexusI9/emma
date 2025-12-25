@@ -1,6 +1,7 @@
 #include "transform.hpp"
 #include "nkengine/include/gui.hpp"
 #include "runtime/manager/allocator.h"
+#include "runtime/node/canvas/transform.h"
 #include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/transform/object_manager.hpp"
 #include "runtime/widgets/transform/transform_box.hpp"
@@ -180,15 +181,15 @@ void Widget::Canvas::canvas_shape_on_module_session_end(void *data) {
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  ::Frame *frame = allocator_frame_entry(frame_data->frame->id);
+  ::Frame *module = allocator_frame_entry(frame_data->frame->id);
 
   // check if still within parent bound
-  if (frame_data->frame->parent != ID_UNDEFINED) {
+  if (module->parent != ID_UNDEFINED) {
 
-    ::Frame *parent = allocator_frame_entry(frame->parent);
+    ::Frame *parent = allocator_frame_entry(module->parent);
 
-    if (!frame_collide(parent, frame))
-      frame_remove_child(parent, frame->id);
+    if (!frame_collide(parent, module))
+      canvas_remove_module_from_frame(frame_data->canvas, parent, module);
   }
 
   // check if the frame is within a parent frame scope
@@ -196,9 +197,8 @@ void Widget::Canvas::canvas_shape_on_module_session_end(void *data) {
     for (size_t i = 0; i < frame_data->parent_list->count; i++) {
       ::Frame *parent =
           allocator_frame_entry(frame_data->parent_list->entries[i]);
-      if (frame_collide(parent, frame)) {
-        frame_add_child(parent, frame->id);
-      }
+      if (frame_collide(parent, module))
+        canvas_add_module_to_frame(frame_data->canvas, parent, module);
     }
 }
 
@@ -276,9 +276,9 @@ void Widget::Canvas::canvas_shape_set_module_position(void *data,
   Canvas::Transform::FrameData *frame_data =
       (Canvas::Transform::FrameData *)data;
 
-  ::Frame *frame = frame_data->frame;
+  ::Frame *module = frame_data->frame;
 
-  canvas_set_module_world_position(frame_data->canvas, frame,
+  canvas_set_module_world_position(frame_data->canvas, module,
                                    (vec2){value.x, value.y});
 
   /*
@@ -299,9 +299,9 @@ void Widget::Canvas::canvas_shape_set_module_position(void *data,
    experience.
    */
   if (frame_data->frame->parent != ID_UNDEFINED) {
-    ::Frame *parent = allocator_frame_entry(frame->parent);
-    if (!frame_collide(parent, frame))
-      frame_remove_child(parent, frame->id);
+    ::Frame *parent = allocator_frame_entry(module->parent);
+    if (!frame_collide(parent, module))
+      canvas_remove_module_from_frame(frame_data->canvas, parent, module);
   }
 }
 

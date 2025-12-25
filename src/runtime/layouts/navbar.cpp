@@ -1,7 +1,6 @@
 #include "navbar.hpp"
 #include "nkengine/include/gui.hpp"
 #include "resources/theme.emma.h"
-#include "runtime/node/canvas.h"
 #include "runtime/widgets/utils.hpp"
 
 Layout::NavBar::Component::Component(const char *label, Gui *gui,

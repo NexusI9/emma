@@ -4,7 +4,7 @@
 #define _(Type, Label, Capacity)                                               \
   typedef struct {                                                             \
     Type entries[Capacity];                                                    \
-    size_t count;                                                             \
+    size_t count;                                                              \
   } AllocatorList##Type;                                                       \
                                                                                \
   static AllocatorList##Type allocator_list_##Label = {0};
@@ -26,7 +26,7 @@ ALLOCATOR_LIST(_)
       if (entry->id == ID_UNDEFINED) {                                         \
         id = i;                                                                \
         entry->id = id;                                                        \
-        allocator_list_##Label.count++;                                       \
+        allocator_list_##Label.count++;                                        \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
@@ -43,12 +43,13 @@ ALLOCATOR_LIST(_);
                                                                                \
     Type *entry = allocator_##Label##_entry(id);                               \
                                                                                \
-    if (entry->id != ID_UNDEFINED) {                                           \
+    if (entry && entry->id != ID_UNDEFINED) {                                  \
       entry->id = ID_UNDEFINED;                                                \
-      allocator_list_##Label.count--;                                         \
+      allocator_list_##Label.count--;                                          \
+      return AllocatorStatus_Success;                                          \
     }                                                                          \
                                                                                \
-    return AllocatorStatus_Succes;                                             \
+    return AllocatorStatus_UnfoundEntry;                                       \
   }
 
 ALLOCATOR_LIST(_);
@@ -79,5 +80,5 @@ AllocatorStatus allocator_init() {
   ALLOCATOR_LIST(_);
 #undef _
 
-  return AllocatorStatus_Succes;
+  return AllocatorStatus_Success;
 }

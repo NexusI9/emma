@@ -9,7 +9,6 @@
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/ui_sprite.h"
 #include "runtime/manager/viewport.h"
-#include "runtime/node/canvas.h"
 #include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/node/frame.h"

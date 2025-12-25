@@ -13,4 +13,5 @@ void solution_system_update_motivation(const Solution *, Motivation *);
 
 void solution_system_update_frame(Solution *, Frame *);
 
+
 #endif

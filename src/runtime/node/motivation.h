@@ -70,4 +70,8 @@ static inline void motivation_print(const Motivation *core) {
 #undef _
 }
 
+static inline void motivation_clear_elements(Motivation *motiv) {
+  memset(&motiv->elements, 0, sizeof(float) * MotivationType_COUNT);
+}
+
 #endif

@@ -25,7 +25,8 @@ static const size_t ALLOCATOR_FRAME_CAPACITY = 1024;
 // clang-format on
 
 typedef enum {
-  AllocatorStatus_Succes,
+  AllocatorStatus_Success,
+  AllocatorStatus_UnfoundEntry,
   AllocatorStatus_UndefError,
 } AllocatorStatus;
 

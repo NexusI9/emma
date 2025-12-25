@@ -8,7 +8,8 @@
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/unit.h"
 #include "runtime/manager/viewport.h"
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/create.h"
+#include "runtime/node/canvas/transform.h"
 #include "runtime/node/heatmap.h"
 #include "runtime/widgets/canvas/canvas.hpp"
 #include "runtime/widgets/frame.hpp"
@@ -197,7 +198,7 @@ void Layout::Container::on_module_drag_end(const TextureAtlasRegion *sprite,
           unit_snap(pos[1] - frame->world_position[1] - sprite->size[1] / 2),
       };
 
-      canvas_add_module_to_frame(canvas, frame, type, local_pos);
+      canvas_create_module_in_frame(canvas, frame, type, local_pos);
       hit_frame = true;
       break;
     }

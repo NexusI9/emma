@@ -2,10 +2,12 @@
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
 #include "runtime/node/connector_handle.h"
+#include "runtime/node/motivation.h"
 #include "runtime/node/octagon.h"
 #include "utils/id.h"
 #include <math.h>
 #include <stddef.h>
+#include <string.h>
 
 FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
 
@@ -14,14 +16,13 @@ FrameStatus frame_create(Frame *node, const FrameDescriptor *desc) {
   node->clickbox.padding = desc->clickbox->padding;
   node->clickbox.count = desc->clickbox->count;
   node->children.count = 0;
+  node->octagon = ID_UNDEFINED;
 
   frame_set_size(node, desc->size);
   frame_set_world_position(node, desc->position);
   frame_set_background(node, desc->background);
   frame_set_uvs(node, desc->uv0, desc->uv1);
   frame_set_parent(node, ID_UNDEFINED);
-
-  node->octagon = ID_UNDEFINED;
 
   return FrameStatus_Success;
 }
@@ -167,7 +168,7 @@ FrameStatus frame_destroy(Frame *frame) {
         parent->children.entries, &parent->children.count, frame->id);
 
     frame->parent = ID_UNDEFINED;
-  } 
+  }
 
   for (uint8_t i = 0; i < frame->solutions.count; i++) {
     frame_remove_solution(frame, frame->solutions.entries[i]);
@@ -201,6 +202,74 @@ FrameStatus frame_destroy(Frame *frame) {
 
   // remove it from the registry/ allocator
   destroy_frame(frame->id);
+
+  return FrameStatus_Success;
+}
+
+/**
+   Traverse the node children and update the parent frame motivations according
+   to the average of children motivations.
+
+   A common use case is when we need to update the canvas frame octalysis when
+   we add or remove module from a frame or plug a distruptor (personas/
+   incubator)
+ */
+FrameStatus
+frame_update_motivation_from_children(Frame *node,
+                                      const alloc_id frame_motivation_index,
+                                      const alloc_id child_motivation_index) {
+
+  Motivation *motivation = allocator_motivation_entry(
+      node->motivations.entries[frame_motivation_index]);
+
+  if (!motivation)
+    return FrameStatus_UninitializedResource;
+
+  motivation_clear_elements(motivation);
+
+  if (!node->children.count)
+    return FrameStatus_Success;
+
+  for (uint8_t j = 0; j < MotivationType_COUNT; j++) {
+
+    float sum = 0.0f;
+    size_t valid_children = 0;
+
+    for (size_t i = 0; i < node->children.count; i++) {
+
+      const Frame *child = allocator_frame_entry(node->children.entries[i]);
+      if (!child)
+        continue;
+
+      const Motivation *child_motiv = allocator_motivation_entry(
+          child->motivations.entries[child_motivation_index]);
+      if (!child_motiv)
+        continue;
+
+      sum += motivation_get_element(child_motiv, (MotivationType)j);
+      valid_children++;
+    }
+
+    if (valid_children > 0)
+      sum /= valid_children;
+
+    motivation_set_element(motivation, (MotivationType)j, sum);
+  }
+
+  return FrameStatus_Success;
+}
+
+FrameStatus frame_update_octagon_motivation(Frame *node,
+                                            const alloc_id motivation_index) {
+
+  Octagon *oct = allocator_octagon_entry(node->octagon);
+  Motivation *motiv =
+      allocator_motivation_entry(node->motivations.entries[motivation_index]);
+
+  if (oct && motiv)
+    octagon_set_outer_offset_from_motivation(oct, motiv);
+  else
+    return FrameStatus_UninitializedResource;
 
   return FrameStatus_Success;
 }

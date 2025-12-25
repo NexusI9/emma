@@ -1,7 +1,7 @@
 #ifndef _WIDGET_CANVAS_SELECTION_H_
 #define _WIDGET_CANVAS_SELECTION_H_
 
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/core.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/connector.hpp"

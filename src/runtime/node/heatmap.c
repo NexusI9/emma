@@ -120,8 +120,6 @@ static inline void heatmap_create_texture(WGPUTexture *texture,
 
    As a result we need to cache the max value of each motivations/
    heatmap attributes (frictions, excitemeent etc...)
-
-
  */
 HeatmapStatus heatmap_update_relative_motivations(Heatmap *heatmap) {
 
@@ -153,8 +151,8 @@ HeatmapStatus heatmap_update_relative_motivations(Heatmap *heatmap) {
   for (size_t i = 0; i < heatmap->frames->count; i++) {
     const Frame *module = allocator_frame_entry(heatmap->frames->entries[i]);
 
-    const Motivation *source_motivation =
-        allocator_motivation_entry(module->motivations.entries[0]);
+    const Motivation *source_motivation = allocator_motivation_entry(
+        module->motivations.entries[FrameMotivations_Default]);
 
     const float source_value =
         motivation_get_element(source_motivation, heatmap->motivation_type);
@@ -162,12 +160,12 @@ HeatmapStatus heatmap_update_relative_motivations(Heatmap *heatmap) {
     max_value = fmaxf(max_value, source_value);
   }
 
-  // === Cache relative motivations
+  // === Cache relative motivations ===
   for (size_t i = 0; i < heatmap->frames->count; i++) {
     const Frame *module = allocator_frame_entry(heatmap->frames->entries[i]);
 
-    const Motivation *source_motivation =
-        allocator_motivation_entry(module->motivations.entries[0]);
+    const Motivation *source_motivation = allocator_motivation_entry(
+        module->motivations.entries[FrameMotivations_Default]);
 
     Motivation *motivation =
         allocator_motivation_entry(heatmap->relative_motivations.entries[i]);

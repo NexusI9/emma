@@ -6,7 +6,7 @@
 #include "runtime/layouts/core.hpp"
 #include "runtime/manager/allocator.h"
 #include "runtime/manager/allocator_list.h"
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/core.h"
 #include "runtime/node/connector.h"
 #include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/canvas/create.hpp"

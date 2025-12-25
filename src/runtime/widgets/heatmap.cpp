@@ -76,9 +76,6 @@ void Widget::Heatmap::Component::compute_render_pass(
     Motivation *mt =
         allocator_motivation_entry(node->relative_motivations.entries[i]);
 
-    printf("module: [ %s ] (%llu) => %f (%llu)\n", module->label, module->id,
-           motivation_get_element(mt, node->motivation_type), mt->id);
-
     int value =
         ((float)motivation_get_element(mt, node->motivation_type)) * 255;
 

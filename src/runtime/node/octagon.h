@@ -2,15 +2,17 @@
 #define _OCTAGON_H_
 
 #include "nkengine/include/utils.h"
+#include "runtime/node/motivation.h"
 #include "utils/id.h"
 #include <cglm/cglm.h>
 #include <string.h>
 
-#define OCTAGON_VERTEX_COUNT 8
+static const uint8_t OCTAGON_VERTEX_COUNT = 8;
+static const float OCTAGON_BASE_SCALE = 100.0f;
 static const float OCTAGON_OUTER_ANGLE = -GLM_PI * 0.5f;
 static const float OCTAGON_INNER_ANGLE = GLM_PI * (3.0f / 8.0f);
-static const color OCTAGON_COLOR_OFF = {164.0f / 255.0f, 173.0f / 255.0f,
-                                        185.0f / 255.0f, 1.0f};
+static const color OCTAGON_COLOR_OFF = {55 / 255.f, 64 / 255.f, 75 / 255.f,
+                                        0.5f};
 
 typedef enum {
   OctagonStatus_Success,
@@ -69,9 +71,22 @@ static inline OctagonStatus octagon_set_outer_offset(Octagon *oct,
 
   oct->outer_offsets[vertex] = value;
 
-  octagon_update_vertices(oct);
-  octagon_update_labels_coordinates(oct);
-  octagon_update_vertices_color(oct);
+  {
+    octagon_update_vertices(oct);
+    octagon_update_labels_coordinates(oct);
+    octagon_update_vertices_color(oct);
+  }
+
+  return OctagonStatus_Success;
+}
+
+static inline OctagonStatus
+octagon_set_outer_offset_from_motivation(Octagon *oct,
+                                         const Motivation *motiv) {
+
+  for (uint8_t i = 0; i < OCTAGON_VERTEX_COUNT; i++)
+    octagon_set_outer_offset(oct, i,
+                             motivation_get_element(motiv, (MotivationType)i));
 
   return OctagonStatus_Success;
 }

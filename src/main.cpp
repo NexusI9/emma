@@ -8,7 +8,9 @@
 #include "runtime/manager/module.h"
 #include "runtime/manager/unit.h"
 #include "runtime/manager/viewport.h"
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/core.h"
+#include "runtime/node/canvas/create.h"
+#include "runtime/node/canvas/transform.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/heatmap.h"
 #include "runtime/node/motivation.h"
@@ -36,11 +38,6 @@ void create_frames(Canvas *canvas) {
     vec2 position;
 
     struct {
-      const uint8_t index;
-      const float value;
-    } octagon_data[3];
-
-    struct {
 
       struct {
         const ModuleType type;
@@ -54,7 +51,6 @@ void create_frames(Canvas *canvas) {
   } cframes[] = {
       {
           .position = {900.0f, 400.0f},
-          .octagon_data = {{1, 0.5}, {6, 0.6}, {2, 0.9}},
           .modules =
               {
                   .entries =
@@ -67,7 +63,6 @@ void create_frames(Canvas *canvas) {
       },
       {
           .position = {1800.0f, 400.0f},
-          .octagon_data = {{7, 0.8}, {0, 0.1}, {5, 0.35}},
           .modules =
               {
                   .entries =
@@ -79,7 +74,6 @@ void create_frames(Canvas *canvas) {
       },
       {
           .position = {2700.0f, 400.0f},
-          .octagon_data = {{3, 0.9}, {4, 0.6}, {5, 0.7}},
           .modules =
               {
                   .entries =
@@ -98,20 +92,12 @@ void create_frames(Canvas *canvas) {
     Frame *frame = canvas_create_frame(canvas);
     unit_snap_vec2((float *)cframes[i].position);
     canvas_set_frame_position(canvas, frame, cframes[i].position);
-    canvas_register_frame_state(canvas, frame, CanvasFrameState_Octagon);
-
-    // add octagons
-    Octagon *oct = allocator_octagon_entry(frame->octagon);
-    for (uint8_t j = 0; j < 3; j++) {
-      octagon_set_outer_offset(oct, cframes[i].octagon_data[j].index,
-                               cframes[i].octagon_data[j].value);
-    }
 
     // add modules
     for (uint8_t k = 0; k < cframes[i].modules.count; k++)
-      canvas_add_module_to_frame(canvas, frame,
-                                 cframes[i].modules.entries[k].type,
-                                 cframes[i].modules.entries[k].position);
+      canvas_create_module_in_frame(canvas, frame,
+                                    cframes[i].modules.entries[k].type,
+                                    cframes[i].modules.entries[k].position);
 
     canvas_frame_wrap(canvas, frame);
 

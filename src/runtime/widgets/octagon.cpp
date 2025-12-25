@@ -50,7 +50,7 @@ void Widget::Octagon::Component::draw_labels(ImDrawList *draw_list) {
 
     draw_list->AddText(
         label_pos,
-        ImColor(255, 255, 255, node->outer_offsets[i] > 0.0f ? 255 : 112),
+        ImColor(255, 255, 255, node->outer_offsets[i] >= 0.5f ? 255 : 112),
         node->labels[i]);
     draw_list->AddCircleFilled(vert_pos, 3.0f, IM_COL32(255, 255, 255, 255));
   }

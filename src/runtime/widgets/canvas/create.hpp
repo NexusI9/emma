@@ -2,7 +2,7 @@
 #define _WIDGET_CANVAS_CREATE_H_
 
 #include "runtime/manager/ui_sprite.h"
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/core.h"
 #include "runtime/node/connector_handle.h"
 #include "runtime/widgets/canvas/core.hpp"
 #include "runtime/widgets/connector.hpp"

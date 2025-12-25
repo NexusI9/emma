@@ -23,8 +23,13 @@ typedef void (*frame_clickbox_updater)(RectCoordinate *, const vec2, const vec2,
 
 typedef enum {
   FrameStatus_Success,
+  FrameStatus_UninitializedResource,
   FrameStatus_UndefError,
 } FrameStatus;
+
+typedef enum {
+  FrameMotivations_Default,
+} FrameMotivations;
 
 typedef struct {
   size_t count;
@@ -125,19 +130,21 @@ const alloc_id frame_get_connector_handle(const Frame *node,
 
 // Mutators
 // clang-format off
-FrameStatus frame_wrap(Frame *node);
+FrameStatus frame_wrap(Frame *);
 
-FrameStatus frame_update_world_position(Frame *node);
-FrameStatus frame_set_world_position(Frame *node, const vec2 value);
+FrameStatus frame_update_world_position(Frame *);
+FrameStatus frame_set_world_position(Frame *, const vec2 );
 
-StaticListStatus frame_add_child(Frame *node, const alloc_id id);
-StaticListStatus frame_remove_child(Frame *node, const alloc_id id);
+StaticListStatus frame_add_child(Frame *, const alloc_id );
+StaticListStatus frame_remove_child(Frame *, const alloc_id );
 
-StaticListStatus frame_add_solution(Frame *node, const alloc_id id);
-StaticListStatus frame_remove_solution(Frame *node, const alloc_id id);
+StaticListStatus frame_add_solution(Frame *, const alloc_id );
+StaticListStatus frame_remove_solution(Frame *, const alloc_id );
 
-StaticListStatus frame_add_motivation(Frame *node, const alloc_id id);
-StaticListStatus frame_remove_motivation(Frame *node, const alloc_id id);
+StaticListStatus frame_add_motivation(Frame *, const alloc_id );
+StaticListStatus frame_remove_motivation(Frame *, const alloc_id );
+FrameStatus frame_update_motivation_from_children(Frame *, const alloc_id, const alloc_id);
+FrameStatus frame_update_octagon_motivation(Frame *, const alloc_id );
 
 static inline void frame_update_boundbox(Frame *);
 static inline FrameStatus frame_set_size(Frame *, const vec2);

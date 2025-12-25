@@ -1,7 +1,7 @@
 #ifndef _CONNECT_SYSTEM_H_
 #define _CONNECT_SYSTEM_H_
 
-#include "runtime/node/canvas.h"
+#include "runtime/node/canvas/core.h"
 #include "runtime/node/connector.h"
 #include "runtime/node/connector_handle.h"
 #include "utils/id.h"
