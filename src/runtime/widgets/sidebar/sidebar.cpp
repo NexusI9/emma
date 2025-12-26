@@ -94,7 +94,7 @@ void Widget::SideBar::Component::update_tabs_position() {
   // update active/ inactive position
   for (uint8_t i = 0; i < TABS_COUNT; i++) {
     if (active_tab == i) {
-      tabs[i].set_position(ImVec2(0, tabs[i].get_position().y));
+      tabs[i].set_position(ImVec2(-2, tabs[i].get_position().y));
     } else {
       tabs[i].set_position(ImVec2(tab_button_offset, tabs[i].get_position().y));
     }

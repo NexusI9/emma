@@ -161,8 +161,15 @@ void Widget::SideBar::Content::Modules::Component::drag_module() {
       ImVec2(mouse.x - mouse_init_pos.x, mouse.y - mouse_init_pos.y);
 
   // cancel selection if start dragging
-  if (drag_offset.x != 0 || drag_offset.y != 0)
+  if (selected_thumbnail > -1 && (drag_offset.x != 0 || drag_offset.y != 0)) {
+
+    for (uint8_t j = 0; j < module_click_callbacks.count; j++)
+      module_click_callbacks.entries[j].callback(
+          (ModuleType)selected_thumbnail, false,
+          module_click_callbacks.entries[j].data);
+
     selected_thumbnail = -1;
+  }
 
   dl->AddImage(
       (ImTextureRef)module_view,
