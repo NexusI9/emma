@@ -7,6 +7,7 @@
 #include "runtime/manager/theme.h"
 #include "runtime/node/persona.h"
 #include "runtime/widgets/sidebar/content/content.hpp"
+#include "utils/callback.h"
 
 namespace Widget {
 
@@ -16,6 +17,10 @@ namespace Content {
 
 namespace Personas {
 
+typedef void (*on_persona_click)(const PersonaType, bool, void *);
+
+typedef CALLBACK_ENTRY(on_persona_click) OnPersonaClickCallback;
+
 class Component : public Content::Component {
 
 public:
@@ -24,10 +29,19 @@ public:
   void layout() override;
   void draw() override;
 
+  void clear_selection() { active_persona = -1; }
+  StaticListStatus add_persona_click_callback(on_persona_click cb, void *data) {
+    OnPersonaClickCallback entry = {cb, data};
+    return stli_insert(persona_click_callbacks.entries, CALLBACK_CAPACITY,
+                       &persona_click_callbacks.count,
+                       sizeof(OnPersonaClickCallback), &entry,
+                       "Persona Click Callback");
+  }
+
 private:
   const ImVec2 padding =
       gui_scale_im_vec2(gui, ImVec2(emma_size(ThemeEmmaSize_Space_Medium),
-                                    emma_size(ThemeEmmaSize_Space_Medium)));
+                                    emma_size(ThemeEmmaSize_Space_Large)));
 
   const ImVec2 size = gui_scale_im_vec2(gui, ImVec2(311, 66));
   const float radius = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
@@ -47,7 +61,11 @@ private:
     ImVec2 label_coo;
   } personas[PersonaType_COUNT];
 
-  void draw_card(struct persona *, bool);
+  bool draw_card(struct persona *, bool);
+
+  static constexpr uint8_t CALLBACK_CAPACITY = 16;
+  STATIC_LIST(OnPersonaClickCallback, CALLBACK_CAPACITY)
+  persona_click_callbacks;
 
   int8_t active_persona = -1;
 };

@@ -50,10 +50,18 @@ void Widget::SideBar::Content::Personas::Component::draw() {
   draw_header("Personas");
 
   for (uint8_t i = 0; i < PersonaType_COUNT; i++)
-    draw_card(&personas[i], active_persona == i);
+    if (draw_card(&personas[i], active_persona == i)) {
+
+      active_persona = (active_persona == i) ? -1 : i;
+
+      for (uint8_t j = 0; j < persona_click_callbacks.count; j++)
+        persona_click_callbacks.entries[j].callback(
+            (PersonaType)i, active_persona == i,
+            persona_click_callbacks.entries[j].data);
+    }
 }
 
-void Widget::SideBar::Content::Personas::Component::draw_card(struct persona *p,
+bool Widget::SideBar::Content::Personas::Component::draw_card(struct persona *p,
                                                               bool active) {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
@@ -65,12 +73,17 @@ void Widget::SideBar::Content::Personas::Component::draw_card(struct persona *p,
   ImVec2 frame_p1 =
       ImVec2(win_pos.x + p->frame_coo.p1[0], win_pos.y + p->frame_coo.p1[1]);
 
-  dl->AddRectFilled(frame_p0, frame_p1,
-                    im_color(emma_color(ThemeEmmaColor_Surface_Low)), radius);
+  dl->AddRectFilled(
+      frame_p0, frame_p1,
+      im_color(emma_color(active ? ThemeEmmaColor_Background_Brand_Strong
+                                 : ThemeEmmaColor_Surface_Low)),
+      radius);
 
-  dl->AddRect(frame_p0, frame_p1,
-              im_color(emma_color(ThemeEmmaColor_Border_Subtle_On_Dark)),
-              radius, 0, thickness);
+  dl->AddRect(
+      frame_p0, frame_p1,
+      im_color(emma_color(active ? ThemeEmmaColor_Border_Brand_Base
+                                 : ThemeEmmaColor_Border_Subtle_On_Dark)),
+      radius, 0, thickness);
 
   dl->AddImage((ImTextureRef)p->avatar.get_view(),
                ImVec2(win_pos.x + p->avatar.get_start().x,
@@ -82,6 +95,12 @@ void Widget::SideBar::Content::Personas::Component::draw_card(struct persona *p,
 
   dl->AddText(ImVec2(win_pos.x + p->label_coo.x, win_pos.y + p->label_coo.y),
               im_color(emma_color(ThemeEmmaColor_Text_On_Dark)), p->label);
+
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+      ImGui::IsMouseHoveringRect(frame_p0, frame_p1))
+    return true;
+
+  return false;
 }
 
 void Widget::SideBar::Content::Personas::Component::layout() {
@@ -104,12 +123,12 @@ void Widget::SideBar::Content::Personas::Component::layout() {
 
     // avatar coordinates
     p->avatar.set_position(
-        ImVec2(frame_start.x + padding.x, frame_start.y + padding.y),
+        ImVec2(frame_start.x + padding.x, frame_start.y + padding.y / 2.0f),
         GuiSpriteAnchor_TopLeft);
 
     // label coordinates
-    p->label_coo = ImVec2(p->avatar.get_end().x + gap,
-                          frame_start.y + size.y / 2 -
-                              (float)gui_scale(gui, ImGui::GetFontSize()) / 2);
+    p->label_coo =
+        ImVec2(p->avatar.get_end().x + gap,
+               frame_start.y + size.y / 2 - (float)gui_scale(gui, 8));
   }
 }

@@ -1,8 +1,12 @@
 #ifndef _WIDGET_SIDEBAR_H_
 #define _WIDGET_SIDEBAR_H_
 
+#include "resources/theme.emma.h"
 #include "runtime/layouts/core.hpp"
+#include "runtime/manager/module.h"
+#include "runtime/manager/theme.h"
 #include "runtime/node/canvas/core.h"
+#include "runtime/node/persona.h"
 #include "runtime/widgets/sidebar/content/content.hpp"
 #include "runtime/widgets/sidebar/content/modules.hpp"
 #include "runtime/widgets/sidebar/content/personas.hpp"
@@ -20,12 +24,20 @@ typedef struct {
   void *data;
 } TabUpdateCallbackEntry;
 
+void on_module_click(const ModuleType, bool, void *);
+void on_persona_click(const PersonaType, bool, void *);
+
 class Component : public Widget, public Layout::Window {
 
 public:
   Component(const char *, Gui *, ::Canvas *);
+  void layout();
   void draw();
-  void close() { active_tab = -1; }
+  void close() {
+    active_tab = -1;
+    set_state(State_Closed);
+    update_window_width();
+  }
 
   StaticListStatus add_tab_update_callback(on_tab_update callback, void *data) {
 
@@ -37,6 +49,33 @@ public:
                        "Tab Update Callback List");
   }
 
+  enum State {
+    State_Closed,
+    State_Level_1,
+    State_Level_2,
+  } state;
+
+  void set_state(const State state) { this->state = state; }
+  void update_window_width() {
+
+    switch (state) {
+
+    case State_Closed:
+      size.x = default_size.x;
+      break;
+
+      // expand width on active
+    case State_Level_1:
+      size.x = panel[0].p1.x;
+      panel[0].enable_border_radius();
+      break;
+
+    case State_Level_2:
+      size.x = panel[1].p1.x;
+      panel[0].disable_border_radius();
+      break;
+    }
+  }
   // Used to set per-module respective API calls
   // NOTE: don't forget to sync with the 'contents' array bellow
   struct {
@@ -45,13 +84,17 @@ public:
   } content;
 
 private:
+  const float panel_margin_left = gui_scale(gui, 60);
+  const float tab_button_offset =
+      -1 * gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large));
+
   static constexpr uint8_t CALLBACK_CAPACITY = 8;
   static constexpr uint8_t TABS_COUNT = 2;
   int8_t active_tab = -1;
 
-  ImVec2 position, size, default_size;
+  ImVec2 position, size, default_size, bar_p1;
 
-  Panel::Component panel;
+  Panel::Component panel[2];
   TabButton::Component tabs[TABS_COUNT];
 
   // Used for draw/update auto call depending on active tab
@@ -61,6 +104,8 @@ private:
   };
 
   STATIC_LIST(TabUpdateCallbackEntry, CALLBACK_CAPACITY) tab_update_callbacks;
+  void draw_transparent_bar();
+  void update_tabs_position();
 };
 
 } // namespace SideBar

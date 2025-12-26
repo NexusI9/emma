@@ -79,26 +79,42 @@ void Widget::SideBar::Content::Modules::Component::draw() {
 
   for (size_t i = 0; i < ModuleType_COUNT; i++) {
 
+    ImVec2 frame_p0 =
+        ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y);
+    ImVec2 frame_p1 =
+        ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y);
+
     if (!active_thumbnail && ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
-        ImGui::IsMouseHoveringRect(
-            ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y),
-            ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y)))
+        ImGui::IsMouseHoveringRect(frame_p0, frame_p1))
       drag_module_begin((ModuleType)i);
 
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+        ImGui::IsMouseHoveringRect(frame_p0, frame_p1)) {
+      selected_thumbnail = (selected_thumbnail == i) ? -1 : i;
+
+      for (uint8_t j = 0; j < module_click_callbacks.count; j++)
+        module_click_callbacks.entries[j].callback(
+            (ModuleType)i, selected_thumbnail == i,
+            module_click_callbacks.entries[j].data);
+    }
+
     const TextureAtlasRegion *region = get_module((ModuleType)i);
+    const bool active = selected_thumbnail == i;
 
     // 3xN grid
 
     // background frame
     dl->AddRectFilled(
-        ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y),
-        ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y),
-        im_color(emma_color(ThemeEmmaColor_Surface_Low)), frame_rounding);
+        frame_p0, frame_p1,
+        im_color(emma_color(active ? ThemeEmmaColor_Background_Brand_Strong
+                                   : ThemeEmmaColor_Surface_Low)),
+        frame_rounding);
 
-    dl->AddRect(ImVec2(frames_p0[i].x + win_pos.x, frames_p0[i].y + win_pos.y),
-                ImVec2(frames_p1[i].x + win_pos.x, frames_p1[i].y + win_pos.y),
-                im_color(emma_color(ThemeEmmaColor_Border_Subtle_On_Dark)),
-                frame_rounding, 0, thickness);
+    dl->AddRect(
+        frame_p0, frame_p1,
+        im_color(emma_color(active ? ThemeEmmaColor_Border_Brand_Base
+                                   : ThemeEmmaColor_Border_Subtle_On_Dark)),
+        frame_rounding, 0, thickness);
 
     // thumbnail
     ImGui::SetCursorPos(modules_position[i]);
@@ -119,6 +135,7 @@ void Widget::SideBar::Content::Modules::Component::draw() {
 void Widget::SideBar::Content::Modules::Component::drag_module_begin(
     const ModuleType module) {
 
+  mouse_init_pos = ImGui::GetMousePos();
   thumbnail_index = (ModuleType)module;
   active_thumbnail = get_module(thumbnail_index);
 
@@ -142,6 +159,10 @@ void Widget::SideBar::Content::Modules::Component::drag_module() {
   ImDrawList *dl = ImGui::GetForegroundDrawList();
   ImVec2 drag_offset =
       ImVec2(mouse.x - mouse_init_pos.x, mouse.y - mouse_init_pos.y);
+
+  // cancel selection if start dragging
+  if (drag_offset.x != 0 || drag_offset.y != 0)
+    selected_thumbnail = -1;
 
   dl->AddImage(
       (ImTextureRef)module_view,

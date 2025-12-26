@@ -27,9 +27,12 @@ typedef void (*on_drag)(const TextureAtlasRegion *, const ModuleType,
 typedef void (*on_drag_end)(const TextureAtlasRegion *, const ModuleType,
                             const ImVec2, void *);
 
+typedef void (*on_module_click)(const ModuleType, bool, void *);
+
 typedef CALLBACK_ENTRY(on_drag_begin) OnDragBeginCallback;
 typedef CALLBACK_ENTRY(on_drag) OnDragCallback;
 typedef CALLBACK_ENTRY(on_drag_end) OnDragEndCallback;
+typedef CALLBACK_ENTRY(on_module_click) OnModuleClickCallback;
 
 class Component : public Content::Component {
 
@@ -38,6 +41,11 @@ public:
 
   void layout() override;
   void draw() override;
+
+  void clear_selection() {
+    active_thumbnail = nullptr;
+    selected_thumbnail = -1;
+  }
 
   StaticListStatus add_drag_begin_callback(on_drag_begin cb, void *data) {
     OnDragBeginCallback entry = {cb, data};
@@ -60,12 +68,20 @@ public:
                        &entry, "Drag End Callback");
   }
 
+  StaticListStatus add_module_click_callback(on_module_click cb, void *data) {
+    OnModuleClickCallback entry = {cb, data};
+    return stli_insert(module_click_callbacks.entries, DRAG_CALLBACK_CAPACITY,
+                       &module_click_callbacks.count,
+                       sizeof(OnModuleClickCallback), &entry,
+                       "Module Click Callback");
+  }
+
 private:
   const WGPUTextureView module_view =
       texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_Module);
 
   const float frame_rounding =
-      gui_scale(gui, emma_size(ThemeEmmaSize_Width_Border_Large));
+      gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
 
   const float thickness =
       gui_scale(gui, emma_size(ThemeEmmaSize_Width_Border_Base));
@@ -92,9 +108,12 @@ private:
   STATIC_LIST(OnDragBeginCallback, DRAG_CALLBACK_CAPACITY) drag_begin_callbacks;
   STATIC_LIST(OnDragEndCallback, DRAG_CALLBACK_CAPACITY) drag_callbacks;
   STATIC_LIST(OnDragEndCallback, DRAG_CALLBACK_CAPACITY) drag_end_callbacks;
+  STATIC_LIST(OnModuleClickCallback, DRAG_CALLBACK_CAPACITY)
+  module_click_callbacks;
 
   // Drag data
   const TextureAtlasRegion *active_thumbnail = nullptr;
+  int32_t selected_thumbnail = -1;
   ModuleType thumbnail_index;
   ImVec2 mouse_init_pos;
 

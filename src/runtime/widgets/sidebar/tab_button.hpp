@@ -27,6 +27,7 @@ public:
   void render(bool);
 
   void set_position(ImVec2);
+  const ImVec2 get_position() { return position; }
 
   // clang-format off
   const float width = gui_scale(gui, 52);
@@ -48,7 +49,7 @@ private:
   ImVec2 endpoint;
 };
 
-} // namespace Button
+} // namespace TabButton
 } // namespace SideBar
 } // namespace Widget
 

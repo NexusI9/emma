@@ -1,6 +1,7 @@
 #ifndef _WIDGET_SIDEBAR_PANEL_H_
 #define _WIDGET_SIDEBAR_PANEL_H_
 
+#include "nkengine/include/gui.hpp"
 #include "resources/theme.emma.h"
 #include "runtime/manager/theme.h"
 #include "runtime/widgets/core.hpp"
@@ -14,30 +15,41 @@ class Component : public Widget {
 public:
   Component(Gui *gui) : Widget(gui) {}
 
-  void begin();
+  void begin(const char *);
   void end();
+  void set_position(ImVec2 position) {
+    p0 = position;
+
+    // adjust size
+    p1.x = init_size.x + p0.x;
+    p1.y = init_size.y + p0.y;
+
+    content_position = ImVec2(p0.x, p0.y);
+    content_inner_position =
+        ImVec2(p0.x + content_padding.x, content_padding.y);
+    content_size = ImVec2(p1.x - content_padding.x, p1.y - content_padding.y);
+  }
+
+  void disable_border_radius() { bd_radius = 0.0f; }
+  void enable_border_radius() { bd_radius = init_bd_radius; }
 
   // clang-format off
-  const float padding_left = gui_scale(gui, 60);
-  const float bd_radius = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
+
+  const float init_bd_radius = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
+  float bd_radius = init_bd_radius;
   const float bd_thickness = gui_scale(gui, 1.0f);
-  
-  const ImVec2 position = ImVec2(0, gui_scale(gui, 92));
-  const ImVec2 size = ImVec2(gui_scale(gui, 442), gui_scale(gui, 776));
+  const ImVec2 init_size = gui_scale_im_vec2(gui, ImVec2(380, 600));
 
   const ImVec2 content_padding = ImVec2(
-					gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_3)),
-					gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_2))
-					);
-
-  const ImVec2 content_position = ImVec2(padding_left, position.y);
+			gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_3)),
+			gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_2))
+		);
   
-  const ImVec2 content_inner_position = ImVec2(
-					 content_padding.x + padding_left,
-					 content_padding.y
-					 );
-  
-  const ImVec2 content_size = ImVec2(size.x - padding_left - content_padding.x, size.y - content_padding.y);
+  ImVec2 p0;
+  ImVec2 p1;
+  ImVec2 content_position;
+  ImVec2 content_inner_position;
+  ImVec2 content_size;
   // clang-format on
 
 private:
