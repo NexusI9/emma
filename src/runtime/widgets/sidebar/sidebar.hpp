@@ -92,7 +92,7 @@ private:
   static constexpr uint8_t TABS_COUNT = 2;
   int8_t active_tab = -1;
 
-  ImVec2 position, size, default_size, bar_p1;
+  ImVec2 position, size, default_size, bar_p1, shadow_p0, shadow_p1;
 
   Panel::Component panel[2];
   TabButton::Component tabs[TABS_COUNT];
@@ -105,6 +105,8 @@ private:
 
   STATIC_LIST(TabUpdateCallbackEntry, CALLBACK_CAPACITY) tab_update_callbacks;
   void draw_transparent_bar();
+  void draw_shadow_bar();
+
   void update_tabs_position();
 };
 

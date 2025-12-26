@@ -30,10 +30,17 @@ void Widget::SideBar::Component::layout() {
   panel[1].set_position(ImVec2(panel[0].p1.x, panel[0].p0.y));
 
   position = ImVec2(0, gui_scale(gui, 92));
-  default_size = ImVec2(gui_scale(gui, 54), gui_scale(gui, 776));
+  default_size = ImVec2(gui_scale(gui, 54), position.y + panel[0].init_size.y);
   size = default_size;
 
   bar_p1 = ImVec2(panel_margin_left, default_size.y);
+
+  shadow_p0 = ImVec2(panel[0].p1.x, panel[0].p0.y);
+  shadow_p1 = ImVec2(shadow_p0.x + gui_scale(gui, 32), default_size.y);
+
+  // DEBUG
+  printf("shadow p0: %f | %f\n", shadow_p0.x, shadow_p0.y);
+  printf("shadow p1: %f | %f\n", shadow_p1.x, shadow_p1.y);
 
   static const ImVec2 buttons_base_position =
       ImVec2(tab_button_offset, gui_scale(gui, 112));
@@ -62,8 +69,10 @@ void Widget::SideBar::Component::draw() {
   if (state == State_Level_2) {
     panel[1].begin("Sidepanel Level 2");
     ImGui::Text("Content 2");
-    // contents[active_tab]->draw();
+    draw_shadow_bar();
+    contents[active_tab]->draw();
     panel[1].end();
+    draw_shadow_bar();
   }
 
   for (uint8_t i = 0; i < TABS_COUNT; i++) {
@@ -106,8 +115,17 @@ void Widget::SideBar::Component::draw_transparent_bar() {
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
   // Transparent background
-  dl->AddRectFilled(ImVec2(), bar_p1,
+  dl->AddRectFilled(position, bar_p1,
                     emma_im_color(ThemeEmmaColor_Surface_Transparent));
+}
+
+void Widget::SideBar::Component::draw_shadow_bar() {
+
+  ImDrawList *dl = ImGui::GetWindowDrawList();
+
+  dl->AddRectFilledMultiColor(shadow_p0, shadow_p1, ImColor(0, 0, 0, 56),
+                              ImColor(0, 0, 0, 0), ImColor(0, 0, 0, 0),
+                              ImColor(0, 0, 0, 56));
 }
 
 void Widget::SideBar::on_module_click(const ModuleType type, bool active,
