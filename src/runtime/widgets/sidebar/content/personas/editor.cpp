@@ -20,11 +20,14 @@ void Widget::SideBar::Content::Personas::Editor::Component::draw() {
   draw_header("Edit");
 
   for (uint8_t i = 0; i < SECTIONS_COUNT; i++) {
+
     // draw header
+    sections[i].section_header.draw();
+    ImGui::Dummy(ImVec2(0, ROW_GAP));
 
     // draw input
     sections[i].input_renderer.draw();
-  
+    ImGui::Dummy(ImVec2(0, ROW_GAP));
   }
 }
 

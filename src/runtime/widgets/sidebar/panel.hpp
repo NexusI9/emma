@@ -30,7 +30,7 @@ public:
         ImVec2(p0.x + content_padding.x, p0.y + content_padding.y);
 
     // Content size (width / height!)
-    content_size = ImVec2(init_size.x - content_padding.x * 2.0f,
+    content_size = ImVec2(init_size.x - content_padding.x,
                           init_size.y - content_padding.y * 2.0f);
   }
 

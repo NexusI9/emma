@@ -60,7 +60,7 @@ void Widget::SideBar::Content::Personas::Component::draw() {
             (PersonaType)i, active_persona == i,
             persona_click_callbacks.entries[j].data);
     }
-    ImGui::Dummy(ImVec2(0, GAP));
+    ImGui::Dummy(ImVec2(0, ROW_GAP));
   }
 }
 

@@ -17,9 +17,9 @@ void Widget::Input::Renderer::Component::init() {
     switch (input->type) {
 
     case Type_Slider:
-      sliders[cursors[Type_Slider]].init(gui, input->slider.label,
-                                         input->slider.value, input->slider.min,
-                                         input->slider.max);
+      sliders[cursors[Type_Slider]].init(
+          gui, input->slider.label, input->slider.value, input->slider.min,
+          input->slider.max, 10, Slider::Component::Format_Integer);
       break;
 
     case Type_Toggle:

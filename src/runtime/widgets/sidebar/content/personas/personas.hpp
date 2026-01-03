@@ -52,7 +52,8 @@ private:
       gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_4));
 
   const float GAP = gui_scale(gui, emma_size(ThemeEmmaSize_Space_Large));
-
+  const float ROW_GAP = gui_scale(gui, emma_size(ThemeEmmaSize_Space_Medium));
+  
   struct persona {
     ::Component::Sprite avatar;
     const char *label;

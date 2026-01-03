@@ -9,6 +9,7 @@
 #include "runtime/manager/ui_sprite.h"
 #include "runtime/widgets/core.hpp"
 #include "utils/callback.h"
+
 #include <imgui/imgui.h>
 
 namespace Widget {
@@ -18,6 +19,11 @@ namespace Slider {
 class Component : public Widget {
 
 public:
+  typedef enum {
+    Format_Float,
+    Format_Integer,
+  } Format;
+
   Component()
       : Widget(nullptr),
         knob(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
@@ -28,12 +34,15 @@ public:
   // This is mostly due to the fact that the input list render use a list or
   // slider and we would need to manually initalize it all 32 sliders at
   // construct, which would not be convenient and elegant.
-  void init(Gui *gui, const char *label, float *value, int min, int max) {
+  void init(Gui *gui, const char *label, float *value, int min = 0, int max = 1,
+            int multiplier = 1, Format format = Format_Float) {
     this->gui = gui;
     this->label = label;
     this->value = value;
     this->min = min;
     this->max = max;
+    this->multiplier = multiplier;
+    this->format = format;
   }
 
   void layout();
@@ -43,18 +52,25 @@ public:
 private:
   const char *label;
   float *value;
+  name_t str_value;
   void update_value(const float);
-  int min, max;
+  int min, max, multiplier;
+  Format format;
 
   // sizes
   ImVec2 item_size;
-  ImVec2 SLIDER_SIZE;
-  int DOT_SIZE;
-  int ROW_GAP;
+  ImVec2 slider_size;
+  int dot_size;
+  int row_gap;
+  int amount_gap;
 
   // positions
-  ImVec2 label_p, amout_p, slider_p0, slider_p1, slider_active_p0,
-      slider_active_p1;
+  ImVec2 label_p;
+  ImVec2 amount_p;
+  ImVec2 slider_p0;
+  ImVec2 slider_p1;
+  ImVec2 slider_active_p0;
+  ImVec2 slider_active_p1;
 
   ::Component::Sprite knob;
 

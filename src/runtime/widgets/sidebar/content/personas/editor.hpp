@@ -15,7 +15,7 @@
 #include "runtime/widgets/input/renderer.hpp"
 #include "runtime/widgets/motivation_overview.hpp"
 #include "runtime/widgets/sidebar/content/content.hpp"
-#include "runtime/widgets/sidebar/content/editor_section.hpp"
+#include "runtime/widgets/sidebar/content/section_header.hpp"
 
 namespace Widget {
 
@@ -54,7 +54,7 @@ public:
 private:
   const int ROW_GAP =
       gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large));
-  
+
   MotivationOverview::Component overview;
   ::Motivation *motivation;
 
@@ -66,12 +66,12 @@ private:
   static constexpr uint8_t SECTIONS_COUNT = 4;
 
   struct Sections {
-    const char *label;
+    SectionHeader::Component section_header;
     Input::List input_list;
     Input::Renderer::Component input_renderer;
   } sections[SECTIONS_COUNT] = {
       {
-          .label = "Motivations",
+          .section_header = {gui, "Motivations"},
           .input_renderer = {gui, &sections[0].input_list},
           .input_list =
               {
@@ -130,7 +130,7 @@ private:
               },
       },
       {
-          .label = "Social Behavior",
+          .section_header = {gui, "Social Behavior"},
           .input_renderer = {gui, &sections[1].input_list},
           .input_list =
               {
@@ -149,7 +149,7 @@ private:
               },
       },
       {
-          .label = "Agency",
+          .section_header = {gui, "Agency"},
           .input_renderer = {gui, &sections[3].input_list},
           .input_list =
               {
@@ -178,7 +178,7 @@ private:
               },
       },
       {
-          .label = "Density",
+          .section_header = {gui, "Density"},
           .input_renderer = {gui, &sections[4].input_list},
           .input_list =
               {
