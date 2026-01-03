@@ -31,8 +31,11 @@ class Component : public Widget, public Layout::Window {
 
 public:
   Component(const char *, Gui *, ::Heatmap *[Type_COUNT]);
-  void listen_update();
+
+  void layout();
   void draw();
+
+  void listen_update();
   void require_update() { state |= State_RequireUpdate; };
 
   /*
@@ -59,7 +62,7 @@ public:
   void enable() {
     size = init_size;
     flag_disable(State_Hidden, &state);
-    
+
     for (uint8_t i = 0; i < Type_COUNT; i++)
       heatmaps[i].update_relative_motivations();
   }
@@ -70,7 +73,8 @@ private:
   unsigned int state = State_None;
   UI::Frame list_frame;
 
-  ImVec2 position, size, init_size;
+  ImVec2 list_position, list_window_position, size, init_size;
+  name_t list_name;
 
   void draw_list();
 };

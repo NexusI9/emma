@@ -28,7 +28,7 @@ public:
   StaticListStatus add_callback(on_tool_change, void *);
 
 private:
-  static constexpr uint8_t TOOLS_COUNT = 5;
+  static constexpr uint8_t TOOLS_COUNT = 4;
 
   ::Component::Sprite background, selector;
 

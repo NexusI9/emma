@@ -4,6 +4,9 @@ ViewportManager g_viewport_manager = {0, .scale = 1.0f};
 
 void viewport_update(ViewportManager *vp) {
 
+  if (vp->state == ViewportState_Freeze)
+    return;
+
   static const float threshold = 5.0f;
 
   float wheel_y = (fabs(input_wheel_y()) < threshold ? 0.0f : input_wheel_y());
@@ -21,8 +24,7 @@ void viewport_update(ViewportManager *vp) {
   } else {
 
     float old_scale = vp->scale;
-    float new_scale =
-        vp->scale * (1.0f + wheel_y * vp->zoom_sensitivity);
+    float new_scale = vp->scale * (1.0f + wheel_y * vp->zoom_sensitivity);
 
     // Clamp scale (optional)
     new_scale = glm_clamp(new_scale, 0.1f, 10.0f);

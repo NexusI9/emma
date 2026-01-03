@@ -21,7 +21,7 @@
   _(Accomplishment)
 
 #define MOTIVATION_HEATMAP(_)                                                  \
-  _(Excitment)                                                                 \
+  _(Excitement)                                                                \
   _(SocialBounding)                                                            \
   _(Friction)                                                                  \
   _(Reward)

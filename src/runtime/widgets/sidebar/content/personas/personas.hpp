@@ -39,19 +39,19 @@ public:
   }
 
 private:
-  const ImVec2 padding =
+  const ImVec2 PADDING =
       gui_scale_im_vec2(gui, ImVec2(emma_size(ThemeEmmaSize_Space_Medium),
                                     emma_size(ThemeEmmaSize_Space_Large)));
 
-  const ImVec2 size = gui_scale_im_vec2(gui, ImVec2(311, 66));
-  const float radius = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
-  const float thickness =
+  const ImVec2 SIZE = gui_scale_im_vec2(gui, ImVec2(350, 66));
+  const float RADIUS = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
+  const float THICKNESS =
       gui_scale(gui, emma_size(ThemeEmmaSize_Width_Border_Base));
 
-  const float base_y =
+  const float BASE_Y =
       gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_4));
 
-  const float gap = gui_scale(gui, emma_size(ThemeEmmaSize_Space_Large));
+  const float GAP = gui_scale(gui, emma_size(ThemeEmmaSize_Space_Large));
 
   struct persona {
     ::Component::Sprite avatar;

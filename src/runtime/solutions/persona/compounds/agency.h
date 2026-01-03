@@ -5,11 +5,13 @@
 typedef enum {
   CompoundPersonaAgencyFeebackSpan_Short,
   CompoundPersonaAgencyFeebackSpan_Long,
+  CompoundPersonaAgencyFeebackSpan_COUNT,
 } CompoundPersonaAgencyFeebackSpan;
 
 typedef enum {
   CompoundPersonaAgencyLearningCurve_Gradual,
   CompoundPersonaAgencyLearningCurve_Instant,
+  CompoundPersonaAgencyLearningCurve_COUNT,
 } CompoundPersonaAgencyLearningCurve;
 
 typedef struct {
@@ -19,6 +21,9 @@ typedef struct {
   float risk_tolerance;
 
 } CompoundPersonaAgency;
+
+static const char *COMPOUND_PERSONA_FEEDBACK_SPAN_LABELS[] = {"Short", "Long"};
+static const char *COMPOUND_PERSONA_LEARNING_CURVE_LABELS[] = {"Gradual", "Instant"};
 
 /*
   Persona with a short feedback span preference and high risk tolerance will be

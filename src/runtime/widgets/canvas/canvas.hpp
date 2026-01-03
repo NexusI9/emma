@@ -92,7 +92,6 @@ private:
   void draw_connectors();
 
   bool disable_creation();
-  bool disable_selection();
 };
 
 } // namespace Canvas

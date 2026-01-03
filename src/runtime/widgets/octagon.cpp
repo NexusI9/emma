@@ -39,14 +39,20 @@ ImU32 Widget::Octagon::Component::vertex_color_rgb(const int vertex) {
   }
 }
 
-void Widget::Octagon::Component::draw_labels(ImDrawList *draw_list) {
+void Widget::Octagon::Component::draw_labels(ImDrawList *draw_list,
+                                             ImVec2 origin,
+                                             transform_callback transform_x,
+                                             transform_callback transform_y) {
 
   for (int i = 0; i < OCTAGON_VERTEX_COUNT; i++) {
     // Calculate position
-    ImVec2 vert_pos = ImVec2(vpx(node->outer_vertices[i][0]),
-                             vpy(node->outer_vertices[i][1]));
-    ImVec2 label_pos = ImVec2(vpx(node->label_coordinates[i][0]),
-                              vpy(node->label_coordinates[i][1]));
+    ImVec2 vert_pos = ImVec2(transform_x(node->outer_vertices[i][0]),
+                             transform_y(node->outer_vertices[i][1]));
+    vert_pos = im_vec2_add(vert_pos, origin);
+
+    ImVec2 label_pos = ImVec2(transform_x(node->label_coordinates[i][0]),
+                              transform_y(node->label_coordinates[i][1]));
+    label_pos = im_vec2_add(label_pos, origin);
 
     draw_list->AddText(
         label_pos,
@@ -56,19 +62,25 @@ void Widget::Octagon::Component::draw_labels(ImDrawList *draw_list) {
   }
 }
 
-void Widget::Octagon::Component::draw_inner_shape(ImDrawList *draw_list) {
+void Widget::Octagon::Component::draw_inner_shape(
+    ImDrawList *draw_list, ImVec2 origin, transform_callback transform_x,
+    transform_callback transform_y) {
 
   ImVec2 vp_vertices[OCTAGON_VERTEX_COUNT];
 
-  for (uint8_t i = 0; i < OCTAGON_VERTEX_COUNT; i++)
-    vp_vertices[i] = ImVec2(vpx(node->inner_vertices[i][0]),
-                            vpy(node->inner_vertices[i][1]));
+  for (uint8_t i = 0; i < OCTAGON_VERTEX_COUNT; i++) {
+    vp_vertices[i] = ImVec2(transform_x(node->inner_vertices[i][0]),
+                            transform_y(node->inner_vertices[i][1]));
+    vp_vertices[i] = im_vec2_add(vp_vertices[i], origin);
+  }
 
   draw_list->AddConvexPolyFilled(vp_vertices, OCTAGON_VERTEX_COUNT,
                                  im_color(node->inner_color));
 }
 
-void Widget::Octagon::Component::draw_outer_gradient(ImDrawList *draw_list) {
+void Widget::Octagon::Component::draw_outer_gradient(
+    ImDrawList *draw_list, ImVec2 origin, transform_callback transform_x,
+    transform_callback transform_y) {
 
   static const int num_segments = OCTAGON_VERTEX_COUNT;
   static const int num_vertices =
@@ -76,14 +88,8 @@ void Widget::Octagon::Component::draw_outer_gradient(ImDrawList *draw_list) {
   static const int num_indices =
       num_segments * 3; // 8 triangles * 3 indices each
 
-  // Define the colors (using ImU32 format: ABGR by default in ImGui)
-  // You can use ImGui::GetColorU32() to convert common formats
-
   const ImColor COLOR_CENTER =
       im_color((float *)OCTAGON_COLOR_OFF); // White (Center)
-
-  // We'll calculate the outer colors using a function for smooth
-  // interpolation
 
   // Allocate space in the draw list buffers
   draw_list->PrimReserve(num_indices, num_vertices);
@@ -92,22 +98,26 @@ void Widget::Octagon::Component::draw_outer_gradient(ImDrawList *draw_list) {
 
   // a. Center Vertex (Vertex 0)
   ImDrawVert *center_vtx = draw_list->_VtxWritePtr;
-  center_vtx->pos = ImVec2(vpx(node->position[0]), vpy(node->position[1]));
+  center_vtx->pos =
+      ImVec2(transform_x(node->position[0]), transform_y(node->position[1]));
+  center_vtx->pos = im_vec2_add(center_vtx->pos, origin);
+
   center_vtx->uv = ImGui::GetFontTexUvWhitePixel(); // Standard texture
                                                     // coordinate
   center_vtx->col = COLOR_CENTER;
 
-  // Advance the pointer to the start of the outer vertices
   draw_list->_VtxWritePtr++;
 
   // b. Outer Vertices (Vertices 1 to 8)
   for (int i = 0; i < num_segments; i++) {
     // Calculate position
-    float angle = i * (2.0f * GLM_PI / num_segments);
-    ImVec2 vtx_pos = ImVec2(vpx(node->outer_vertices[i][0]),
-                            vpy(node->outer_vertices[i][1]));
+    const float angle = i * (2.0f * GLM_PI / num_segments);
 
-    ImU32 vtx_color = im_color(node->vertices_colors[i]);
+    ImVec2 vtx_pos = ImVec2(transform_x(node->outer_vertices[i][0]),
+                            transform_y(node->outer_vertices[i][1]));
+    vtx_pos = im_vec2_add(vtx_pos, origin);
+
+    const ImU32 vtx_color = im_color(node->vertices_colors[i]);
 
     // Populate the vertex structure
     ImDrawVert *vtx = draw_list->_VtxWritePtr;
@@ -144,13 +154,19 @@ void Widget::Octagon::Component::draw_outer_gradient(ImDrawList *draw_list) {
   draw_list->_VtxCurrentIdx += num_vertices;
 }
 
-void Widget::Octagon::Component::draw() {
+void Widget::Octagon::Component::draw(ImVec2 origin,
+                                      transform_callback transform_x,
+                                      transform_callback transform_y) {
 
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
-  draw_outer_gradient(draw_list);
-  draw_inner_shape(draw_list);
+  draw_outer_gradient(draw_list, origin, transform_x, transform_y);
+  draw_inner_shape(draw_list, origin, transform_x, transform_y);
 
   if (viewport_get_scale() > 0.8f)
-    draw_labels(draw_list);
+    draw_labels(draw_list, origin, transform_x, transform_y);
+}
+
+void Widget::Octagon::Component::draw_viewport() {
+  draw(ImVec2(0, 0), vpx, vpy);
 }

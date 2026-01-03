@@ -42,10 +42,6 @@ void Widget::Canvas::Create::begin() {
         frame_resize();
         break;
 
-      case Mode_Module:
-        module();
-        break;
-
       case Mode_Shape:
         shape();
         break;
@@ -122,8 +118,6 @@ void Widget::Canvas::Create::frame_release() {
 
   new_frame = nullptr;
 }
-
-void Widget::Canvas::Create::module() {}
 
 void Widget::Canvas::Create::pod() {
 

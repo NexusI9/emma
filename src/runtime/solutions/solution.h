@@ -39,7 +39,6 @@
                                                             '-------------'
 */
 
-
 typedef struct Solution Solution;
 typedef float (*solution_formula)(const Solution *);
 
@@ -55,7 +54,7 @@ typedef float (*solution_formula)(const Solution *);
   static inline float solution_##Label##_get_scarcity(const Solution *);           \
   static inline float solution_##Label##_get_ownership(const Solution *);          \
   static inline float solution_##Label##_get_accomplishment(const Solution *);     \
-  static inline float solution_##Label##_get_excitment(const Solution *);          \
+  static inline float solution_##Label##_get_excitement(const Solution *);         \
   static inline float solution_##Label##_get_social_bounding(const Solution *);    \
   static inline float solution_##Label##_get_friction(const Solution *);           \
   static inline float solution_##Label##_get_reward(const Solution *);

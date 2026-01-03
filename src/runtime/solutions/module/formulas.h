@@ -82,22 +82,22 @@ float solution_module_get_accomplishment(const Solution *solution) {
   return accomplishment / solution->module.actions.count;
 }
 
-float solution_module_get_excitment(const Solution *solution) {
+float solution_module_get_excitement(const Solution *solution) {
 
   static const float w_reward = 0.8f;
   static const float w_social = 0.2f;
   static const float w_experience = 0.8f;
 
-  float reward_excitment = 0.0f;
+  float reward_excitement = 0.0f;
   for (size_t i = 0; i < solution->module.actions.count; i++)
-    reward_excitment += compound_module_reward_get_accomplishment(
+    reward_excitement += compound_module_reward_get_accomplishment(
                             &solution->module.actions.entries[i].reward) *
                         compound_module_action_get_role_weight(
                             &solution->module.actions.entries[i].action);
 
-  reward_excitment /= solution->module.actions.count;
+  reward_excitement /= solution->module.actions.count;
 
-  return w_reward * reward_excitment +
+  return w_reward * reward_excitement +
          w_social *
              compound_module_social_get_excitement(&solution->module.social) +
          w_experience *

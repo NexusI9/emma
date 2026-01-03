@@ -14,6 +14,11 @@ static const float OCTAGON_INNER_ANGLE = GLM_PI * (3.0f / 8.0f);
 static const color OCTAGON_COLOR_OFF = {55 / 255.f, 64 / 255.f, 75 / 255.f,
                                         0.5f};
 
+static const char *OCTAGON_LABELS_OCTALYSIS[OCTAGON_VERTEX_COUNT] = {
+    "Epic Meaning", "Empowerment", "Social Influence", "Unpredictability",
+    "Avoidance",    "Scarcity",    "Ownership",        "Accomplishment",
+};
+
 typedef enum {
   OctagonStatus_Success,
   OctagonStatus_OutOfBound,
@@ -23,7 +28,7 @@ typedef enum {
 typedef struct {
   const char *label;
   const float scale;
-  const color inner_color, outer_color;
+  const float *inner_color, *outer_color;
   const float inner_radius;
   const vec2 position;
 } OctagonDescriptor;
@@ -45,7 +50,7 @@ typedef struct {
 
   vec2 position;
   float scale;
-  color inner_color, outer_color;
+  const float *inner_color, *outer_color;
   float inner_radius;
 } Octagon;
 
@@ -142,14 +147,14 @@ static inline OctagonStatus octagon_set_inner_radius(Octagon *oct,
 }
 
 static inline OctagonStatus octagon_set_inner_color(Octagon *oct,
-                                                    const color value) {
-  glm_vec4_copy((float *)value, oct->inner_color);
+                                                    const float *value) {
+  oct->inner_color = value;
   return OctagonStatus_Success;
 }
 
 static inline OctagonStatus octagon_set_outer_color(Octagon *oct,
-                                                    const color value) {
-  glm_vec4_copy((float *)value, oct->outer_color);
+                                                    const float *value) {
+  oct->outer_color = value;
   return OctagonStatus_Success;
 }
 

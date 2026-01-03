@@ -17,6 +17,8 @@ Widget::SideBar::Component::Component(const char *label, Gui *gui,
       content{
           {gui},
           {gui},
+          {gui},
+          {gui},
       } {
 
   layout();
@@ -37,10 +39,6 @@ void Widget::SideBar::Component::layout() {
 
   shadow_p0 = ImVec2(panel[0].p1.x, panel[0].p0.y);
   shadow_p1 = ImVec2(shadow_p0.x + gui_scale(gui, 32), default_size.y);
-
-  // DEBUG
-  printf("shadow p0: %f | %f\n", shadow_p0.x, shadow_p0.y);
-  printf("shadow p1: %f | %f\n", shadow_p1.x, shadow_p1.y);
 
   static const ImVec2 buttons_base_position =
       ImVec2(tab_button_offset, gui_scale(gui, 112));
@@ -67,11 +65,12 @@ void Widget::SideBar::Component::draw() {
   }
 
   if (state == State_Level_2) {
+
     panel[1].begin("Sidepanel Level 2");
-    ImGui::Text("Content 2");
     draw_shadow_bar();
-    contents[active_tab]->draw();
+    sub_contents[active_tab]->draw();
     panel[1].end();
+
     draw_shadow_bar();
   }
 
@@ -136,6 +135,7 @@ void Widget::SideBar::on_module_click(const ModuleType type, bool active,
   if (active) {
     sidebar->set_state(Component::State_Level_2);
     // update lv2 content
+
   } else {
     sidebar->set_state(Component::State_Level_1);
   }
@@ -149,8 +149,8 @@ void Widget::SideBar::on_persona_click(const PersonaType type, bool active,
   Component *sidebar = (Component *)data;
 
   if (active) {
+    sidebar->content.personas_editor.set_persona(type);
     sidebar->set_state(Component::State_Level_2);
-    // update lv2 content
   } else {
     sidebar->set_state(Component::State_Level_1);
   }

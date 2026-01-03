@@ -54,10 +54,15 @@ void Widget::Canvas::Component::draw() {
   grid_background.draw_texture(gui->pass_encoder);
   toolbar_glow.draw();
 
-  if (disable_selection())
+  if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_None)) {
     module.selection.freeze();
-  else
+    module.transform.freeze();
+    viewport_freeze();
+  } else {
     module.selection.unfreeze();
+    module.transform.unfreeze();
+    viewport_unfreeze();
+  }
 
   // Main Canvas Entities
   module.transform.begin();
@@ -121,7 +126,7 @@ void Widget::Canvas::Component::draw_frames_octagon() {
   for (size_t i = 0; i < node->frames[CanvasFrameState_Octagon].count; i++) {
     ::Frame *frame = allocator_frame_entry(
         node->frames[CanvasFrameState_Octagon].entries[i]);
-    Octagon::Component(allocator_octagon_entry(frame->octagon)).draw();
+    Octagon::Component(allocator_octagon_entry(frame->octagon)).draw_viewport();
   }
 }
 
@@ -233,8 +238,4 @@ bool Widget::Canvas::Component::disable_creation() {
   return heatmap_displayed || transform_box_dragging ||
          transform_module_active || selection_active ||
          !ImGui::IsWindowHovered(ImGuiHoveredFlags_None);
-}
-
-bool Widget::Canvas::Component::disable_selection() {
-  return !ImGui::IsWindowHovered(ImGuiHoveredFlags_None);
 }

@@ -8,8 +8,10 @@
 #include "runtime/node/canvas/core.h"
 #include "runtime/node/persona.h"
 #include "runtime/widgets/sidebar/content/content.hpp"
-#include "runtime/widgets/sidebar/content/modules.hpp"
-#include "runtime/widgets/sidebar/content/personas.hpp"
+#include "runtime/widgets/sidebar/content/modules/editor.hpp"
+#include "runtime/widgets/sidebar/content/modules/modules.hpp"
+#include "runtime/widgets/sidebar/content/personas/editor.hpp"
+#include "runtime/widgets/sidebar/content/personas/personas.hpp"
 #include "runtime/widgets/sidebar/panel.hpp"
 #include "runtime/widgets/sidebar/tab_button.hpp"
 
@@ -81,6 +83,8 @@ public:
   struct {
     Content::Modules::Component modules;
     Content::Personas::Component personas;
+    Content::Modules::Editor::Component modules_editor;
+    Content::Personas::Editor::Component personas_editor;
   } content;
 
 private:
@@ -101,6 +105,11 @@ private:
   Content::Component *contents[TABS_COUNT] = {
       &content.modules,
       &content.personas,
+  };
+
+  Content::Component *sub_contents[TABS_COUNT] = {
+      &content.modules_editor,
+      &content.personas_editor,
   };
 
   STATIC_LIST(TabUpdateCallbackEntry, CALLBACK_CAPACITY) tab_update_callbacks;

@@ -10,7 +10,6 @@ Widget::ToolBar::Component::Component(const char *label, Gui *gui,
       selector(view, ui_sprite(UISprite_Toolbar_Icon_Selector)),
       tools{
           Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Frame)),
-          Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Cursor)),
           Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Persona)),
           Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Note)),
           Button::Component(view, ui_sprite(UISprite_Toolbar_Icon_Shape)),

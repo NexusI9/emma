@@ -21,7 +21,7 @@
     [ MotivationType_Scarcity         ]  =   solution_##FuncLabel##_get_scarcity,          \
     [ MotivationType_Ownership        ]  =   solution_##FuncLabel##_get_ownership,         \
     [ MotivationType_Accomplishment   ]  =   solution_##FuncLabel##_get_accomplishment,    \
-    [ MotivationType_Excitment        ]  =   solution_##FuncLabel##_get_excitment,         \
+    [ MotivationType_Excitement       ]  =   solution_##FuncLabel##_get_excitement,        \
     [ MotivationType_SocialBounding   ]  =   solution_##FuncLabel##_get_social_bounding,   \
     [ MotivationType_Friction         ]  =   solution_##FuncLabel##_get_friction,          \
     [ MotivationType_Reward           ]  =   solution_##FuncLabel##_get_reward,            \

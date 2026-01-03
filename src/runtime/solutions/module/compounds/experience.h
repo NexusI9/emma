@@ -1,21 +1,29 @@
 #ifndef _EMMA_MODULE_COMPOUND_EXPERIENCE_H_
 #define _EMMA_MODULE_COMPOUND_EXPERIENCE_H_
 
-#include "runtime/solutions/utils.h"
 #include "runtime/solutions/module/compounds/action.h"
+#include "runtime/solutions/utils.h"
 #include <inttypes.h>
 
 typedef enum {
   CompoundModuleExperienceImpact_Trivial,
   CompoundModuleExperienceImpact_Routine,
   CompoundModuleExperienceImpact_Important,
+  CompoundModuleExperienceImpact_COUNT,
 } CompoundModuleExperienceImpact;
 
 typedef enum {
   CompoundModuleExperienceLearnability_Easy,
   CompoundModuleExperienceLearnability_Medium,
   CompoundModuleExperienceLearnability_Hard,
+  CompoundModuleExperienceLearnability_COUNT,
 } CompoundModuleExperienceLearnability;
+
+static const char *COMPOUND_MODULE_IMPACT_LABELS[] = {"Trivial", "Routine",
+                                                      "Important"};
+
+static const char *COMPOUND_MODULE_LEARNABILITY_LABELS[] = {"Easy", "Medium",
+                                                            "Hard"};
 
 typedef struct {
   CompoundModuleExperienceImpact impact;

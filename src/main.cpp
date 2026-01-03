@@ -16,6 +16,7 @@
 #include "runtime/node/motivation.h"
 #include "runtime/node/octagon.h"
 #include "runtime/node/persona.h"
+#include "runtime/solutions/globals.h"
 #include <emscripten/emscripten.h>
 
 void create_pod(Canvas *canvas) {
@@ -122,7 +123,7 @@ void create_heatmaps(Canvas *canvas, Heatmap dest[4]) {
                   .label = "Excitment",
                   .axes = {"Boredom", "Thrill"},
                   .background = {23.f / 255, 21.f / 255, 44.f / 255, 0.6f},
-                  .motivation = MotivationType_Excitment,
+                  .motivation = MotivationType_Excitement,
               },
           .color_map =
               {
@@ -241,6 +242,7 @@ int main() {
 
   ContextDescriptor ctx = {.html_target = "canvas"};
   context_init(&ctx);
+  input_set_wheel_sensitivity(0.1);
 
   Renderer *renderer = rem_new_renderer();
   RendererCreateDescriptor rd = {
@@ -262,6 +264,8 @@ int main() {
   atlas_create();
 
   allocator_init();
+  global_solutions_init();
+
   viewport_set_pan_sensitivity(60.0f);
   viewport_set_zoom_sensitivity(0.001f);
   unit_set_step(40.0f);

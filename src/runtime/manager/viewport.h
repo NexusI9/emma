@@ -5,7 +5,13 @@
 #include "nkengine/include/input.h"
 #include <cglm/cglm.h>
 
+typedef enum {
+  ViewportState_None,
+  ViewportState_Freeze,
+} ViewportState;
+
 typedef struct {
+  ViewportState state;
   float pan_sensitivity;
   float zoom_sensitivity;
   vec2 pan;
@@ -17,6 +23,13 @@ extern ViewportManager g_viewport_manager;
 EXTERN_C_BEGIN
 
 void viewport_update(ViewportManager *);
+
+static inline void viewport_freeze() {
+  g_viewport_manager.state = ViewportState_Freeze;
+}
+static inline void viewport_unfreeze() {
+  g_viewport_manager.state = ViewportState_None;
+}
 
 static inline void viewport_set_pan_sensitivity(const float value) {
   g_viewport_manager.pan_sensitivity = value;

@@ -39,7 +39,7 @@
 
    === Heatmap ===
 
-   Excitment:
+   Excitement:
     [-] Introverted and moderate mindset
     [+] Extraverted and highly expressive personalities
 
@@ -65,7 +65,7 @@
   _(scarcity)                                                                  \
   _(ownership)                                                                 \
   _(accomplishment)                                                            \
-  _(excitment)                                                                 \
+  _(excitement)                                                                \
   _(social_bounding)                                                           \
   _(friction)                                                                  \
   _(reward)

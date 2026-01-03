@@ -76,7 +76,23 @@ typedef enum {
   CompoundModuleRewardAmountType_Undefined,
   CompoundModuleRewardAmountType_Fixed,
   CompoundModuleRewardAmountType_Range,
+  CompoundModuleRewardAmountType_COUNT,
 } CompoundModuleRewardAmountType;
+
+static const char *COMPOUND_MODULE_REWARD_AMOUNT_LABELS[] = {"Undefined",
+                                                             "Fixed", "Range"};
+
+static const char *COMPOUND_MODULE_REWARD_TYPE_LABELS[] = {
+#define _(Label, Amount, Weight) #Label,
+    REWARD_TYPES(_)
+#undef _
+};
+
+static const char *COMPOUND_MODULE_REWARD_TIME_LABELS[] = {
+#define _(Label, Amount, Weight) #Label,
+    REWARD_CYCLES(_)
+#undef _
+};
 
 typedef struct {
 

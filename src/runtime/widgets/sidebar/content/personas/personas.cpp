@@ -1,4 +1,5 @@
 #include "personas.hpp"
+#include "nkengine/vendor/imgui/imgui_internal.h"
 #include "resources/theme.emma.h"
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/theme.h"
@@ -49,7 +50,7 @@ void Widget::SideBar::Content::Personas::Component::draw() {
 
   draw_header("Personas");
 
-  for (uint8_t i = 0; i < PersonaType_COUNT; i++)
+  for (uint8_t i = 0; i < PersonaType_COUNT; i++) {
     if (draw_card(&personas[i], active_persona == i)) {
 
       active_persona = (active_persona == i) ? -1 : i;
@@ -59,41 +60,36 @@ void Widget::SideBar::Content::Personas::Component::draw() {
             (PersonaType)i, active_persona == i,
             persona_click_callbacks.entries[j].data);
     }
+    ImGui::Dummy(ImVec2(0, GAP));
+  }
 }
 
 bool Widget::SideBar::Content::Personas::Component::draw_card(struct persona *p,
                                                               bool active) {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
-  ImVec2 win_pos = ImGui::GetWindowPos();
+  ImVec2 origin = ImGui::GetCursorScreenPos();
 
-  ImVec2 frame_p0 =
-      ImVec2(win_pos.x + p->frame_coo.p0[0], win_pos.y + p->frame_coo.p0[1]);
+  ImVec2 frame_p0 = im_vec2_add(im_vec2(p->frame_coo.p0), origin);
+  ImVec2 frame_p1 = im_vec2_add(im_vec2(p->frame_coo.p1), origin);
 
-  ImVec2 frame_p1 =
-      ImVec2(win_pos.x + p->frame_coo.p1[0], win_pos.y + p->frame_coo.p1[1]);
+  ImGui::ItemSize(SIZE);
 
   dl->AddRectFilled(
       frame_p0, frame_p1,
       im_color(emma_color(active ? ThemeEmmaColor_Background_Brand_Strong
                                  : ThemeEmmaColor_Surface_Low)),
-      radius);
+      RADIUS);
 
   dl->AddRect(
       frame_p0, frame_p1,
       im_color(emma_color(active ? ThemeEmmaColor_Border_Brand_Base
                                  : ThemeEmmaColor_Border_Subtle_On_Dark)),
-      radius, 0, thickness);
+      RADIUS, 0, THICKNESS);
 
-  dl->AddImage((ImTextureRef)p->avatar.get_view(),
-               ImVec2(win_pos.x + p->avatar.get_start().x,
-                      win_pos.y + p->avatar.get_start().y),
-               ImVec2(win_pos.x + p->avatar.get_end().x,
-                      win_pos.y + p->avatar.get_end().y),
-               im_vec2((float *)p->avatar.region->uv0),
-               im_vec2((float *)p->avatar.region->uv1));
+  p->avatar.draw_at(origin);
 
-  dl->AddText(ImVec2(win_pos.x + p->label_coo.x, win_pos.y + p->label_coo.y),
+  dl->AddText(im_vec2_add(p->label_coo, origin),
               im_color(emma_color(ThemeEmmaColor_Text_On_Dark)), p->label);
 
   if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
@@ -115,20 +111,16 @@ void Widget::SideBar::Content::Personas::Component::layout() {
 
     p->label = persona_labels[i];
 
-    ImVec2 frame_start = ImVec2(0.0f, base_y + i * (size.y + gap));
-
     // frame coordinates
-    glm_vec2_copy((vec2){frame_start.x, frame_start.y}, p->frame_coo.p0);
-    glm_vec2_copy((vec2){size.x, frame_start.y + size.y}, p->frame_coo.p1);
+    glm_vec2_copy(GLM_VEC2_ZERO, p->frame_coo.p0);
+    glm_vec2_copy((vec2){SIZE.x, SIZE.y}, p->frame_coo.p1);
 
     // avatar coordinates
-    p->avatar.set_position(
-        ImVec2(frame_start.x + padding.x, frame_start.y + padding.y / 2.0f),
-        GuiSpriteAnchor_TopLeft);
+    p->avatar.set_position(ImVec2(PADDING.x, PADDING.y / 2.0f),
+                           GuiSpriteAnchor_TopLeft);
 
     // label coordinates
-    p->label_coo =
-        ImVec2(p->avatar.get_end().x + gap,
-               frame_start.y + size.y / 2 - (float)gui_scale(gui, 8));
+    p->label_coo = ImVec2(p->avatar.get_end().x + GAP,
+                          SIZE.y / 2 - (float)gui_scale(gui, 8));
   }
 }

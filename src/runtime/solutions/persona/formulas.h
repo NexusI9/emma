@@ -78,9 +78,9 @@ float solution_persona_get_accomplishment(const Solution *solution) {
   // clang-format on
 }
 
-float solution_persona_get_excitment(const Solution *solution) {
+float solution_persona_get_excitement(const Solution *solution) {
 
-  return compound_persona_motivation_get_excitment(
+  return compound_persona_motivation_get_excitement(
       &solution->persona.motivation);
 }
 

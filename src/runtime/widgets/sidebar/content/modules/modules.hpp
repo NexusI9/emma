@@ -77,24 +77,23 @@ public:
   }
 
 private:
-  const WGPUTextureView module_view =
+  const WGPUTextureView VIEW =
       texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_Module);
 
-  const float frame_rounding =
-      gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
+  const float RADIUS = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
 
-  const float thickness =
+  const float THICKNESS =
       gui_scale(gui, emma_size(ThemeEmmaSize_Width_Border_Base));
 
-  const float cell_base_width = 90;
-  const ImVec2 cell_size = ImVec2(gui_scale(gui, cell_base_width),
-                                  gui_scale(gui, cell_base_width * 3 / 4));
+  const float CELL_BASE_WIDTH = 105;
+  const ImVec2 CELL_SIZE = ImVec2(gui_scale(gui, CELL_BASE_WIDTH),
+                                  gui_scale(gui, CELL_BASE_WIDTH * 3 / 4));
 
   // cache coordinates
   // TODO: Convert those to UINode
   // clang-format off
-  ImVec2 modules_size[ModuleType_COUNT],
-         modules_position[ModuleType_COUNT],
+  ImVec2 modules_p0[ModuleType_COUNT],
+         modules_p1[ModuleType_COUNT],
 
          frames_p0[ModuleType_COUNT],
          frames_p1[ModuleType_COUNT],

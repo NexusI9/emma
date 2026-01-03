@@ -25,7 +25,6 @@ public:
 
   typedef enum {
     Mode_Frame,
-    Mode_Module,
     Mode_Pod,
     Mode_Note,
     Mode_Shape,
@@ -57,7 +56,6 @@ private:
   void frame_create();
   void frame_resize();
   void frame_release();
-  void module();
   void pod();
   void shape();
   void note();

@@ -24,8 +24,8 @@ public:
     ImGui::SetWindowFontScale(1.3);
     ImGui::Text("%s", label);
     ImGui::SetWindowFontScale(1);
-    ImGui::Dummy(ImVec2(
-        0, gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large_3))));
+    ImGui::Dummy(
+        ImVec2(0, gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large))));
   }
 };
 

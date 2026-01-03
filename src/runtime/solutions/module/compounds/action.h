@@ -9,12 +9,16 @@ typedef enum {
   CompoundModuleActionRole_Primary,
   CompoundModuleActionRole_Secondary,
   CompoundModuleActionRole_Tertiary,
+  CompoundModuleActionRole_COUNT,
 } CompoundModuleActionRole;
 
 typedef struct {
   const char *label;
   CompoundModuleActionRole role;
 } CompoundModuleAction;
+
+static const char *COMPOUND_MODULE_ACTION_ROLE_LABELS[] = {
+    "Primary", "Secondary", "Tertiary"};
 
 static inline float
 compound_module_action_get_role_weight(const CompoundModuleAction *action) {

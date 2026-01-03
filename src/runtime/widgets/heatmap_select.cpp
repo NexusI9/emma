@@ -12,13 +12,19 @@ Widget::Heatmap::Selector::Component::Component(const char *label, Gui *gui,
                                       {gui, heatmaps[2]},
                                       {gui, heatmaps[3]},
                                   } {
+  name_compose(list_name, "%slist", label);
+  layout();
+}
 
-  position = ImVec2(gui_scale(gui, 1275), gui_scale(gui, 80));
+void Widget::Heatmap::Selector::Component::layout() {
+
   init_size =
       ImVec2(gui_scale(gui, context_width()), gui_scale(gui, context_height()));
   size = init_size;
 
   {
+    list_position = ImVec2(gui_scale(gui, 1275), gui_scale(gui, 80));
+
     list_frame = UI::Frame();
     list_frame.background_color = emma_im_color(ThemeEmmaColor_Surface_Lower);
     list_frame.border_color =
@@ -28,8 +34,10 @@ Widget::Heatmap::Selector::Component::Component(const char *label, Gui *gui,
                                       emma_size(ThemeEmmaSize_Space_Medium)));
     list_frame.border_radius =
         gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
-    list_frame.position = position;
-    list_frame.size = ImVec2(0, 0); // AUTO
+    list_frame.position = list_position;
+    list_frame.size = UI::Frame::SIZE_AUTO;
+
+    list_window_position = im_vec2_sub(list_position, list_frame.padding);
   }
 }
 
@@ -51,14 +59,25 @@ void Widget::Heatmap::Selector::Component::listen_update() {
 
 void Widget::Heatmap::Selector::Component::draw() {
 
-  UI::DockedWindow().Begin(label, ImVec2(0, 0), size);
-
-  if (!(State_Hidden & state)) {
-    heatmaps[active_heatmap].draw();
-    draw_list();
+  {
+    UI::DockedWindow().Begin(list_name, list_window_position, size,
+                             ImGuiWindowFlags_AlwaysAutoResize);
+    if (!(State_Hidden & state))
+      draw_list();
+    UI::DockedWindow().End();
   }
 
-  UI::DockedWindow().End();
+  {
+    // overlay part, need to set no inputs, so the heatmap doesn't obstruct the
+    // canvas and can still register wheel movement
+    UI::DockedWindow().Begin(label, ImVec2(0, 0), size,
+                             ImGuiWindowFlags_NoInputs);
+
+    if (!(State_Hidden & state))
+      heatmaps[active_heatmap].draw();
+
+    UI::DockedWindow().End();
+  }
 }
 
 void Widget::Heatmap::Selector::Component::draw_list() {

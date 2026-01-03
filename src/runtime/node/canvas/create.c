@@ -1,6 +1,8 @@
 #include "create.h"
 #include "core.h"
+#include "resources/theme.emma.h"
 #include "runtime/manager/allocator.h"
+#include "runtime/manager/theme.h"
 #include "runtime/manager/ui_sprite.h"
 #include "runtime/node/frame.h"
 #include "runtime/node/motivation.h"
@@ -8,11 +10,6 @@
 #include "runtime/systems/solution_system.h"
 #include "state.h"
 #include "transform.h"
-
-static const char *octalysis_labels[OCTAGON_VERTEX_COUNT] = {
-    "Epic Meaning", "Empowerment", "Social Influence", "Unpredictability",
-    "Avoidance",    "Scarcity",    "Ownership",        "Accomplishment",
-};
 
 typedef enum {
   CanvasFrameCreateFlags_None = 0,
@@ -54,7 +51,7 @@ Frame *canvas_create_frame_core(Canvas *canvas,
     Octagon *oct = canvas_create_octagon(canvas);
     octagon_update_vertices(oct);
 
-    octagon_set_labels(oct, octalysis_labels);
+    octagon_set_labels(oct, OCTAGON_LABELS_OCTALYSIS);
     octagon_update_labels_coordinates(oct);
 
     // Link octagon to frame
@@ -220,8 +217,8 @@ Octagon *canvas_create_octagon(Canvas *canvas) {
                          &canvas->octagons.count, oct->id);
 
   OctagonDescriptor oct_desc = {
-      .inner_color = {0.1f, 0.1, 0.1f, 1.0f},
-      .outer_color = {1.0f, 1.0f, 1.0f, 1.0f},
+      .inner_color = emma_color(ThemeEmmaColor_Surface_Lowest),
+      .outer_color = emma_color(ThemeEmmaColor_Surface_Highest),
       .inner_radius = 0.6f,
       .label = "Octagon",
       .position =
