@@ -19,7 +19,7 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
             .semantic =
                 {
                     .empowerment = 0,
-                    .epic_meaning = 3,
+                    .epic_meaning = 0.6,
                 },
             .social =
                 {
@@ -58,8 +58,8 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                 },
             .semantic =
                 {
-                    .empowerment = 3,
-                    .epic_meaning = 2,
+                    .empowerment = 0.6,
+                    .epic_meaning = 0.4,
                 },
             .social =
                 {
@@ -91,8 +91,8 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                 },
             .semantic =
                 {
-                    .empowerment = 5,
-                    .epic_meaning = 2,
+                    .empowerment = 1,
+                    .epic_meaning = 0.4,
                 },
             .social =
                 {
@@ -179,8 +179,8 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                 },
             .semantic =
                 {
-                    .empowerment = 2,
-                    .epic_meaning = 1,
+                    .empowerment = 0.4,
+                    .epic_meaning = 0.2,
                 },
             .social =
                 {
@@ -252,7 +252,7 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                 },
             .semantic =
                 {
-                    .empowerment = 5,
+                    .empowerment = 1,
                     .epic_meaning = 0,
                 },
             .social =
@@ -318,7 +318,7 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                 },
             .semantic =
                 {
-                    .empowerment = 5,
+                    .empowerment = 1,
                     .epic_meaning = 0,
                 },
             .social =

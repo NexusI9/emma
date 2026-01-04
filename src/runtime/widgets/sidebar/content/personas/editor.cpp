@@ -2,48 +2,7 @@
 #include "runtime/manager/allocator.h"
 #include "runtime/widgets/input/input.hpp"
 
-Widget::SideBar::Content::Personas::Editor::Component::Component(Gui *gui)
-    : Content::Component(gui), overview(gui) {
 
-  // WARNING make sure to monitor constructor call pattern
-  motivation = new_motivation();
-}
-
-void Widget::SideBar::Content::Personas::Editor::Component::layout() {}
-
-void Widget::SideBar::Content::Personas::Editor::Component::draw() {
-
-  draw_header("Persona Overview");
-  overview.draw();
-
-  ImGui::Dummy(ImVec2(0, ROW_GAP));
-  draw_header("Edit");
-
-  for (uint8_t i = 0; i < SECTIONS_COUNT; i++) {
-
-    // draw header
-    sections[i].section_header.draw();
-    ImGui::Dummy(ImVec2(0, ROW_GAP));
-
-    // draw input
-    sections[i].input_renderer.draw();
-    ImGui::Dummy(ImVec2(0, ROW_GAP));
-  }
-}
-
-void Widget::SideBar::Content::Personas::Editor::Component::
-    set_slider_static_attributes(Input::Descriptor *input) {
-
-  static constexpr float SLIDER_MIN = 0.0f;
-  static constexpr float SLIDER_MAX = 10.0f;
-  static constexpr float SLIDER_STEP = 1.0f;
-  static constexpr float SLIDER_MULTIPLIER = 10.0f;
-
-  input->slider.min = SLIDER_MIN;
-  input->slider.max = SLIDER_MAX;
-  input->slider.step = SLIDER_STEP;
-  input->slider.multiplier = SLIDER_MULTIPLIER;
-}
 
 /**
  Link each sections input descriptor values pointer with the right motivation
@@ -121,7 +80,8 @@ void Widget::SideBar::Content::Personas::Editor::Component::
         sizeof(button_values) / sizeof(button_values[0]);
 
     for (uint8_t i = 0; i < button_count; i++)
-      sections[2].input_list.entries[i].button_bar.selected = button_values[i];
+      sections[2].input_list.entries[i].button_bar.selected =
+          button_values[i];
   }
 
   // === Link Density ===
@@ -140,19 +100,3 @@ void Widget::SideBar::Content::Personas::Editor::Component::
   }
 }
 
-/**
-   Once the descriptors have the right values, we init and layout the input
-   renderer entries according to the previously set input. Note that the order
-   assign/link value ==> init/layout is important.
-   The overall flow is:
-
-   Select Persona => Fetch Info => Update Input DATA => Update Input Widget
- */
-void Widget::SideBar::Content::Personas::Editor::Component::
-    update_inputs_layout() {
-
-  for (uint8_t i = 0; i < SECTIONS_COUNT; i++) {
-    sections[i].input_renderer.init();
-    sections[i].input_renderer.layout();
-  }
-}

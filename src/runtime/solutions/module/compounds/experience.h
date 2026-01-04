@@ -72,7 +72,7 @@ compound_module_experience_get_friction(const CompoundModuleExperience *set,
   const float learn = compound_module_experience_get_learnability_weight(set);
 
   // clang-format off
-  return   w_action * actions_count
+  return   w_action * norm(actions_count, COMPOUND_MODULE_ACTION_CAPACITY)
          + w_impact * impact
          + w_learn  * learn;
   // clang-format on

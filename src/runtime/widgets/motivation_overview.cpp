@@ -31,28 +31,6 @@ Widget::MotivationOverview::Component::Component(Gui *gui,
                       ui_sprite(UISprite_Statbar_Icon_Excited),
                   },
           },
-          // === Reward ===
-          {
-              .label = "Reward",
-              .gradient =
-                  {
-                      texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
-                      ui_sprite(UISprite_Statbar_Gradient_Reward),
-                  },
-              .window =
-                  {
-                      texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
-                      ui_sprite(UISprite_Statbar_Window),
-                  },
-              .leading_icon = {texture_atlas_layer_view(&g_atlas,
-                                                        TextureAtlasLayer_UI),
-                               ui_sprite(UISprite_Statbar_Icon_Coin)},
-              .trailing_icon =
-                  {
-                      texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
-                      ui_sprite(UISprite_Statbar_Icon_Gift),
-                  },
-          },
           // === Bounding ===
           {
               .label = "Bounding",
@@ -77,6 +55,7 @@ Widget::MotivationOverview::Component::Component(Gui *gui,
                       ui_sprite(UISprite_Statbar_Icon_Group),
                   },
           },
+
           // === Friction ===
           {
               .label = "Friction",
@@ -99,6 +78,28 @@ Widget::MotivationOverview::Component::Component(Gui *gui,
                   {
                       texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
                       ui_sprite(UISprite_Statbar_Icon_Weight),
+                  },
+          },
+          // === Reward ===
+          {
+              .label = "Reward",
+              .gradient =
+                  {
+                      texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
+                      ui_sprite(UISprite_Statbar_Gradient_Reward),
+                  },
+              .window =
+                  {
+                      texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
+                      ui_sprite(UISprite_Statbar_Window),
+                  },
+              .leading_icon = {texture_atlas_layer_view(&g_atlas,
+                                                        TextureAtlasLayer_UI),
+                               ui_sprite(UISprite_Statbar_Icon_Coin)},
+              .trailing_icon =
+                  {
+                      texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
+                      ui_sprite(UISprite_Statbar_Icon_Gift),
                   },
           },
       } {
@@ -163,7 +164,7 @@ void Widget::MotivationOverview::Component::update_gauges_mask() {
         (MotivationType)(i + (MotivationType_COUNT - GAUGES_COUNT)));
 
     const int size =
-        g->gradient.region->size[0] - (g->gradient.region->size[0] * value);
+        g->gradient.region->size[0] - g->gradient.region->size[0] * (1 - value);
 
     g->mask_p0 =
         ImVec2(g->gradient.get_start().x + size, g->gradient.get_start().y);

@@ -17,7 +17,8 @@ typedef struct {
   influence user to follow the movement. Also considers user’s ability to share,
   as it may encourage them to show their best outcome to others.
  */
-static inline float compound_module_social_get_influence(const CompoundModuleSocial *set) {
+static inline float
+compound_module_social_get_influence(const CompoundModuleSocial *set) {
 
   static const float w_publish = 0.7;
   static const float w_share = 0.3;
@@ -29,7 +30,8 @@ static inline float compound_module_social_get_influence(const CompoundModuleSoc
   Mostly based on module’s collaborative nature. With a strong malus if
   competitive.
  */
-static inline float compound_module_social_get_bounding(const CompoundModuleSocial *set) {
+static inline float
+compound_module_social_get_bounding(const CompoundModuleSocial *set) {
 
   static const float w_compet = 0.7;
   static const float w_collab = 0.3;
@@ -44,7 +46,8 @@ static inline float compound_module_social_get_bounding(const CompoundModuleSoci
   user’s outcome to public. Some competitiveness might be involved as well, for
   higher competition means higher fear of loss.
  */
-static inline float compound_module_social_get_avoidance(const CompoundModuleSocial *set) {
+static inline float
+compound_module_social_get_avoidance(const CompoundModuleSocial *set) {
 
   static const float w_publish = 0.8;
   static const float w_compet = 0.2;
@@ -83,7 +86,8 @@ compound_module_social_get_accomplishment(const CompoundModuleSocial *set) {
   also induce some kind of excitement as we know we may get recognition from it
   (comment, like, exposure)
  */
-static inline float compound_module_social_get_excitement(const CompoundModuleSocial *set) {
+static inline float
+compound_module_social_get_excitement(const CompoundModuleSocial *set) {
 
   static const float w_publish = 0.15;
   static const float w_collab = 0.35;

@@ -4,14 +4,14 @@
 #include <inttypes.h>
 
 static const uint8_t COMPOUND_MODULE_SEMANTIC_EPIC_MEANING_MIN = 0;
-static const uint8_t COMPOUND_MODULE_SEMANTIC_EPIC_MEANING_MAX = 5;
+static const uint8_t COMPOUND_MODULE_SEMANTIC_EPIC_MEANING_MAX = 1;
 
 static const uint8_t COMPOUND_MODULE_SEMANTIC_EMPOWERMENT_MIN = 0;
-static const uint8_t COMPOUND_MODULE_SEMANTIC_EMPOWERMENT_MAX = 5;
+static const uint8_t COMPOUND_MODULE_SEMANTIC_EMPOWERMENT_MAX = 1;
 
 typedef struct {
-  uint8_t epic_meaning;
-  uint8_t empowerment;
+  float epic_meaning;
+  float empowerment;
 } CompoundModuleSemantic;
 
 /*
@@ -20,7 +20,7 @@ typedef struct {
  */
 static inline float
 compound_module_semantic_get_epic_meaning(const CompoundModuleSemantic *set) {
-  return (float)set->epic_meaning / COMPOUND_MODULE_SEMANTIC_EPIC_MEANING_MAX;
+  return (float)set->epic_meaning;
 }
 
 /*
@@ -29,7 +29,7 @@ compound_module_semantic_get_epic_meaning(const CompoundModuleSemantic *set) {
  */
 static inline float
 compound_module_semantic_get_empowerment(const CompoundModuleSemantic *set) {
-  return (float)set->empowerment / COMPOUND_MODULE_SEMANTIC_EMPOWERMENT_MAX;
+  return (float)set->empowerment;
 }
 
 #endif

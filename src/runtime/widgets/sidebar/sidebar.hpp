@@ -39,6 +39,7 @@ public:
     active_tab = -1;
     set_state(State_Closed);
     update_window_width();
+    update_tabs_position();
   }
 
   StaticListStatus add_tab_update_callback(on_tab_update callback, void *data) {

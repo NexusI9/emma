@@ -36,9 +36,7 @@ typedef struct {
 
     struct {
       const char *label;
-      const char **items;
-      uint32_t count;
-      int *selected;
+      bool *active;
     } toggle;
 
     struct {

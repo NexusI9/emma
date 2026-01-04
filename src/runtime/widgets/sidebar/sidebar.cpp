@@ -133,9 +133,8 @@ void Widget::SideBar::on_module_click(const ModuleType type, bool active,
   Component *sidebar = (Component *)data;
 
   if (active) {
+    sidebar->content.modules_editor.set_module(type);
     sidebar->set_state(Component::State_Level_2);
-    // update lv2 content
-
   } else {
     sidebar->set_state(Component::State_Level_1);
   }
