@@ -3,6 +3,7 @@
 
 #include "runtime/solutions/formula.h"
 #include "runtime/solutions/globals.h"
+#include "runtime/widgets/input/input.hpp"
 #include "runtime/widgets/sidebar/content/editor.hpp"
 
 namespace Widget {
@@ -135,15 +136,15 @@ private:
                           .entries =
                               {
                                   {
-                                      .type = Input::Type_ButtonBar,
-                                      .button_bar =
+                                      .type = Input::Type_Segment,
+                                      .segment =
                                           {"Feedback Span",
                                            COMPOUND_PERSONA_FEEDBACK_SPAN_LABELS,
                                            CompoundPersonaAgencyFeebackSpan_COUNT},
                                   },
                                   {
-                                      .type = Input::Type_ButtonBar,
-                                      .button_bar =
+                                      .type = Input::Type_Segment,
+                                      .segment =
                                           {"Learning Curve",
                                            COMPOUND_PERSONA_LEARNING_CURVE_LABELS,
                                            CompoundPersonaAgencyLearningCurve_COUNT},

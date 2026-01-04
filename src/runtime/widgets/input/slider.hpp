@@ -47,7 +47,6 @@ public:
 
   void layout();
   void draw();
-  void draw_at(ImVec2);
 
 private:
   const char *label;
@@ -58,7 +57,6 @@ private:
   Format format;
 
   // sizes
-  ImVec2 item_size;
   ImVec2 slider_size;
   int dot_size;
   int row_gap;

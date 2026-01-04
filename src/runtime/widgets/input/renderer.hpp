@@ -4,7 +4,10 @@
 #include "nkengine/include/list.h"
 #include "runtime/widgets/core.hpp"
 #include "runtime/widgets/input/input.hpp"
+#include "runtime/widgets/input/segment.hpp"
 #include "runtime/widgets/input/slider.hpp"
+#include "runtime/widgets/input/toggle.hpp"
+
 #include <stdint.h>
 
 namespace Widget {
@@ -32,6 +35,8 @@ private:
 
   // cached inputs
   Slider::Component sliders[INPUT_LIST_CAPACITY];
+  Toggle::Component toggles[INPUT_LIST_CAPACITY];
+  Segment::Component segments[INPUT_LIST_CAPACITY];
 };
 
 } // namespace Renderer

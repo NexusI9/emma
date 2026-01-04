@@ -36,6 +36,7 @@ typedef enum {
   UISprite_Statbar_Gradient_Friction,
   UISprite_Slider_Knob,
   UISprite_Icon_Info,
+  UISprite_Button_Gradient,
 } UISprite;
 
 static const TextureAtlasRegion sprites[] =
@@ -224,7 +225,7 @@ static const TextureAtlasRegion sprites[] =
             },
         [UISprite_Statbar_Gradient_Excitement] =
             {
-                .label = "Statbar Gradient Excitment",
+                .label = "Statbar Gradient Excitement",
                 .uv0 = {0.469f, 0.235f},
                 .uv1 = {0.664f, 0.251f},
                 .size = {400, 32},
@@ -263,6 +264,13 @@ static const TextureAtlasRegion sprites[] =
                 .uv0 = {0.818f, 0.124f},
                 .uv1 = {0.834f, 0.140f},
                 .size = {32, 32},
+            },
+        [UISprite_Button_Gradient] =
+            {
+                .label = "Button Gradient",
+                .uv0 = {0.975f, 0.009f},
+                .uv1 = {0.987f, 0.054f},
+                .size = {26, 92},
             },
 };
 

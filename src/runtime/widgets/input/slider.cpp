@@ -31,7 +31,7 @@ void Widget::Slider::Component::layout() {
   if (value)
     update_value(*value);
 
-  item_size = ImVec2(slider_size.x, knob.get_end().y - label_p.y);
+  size = ImVec2(slider_size.x, knob.get_end().y - label_p.y);
 }
 
 void Widget::Slider::Component::update_value(const float value) {
@@ -57,7 +57,7 @@ void Widget::Slider::Component::draw() {
   ImDrawList *dl = ImGui::GetWindowDrawList();
 
   ImVec2 origin = ImGui::GetCursorScreenPos();
-  ImGui::ItemSize(item_size);
+  ImGui::ItemSize(size);
 
   dl->AddText(im_vec2_add(label_p, origin), LABEL_COLOR, label);
 

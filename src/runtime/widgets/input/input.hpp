@@ -12,7 +12,7 @@ namespace Input {
 typedef enum {
   Type_Slider,
   Type_Toggle,
-  Type_ButtonBar,
+  Type_Segment,
   Type_Amount,
   Type_Combobox,
   Type_Checkbox,
@@ -44,7 +44,7 @@ typedef struct {
       const char **items;
       uint32_t count;
       int *selected;
-    } button_bar;
+    } segment;
 
     struct {
       const char *label;

@@ -1,5 +1,5 @@
-#ifndef _WIDGET_TOGGLE_H_
-#define _WIDGET_TOGGLE_H_
+#ifndef _WIDGET_SEGMENT_H_
+#define _WIDGET_SEGMENT_H_
 
 #include "nkengine/include/gui.hpp"
 #include "resources/theme.emma.h"
@@ -11,7 +11,7 @@
 
 namespace Widget {
 
-namespace Toggle {
+namespace Segment {
 
 class Component : public Widget {
 
@@ -21,14 +21,16 @@ public:
                                              &g_atlas, TextureAtlasLayer_UI),
                                          ui_sprite(UISprite_Button_Gradient)) {}
 
-  void init(Gui *gui, const char *label, bool *active) {
+  void init(Gui *gui, const char *label, const char **items, uint32_t count,
+            int *selected) {
 
     this->gui = gui;
-    this->active = active;
+    this->selected = selected;
+    this->items = items;
+    this->count = (uint32_t)fminf(count, CAPACITY);
     this->label = label;
 
-    size = ImVec2(gui_scale(gui, 368),
-                  gui_scale(gui, emma_size(ThemeEmmaSize_Height_Input_Large)));
+    size = ImVec2(gui_scale(gui, 368), gui_scale(gui, 54));
     layout();
   }
   void layout();
@@ -40,24 +42,38 @@ public:
   }
 
 private:
+  static constexpr const uint8_t CAPACITY = 8;
+
   const char *label;
   ImVec2 label_p;
-  bool *active;
+
+  const char **items;
+  uint32_t count;
+
+  int *selected;
+
+  typedef struct {
+    const char *label;
+    ImVec2 label_p;
+    ImVec2 p0;
+    ImVec2 p1;
+    int radius;
+    ImDrawFlags flags;
+  } Button;
+
+  Button buttons[CAPACITY];
 
   ::Component::Sprite button_gradient;
   const WGPUTextureView view =
       texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI);
 
-  ImVec2 p0;
-  ImVec2 p1;
-
-  int radius;
+  int RADIUS, GAP;
 
   const ImColor LABEL_COLOR = im_color(emma_color(ThemeEmmaColor_Text_On_Dark));
   const ImColor STROKE_COLOR =
-      im_color(emma_color(ThemeEmmaColor_Border_Brand_Subtle));
+      im_color(emma_color(ThemeEmmaColor_Border_Subtlest_On_Dark));
 };
-} // namespace Toggle
+} // namespace Segment
 } // namespace Widget
 
 #endif

@@ -13,6 +13,7 @@ public:
 
 protected:
   Gui *gui;
+  ImVec2 size;
 };
 } // namespace Widget
 #endif

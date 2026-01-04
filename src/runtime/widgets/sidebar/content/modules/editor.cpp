@@ -18,7 +18,7 @@ void Widget::SideBar::Content::Modules::Editor::Component::update_inputs_values(
 
     for (uint8_t i = 0; i < count; i++) {
       Input::Descriptor *input = &sections[0].input_list.entries[i];
-      input->button_bar.selected = values[i];
+      input->segment.selected = values[i];
     }
   }
 

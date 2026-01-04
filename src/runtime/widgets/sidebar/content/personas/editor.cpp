@@ -80,7 +80,7 @@ void Widget::SideBar::Content::Personas::Editor::Component::
         sizeof(button_values) / sizeof(button_values[0]);
 
     for (uint8_t i = 0; i < button_count; i++)
-      sections[2].input_list.entries[i].button_bar.selected =
+      sections[2].input_list.entries[i].segment.selected =
           button_values[i];
   }
 

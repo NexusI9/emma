@@ -13,19 +13,23 @@ void Widget::Input::Renderer::Component::init() {
   for (uint8_t i = 0; i < list->count; i++) {
 
     Input::Descriptor *input = &list->entries[i];
+    int *cursor = &cursors[input->type];
 
     switch (input->type) {
 
     case Type_Slider:
-      sliders[cursors[Type_Slider]].init(
-          gui, input->slider.label, input->slider.value, input->slider.min,
-          input->slider.max, 10, Slider::Component::Format_Integer);
+      sliders[*cursor].init(gui, input->slider.label, input->slider.value,
+                            input->slider.min, input->slider.max, 10,
+                            Slider::Component::Format_Integer);
       break;
 
     case Type_Toggle:
+      toggles[*cursor].init(gui, input->toggle.label, input->toggle.active);
       break;
 
-    case Type_ButtonBar:
+    case Type_Segment:
+      segments[*cursor].init(gui, input->segment.label, input->segment.items,
+                             input->segment.count, input->segment.selected);
       break;
 
     case Type_Amount:
@@ -44,7 +48,7 @@ void Widget::Input::Renderer::Component::init() {
       break;
     }
 
-    cursors[list->entries[i].type]++;
+    (*cursor)++;
   }
 }
 
@@ -54,16 +58,21 @@ void Widget::Input::Renderer::Component::layout() {
 
   for (uint8_t i = 0; i < list->count; i++) {
 
-    switch (list->entries[i].type) {
+    Input::Type type = list->entries[i].type;
+    int *cursor = &cursors[type];
+
+    switch (type) {
 
     case Type_Slider:
-      sliders[cursors[Type_Slider]].layout();
+      sliders[*cursor].layout();
       break;
 
     case Type_Toggle:
+      toggles[*cursor].layout();
       break;
 
-    case Type_ButtonBar:
+    case Type_Segment:
+      segments[*cursor].layout();
       break;
 
     case Type_Amount:
@@ -82,7 +91,7 @@ void Widget::Input::Renderer::Component::layout() {
       break;
     }
 
-    cursors[list->entries[i].type]++;
+    (*cursor)++;
   }
 }
 
@@ -92,17 +101,21 @@ void Widget::Input::Renderer::Component::draw() {
 
   for (uint8_t i = 0; i < list->count; i++) {
 
-    switch (list->entries[i].type) {
+    Input::Type type = list->entries[i].type;
+    int *cursor = &cursors[type];
+
+    switch (type) {
 
     case Type_Slider:
-      sliders[cursors[Type_Slider]].draw();
+      sliders[*cursor].draw();
       break;
 
     case Type_Toggle:
-
+      toggles[*cursor].draw();
       break;
 
-    case Type_ButtonBar:
+    case Type_Segment:
+      segments[*cursor].draw();
       break;
 
     case Type_Amount:
@@ -121,7 +134,7 @@ void Widget::Input::Renderer::Component::draw() {
       break;
     }
 
-    cursors[list->entries[i].type]++;
+    (*cursor)++;
     ImGui::Dummy(ImVec2(0, INPUT_GAP));
   }
 }

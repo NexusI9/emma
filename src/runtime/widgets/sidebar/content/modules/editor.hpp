@@ -58,8 +58,8 @@ private:
                   .entries =
                       {
                           {
-                              .type = Input::Type_ButtonBar,
-                              .button_bar =
+                              .type = Input::Type_Segment,
+                              .segment =
                                   {
                                       "Impact",
                                       COMPOUND_MODULE_IMPACT_LABELS,
@@ -67,8 +67,8 @@ private:
                                   },
                           },
                           {
-                              .type = Input::Type_ButtonBar,
-                              .button_bar =
+                              .type = Input::Type_Segment,
+                              .segment =
                                   {
                                       "Learnability",
                                       COMPOUND_MODULE_LEARNABILITY_LABELS,
