@@ -21,7 +21,8 @@ public:
   // draw fixed, according to window/ cursor position
   void draw(ImVec2 origin = ImGui::GetCursorScreenPos(),
             transform_callback transform_x = no_transform,
-            transform_callback transform_y = no_transform);
+            transform_callback transform_y = no_transform,
+            bool display_label = true);
 
   // draw for viewport, absolute position with viewport wheel movement
   void draw_viewport();
@@ -30,7 +31,7 @@ public:
 
 private:
   ::Octagon *node;
-  
+
   void draw_labels(ImDrawList *draw_list, ImVec2 origin = ImVec2(0, 0),
                    transform_callback transform_x = no_transform,
                    transform_callback transform_y = no_transform);

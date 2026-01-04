@@ -156,17 +156,18 @@ void Widget::Octagon::Component::draw_outer_gradient(
 
 void Widget::Octagon::Component::draw(ImVec2 origin,
                                       transform_callback transform_x,
-                                      transform_callback transform_y) {
+                                      transform_callback transform_y,
+                                      bool display_label) {
 
   ImDrawList *draw_list = ImGui::GetWindowDrawList();
 
   draw_outer_gradient(draw_list, origin, transform_x, transform_y);
   draw_inner_shape(draw_list, origin, transform_x, transform_y);
 
-  if (viewport_get_scale() > 0.8f)
+  if (display_label)
     draw_labels(draw_list, origin, transform_x, transform_y);
 }
 
 void Widget::Octagon::Component::draw_viewport() {
-  draw(ImVec2(0, 0), vpx, vpy);
+  draw(ImVec2(0, 0), vpx, vpy, viewport_get_scale() > 0.8f);
 }
