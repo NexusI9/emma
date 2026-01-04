@@ -34,8 +34,8 @@ class Component : public Content::Component {
 public:
   Component(Gui *gui, const char *header, Section *sections,
             const uint8_t count)
-      : Content::Component(gui), overview(gui), sections(sections),
-        sections_count(count) {
+      : Content::Component(gui), header(header), overview(gui),
+        sections(sections), sections_count(count) {
 
     // WARNING make sure to monitor constructor call pattern
     motivation = new_motivation();
@@ -45,7 +45,16 @@ public:
   void draw() override;
 
 protected:
-  const char *header;
+  // set min, max etc. of sliders
+
+  void set_name(const char *name) { this->name = name; }
+  void set_description(const char *desc) { this->description = desc; }
+
+  void set_slider_static_attributes(Input::Descriptor *);
+  void update_inputs_layout();
+  void update_motivation(const ::Solution *, const solution_formula *);
+
+private:
   const int ROW_GAP =
       gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large));
 
@@ -55,10 +64,9 @@ protected:
   Section *sections;
   const uint8_t sections_count;
 
-  // set min, max etc. of sliders
-  void set_slider_static_attributes(Input::Descriptor *);
-  void update_inputs_layout();
-  void update_motivation(const ::Solution *, const solution_formula *);
+  const char *header;
+  const char *name;
+  const char *description;
 };
 
 } // namespace Editor

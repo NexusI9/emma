@@ -6,10 +6,22 @@ void Widget::SideBar::Content::Editor::Component::layout() {}
 void Widget::SideBar::Content::Editor::Component::draw() {
 
   draw_header(header);
+
+  {
+    ImGui::SetWindowFontScale(1.2);
+    ImGui::Text("%s", name);
+    ImGui::SetWindowFontScale(1);
+    ImGui::PushTextWrapPos(ImGui::GetCursorPosX() +
+                           ImGui::GetContentRegionAvail().x);
+    ImGui::TextWrapped("%s", description);
+    ImGui::PopTextWrapPos();
+  }
+
+  ImGui::Dummy(ImVec2(0, ROW_GAP));
+
   overview.draw();
 
   ImGui::Dummy(ImVec2(0, ROW_GAP));
-  draw_header("Edit");
 
   for (uint8_t i = 0; i < sections_count; i++) {
 

@@ -5,7 +5,6 @@
 #include "runtime/solutions/globals.h"
 #include "runtime/widgets/sidebar/content/editor.hpp"
 
-
 namespace Widget {
 
 namespace SideBar {
@@ -20,7 +19,7 @@ class Component : public Content::Editor::Component {
 
 public:
   Component(Gui *gui)
-      : Content::Editor::Component(gui, "Persona Overview", sections,
+      : Content::Editor::Component(gui, "Persona Profile", sections,
                                    SECTIONS_COUNT) {}
 
   void set_persona(const PersonaType persona) {
@@ -35,6 +34,9 @@ public:
     // TODO: find a way to streamline and unify the input update process
     update_inputs_values(persona);
     update_inputs_layout();
+
+    set_name(PERSONA_INTRO[persona].label);
+    set_description(PERSONA_INTRO[persona].description);
   }
 
 private:

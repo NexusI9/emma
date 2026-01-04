@@ -20,6 +20,4 @@ typedef struct {
   STATIC_LIST(SolutionModuleAction, COMPOUND_MODULE_ACTION_CAPACITY) actions;
 } SolutionModule;
 
-
-
 #endif

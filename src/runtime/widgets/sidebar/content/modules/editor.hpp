@@ -23,7 +23,7 @@ class Component : public Content::Editor::Component {
 
 public:
   Component(Gui *gui)
-      : Content::Editor::Component(gui, "Module Overview", sections,
+      : Content::Editor::Component(gui, "Module Profile", sections,
                                    SECTIONS_COUNT) {}
 
   void set_module(const ModuleType module) {
@@ -37,6 +37,9 @@ public:
     // TODO: find a way to streamline and unify the input update process
     update_inputs_values(module);
     update_inputs_layout();
+
+    set_name(MODULE_INTRO[module].label);
+    set_description(MODULE_INTRO[module].description);
   }
 
 private:
