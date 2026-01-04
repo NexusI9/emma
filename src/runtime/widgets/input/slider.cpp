@@ -38,7 +38,9 @@ void Widget::Slider::Component::update_value(const float value) {
 
   slider_active_p1.x = slider_size.x * value;
   knob.set_position(ImVec2(slider_active_p1.x, knob.get_start().y),
-                    GuiSpriteAnchor_TopMiddle);
+                    value == 0.0f   ? GuiSpriteAnchor_TopLeft
+                    : value == 1.0f ? GuiSpriteAnchor_TopRight
+                                    : GuiSpriteAnchor_TopMiddle);
 
   switch (format) {
 
