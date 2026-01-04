@@ -14,12 +14,12 @@ Widget::SideBar::Content::Personas::Component::Component(Gui *gui)
           {
               .avatar = ::Component::Sprite(
                   texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
-                  ui_sprite(UISprite_Persona_Artisan)),
+                  ui_sprite(UISprite_Persona_Operator)),
           },
           {
               .avatar = ::Component::Sprite(
                   texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
-                  ui_sprite(UISprite_Persona_Explorer)),
+                  ui_sprite(UISprite_Persona_Artisan)),
           },
           {
               .avatar = ::Component::Sprite(
@@ -29,17 +29,17 @@ Widget::SideBar::Content::Personas::Component::Component(Gui *gui)
           {
               .avatar = ::Component::Sprite(
                   texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
-                  ui_sprite(UISprite_Persona_Operator)),
-          },
-          {
-              .avatar = ::Component::Sprite(
-                  texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
-                  ui_sprite(UISprite_Persona_Pioneer)),
+                  ui_sprite(UISprite_Persona_Explorer)),
           },
           {
               .avatar = ::Component::Sprite(
                   texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
                   ui_sprite(UISprite_Persona_Striver)),
+          },
+          {
+              .avatar = ::Component::Sprite(
+                  texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
+                  ui_sprite(UISprite_Persona_Pioneer)),
           },
       } {
 
@@ -101,15 +101,11 @@ bool Widget::SideBar::Content::Personas::Component::draw_card(struct persona *p,
 
 void Widget::SideBar::Content::Personas::Component::layout() {
 
-  static const char *persona_labels[] = {
-      "Artisan", "Explorer", "Giver", "Operator", "Pioneer", "Striver",
-  };
-
   for (uint8_t i = 0; i < PersonaType_COUNT; i++) {
 
     struct persona *p = &personas[i];
 
-    p->label = persona_labels[i];
+    p->label = PERSONA_INTRO[i].label;
 
     // frame coordinates
     glm_vec2_copy(GLM_VEC2_ZERO, p->frame_coo.p0);
