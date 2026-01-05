@@ -1,8 +1,7 @@
 #include "editor.hpp"
 #include "runtime/manager/allocator.h"
+#include "runtime/solutions/globals.h"
 #include "runtime/widgets/input/input.hpp"
-
-
 
 /**
  Link each sections input descriptor values pointer with the right motivation
@@ -11,21 +10,23 @@
 void Widget::SideBar::Content::Personas::Editor::Component::
     update_inputs_values(const PersonaType persona) {
 
+  ::Solution *solution = global_persona_solution(persona);
+
   // === Link Motivation ===
   {
     float *values[] = {
-        &g_persona_solutions[persona]->persona.motivation.epic_meaning,
-        &g_persona_solutions[persona]->persona.motivation.empowerment,
-        &g_persona_solutions[persona]->persona.motivation.social_influence,
-        &g_persona_solutions[persona]->persona.motivation.unpredictability,
-        &g_persona_solutions[persona]->persona.motivation.avoidance,
-        &g_persona_solutions[persona]->persona.motivation.scarcity,
-        &g_persona_solutions[persona]->persona.motivation.ownership,
-        &g_persona_solutions[persona]->persona.motivation.accomplishment,
-        &g_persona_solutions[persona]->persona.motivation.excitement,
-        &g_persona_solutions[persona]->persona.motivation.reward,
-        &g_persona_solutions[persona]->persona.motivation.social_bounding,
-        &g_persona_solutions[persona]->persona.motivation.friction,
+        &solution->persona.motivation.epic_meaning,
+        &solution->persona.motivation.empowerment,
+        &solution->persona.motivation.social_influence,
+        &solution->persona.motivation.unpredictability,
+        &solution->persona.motivation.avoidance,
+        &solution->persona.motivation.scarcity,
+        &solution->persona.motivation.ownership,
+        &solution->persona.motivation.accomplishment,
+        &solution->persona.motivation.excitement,
+        &solution->persona.motivation.reward,
+        &solution->persona.motivation.social_bounding,
+        &solution->persona.motivation.friction,
     };
 
     static const uint8_t count = sizeof(values) / sizeof(values[0]);
@@ -40,8 +41,8 @@ void Widget::SideBar::Content::Personas::Editor::Component::
   // === Link Social Behavior ===
   {
     float *values[] = {
-        &g_persona_solutions[persona]->persona.social.collaborative,
-        &g_persona_solutions[persona]->persona.social.visibility,
+        &solution->persona.social.collaborative,
+        &solution->persona.social.visibility,
     };
 
     static const uint8_t count = sizeof(values) / sizeof(values[0]);
@@ -58,7 +59,7 @@ void Widget::SideBar::Content::Personas::Editor::Component::
 
     // Slider
     float *slider_values[] = {
-        &g_persona_solutions[persona]->persona.agency.risk_tolerance,
+        &solution->persona.agency.risk_tolerance,
     };
 
     static const uint8_t slider_count =
@@ -72,22 +73,21 @@ void Widget::SideBar::Content::Personas::Editor::Component::
 
     // Buttons bar
     int *button_values[] = {
-        (int *)&g_persona_solutions[persona]->persona.agency.feedback_span,
-        (int *)&g_persona_solutions[persona]->persona.agency.learning_curve,
+        (int *)&solution->persona.agency.feedback_span,
+        (int *)&solution->persona.agency.learning_curve,
     };
 
     static const uint8_t button_count =
         sizeof(button_values) / sizeof(button_values[0]);
 
     for (uint8_t i = 0; i < button_count; i++)
-      sections[2].input_list.entries[i].segment.selected =
-          button_values[i];
+      sections[2].input_list.entries[i].segment.selected = button_values[i];
   }
 
   // === Link Density ===
   {
     float *values[] = {
-        &g_persona_solutions[persona]->persona.density.value,
+        &solution->persona.density.value,
     };
 
     static const uint8_t count = sizeof(values) / sizeof(values[0]);
@@ -99,4 +99,3 @@ void Widget::SideBar::Content::Personas::Editor::Component::
     }
   }
 }
-

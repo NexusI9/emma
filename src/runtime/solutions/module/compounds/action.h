@@ -15,6 +15,7 @@ typedef enum {
 typedef struct {
   const char *label;
   CompoundModuleActionRole role;
+  bool active;
 } CompoundModuleAction;
 
 static const char *COMPOUND_MODULE_ACTION_ROLE_LABELS[] = {

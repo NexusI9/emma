@@ -111,12 +111,14 @@ typedef struct {
 typedef struct {
   uint32_t quota;    // how many times available per cycle (e.g. 3)
   uint32_t interval; // cycle length (e.g. 2)
-  uint32_t repeat;   // how many cycles occur (0 or UINT64_MAX = infinite)
+  uint32_t repeat;   // how many cycles occur (0 or UINT32_MAX = infinite)
+  bool forever;      // if enabled, set repeat to UINT32_MAX (infinite)
   CompoundModuleRewardTimeUnit unit;
 } CompoundModuleRewardFrequency;
 
 typedef struct {
-  uint64_t amount;
+  bool active;
+  uint32_t amount;
   CompoundModuleRewardTimeUnit unit;
 } CompoundModuleRewardTimeLimit;
 

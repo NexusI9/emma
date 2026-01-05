@@ -3,6 +3,7 @@
 
 #include "nkengine/include/list.h"
 #include "runtime/widgets/core.hpp"
+#include "runtime/widgets/input/action.hpp"
 #include "runtime/widgets/input/input.hpp"
 #include "runtime/widgets/input/segment.hpp"
 #include "runtime/widgets/input/slider.hpp"
@@ -33,10 +34,13 @@ private:
   int cursors[Input::Type_COUNT];
   void reset_cursors() { memset(cursors, 0, sizeof(cursors)); }
 
+  void map_action(Input::Descriptor *, Action::Component *);
+
   // cached inputs
   Slider::Component sliders[INPUT_LIST_CAPACITY];
   Toggle::Component toggles[INPUT_LIST_CAPACITY];
   Segment::Component segments[INPUT_LIST_CAPACITY];
+  Action::Component actions[INPUT_LIST_CAPACITY];
 };
 
 } // namespace Renderer

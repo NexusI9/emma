@@ -29,6 +29,11 @@ typedef struct {
   Input::Renderer::Component input_renderer;
 } Section;
 
+/**
+   Core component being used to initialize render and manage the Persona and
+   Module profile allowing to Edit each properties through sliders, combobox and
+   and other inputs.
+*/
 class Component : public Content::Component {
 
 public:

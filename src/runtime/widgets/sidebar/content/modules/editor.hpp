@@ -43,103 +43,110 @@ public:
   }
 
 private:
+  void create_actions_input_descriptor(const ModuleType);
   // Update inputs data according to selected persona
   void update_inputs_values(const ModuleType);
+
+  typedef enum {
+    SectionType_Experience,
+    SectionType_Semantic,
+    SectionType_Social,
+    SectionType_Actions,
+  } SectionType;
 
   static constexpr uint8_t SECTIONS_COUNT = 4;
   Content::Editor::Section sections[SECTIONS_COUNT] = {
 
-      {
-          .section_header = {gui, "Experience"},
-          .input_renderer = {gui, &sections[0].input_list},
-          .input_list =
-              {
-                  .count = 2,
-                  .entries =
-                      {
+      [SectionType_Experience] =
+          {
+              .section_header = {gui, "Experience"},
+              .input_renderer = {gui,
+                                 &sections[SectionType_Experience].input_list},
+              .input_list =
+                  {
+                      .count = 2,
+                      .entries =
                           {
-                              .type = Input::Type_Segment,
-                              .segment =
-                                  {
-                                      "Impact",
-                                      COMPOUND_MODULE_IMPACT_LABELS,
-                                      CompoundModuleExperienceImpact_COUNT,
-                                  },
-                          },
-                          {
-                              .type = Input::Type_Segment,
-                              .segment =
-                                  {
-                                      "Learnability",
-                                      COMPOUND_MODULE_LEARNABILITY_LABELS,
-                                      CompoundModuleExperienceLearnability_COUNT,
-                                  },
-                          },
+                              {
+                                  .type = Input::Type_Segment,
+                                  .segment =
+                                      {
+                                          "Impact",
+                                          COMPOUND_MODULE_IMPACT_LABELS,
+                                          CompoundModuleExperienceImpact_COUNT,
+                                      },
+                              },
+                              {
+                                  .type = Input::Type_Segment,
+                                  .segment =
+                                      {
+                                          "Learnability",
+                                          COMPOUND_MODULE_LEARNABILITY_LABELS,
+                                          CompoundModuleExperienceLearnability_COUNT,
+                                      },
+                              },
 
-                      },
-              },
-      },
-      {
-          .section_header = {gui, "Semantic"},
-          .input_renderer = {gui, &sections[1].input_list},
-          .input_list =
-              {
-                  .count = 2,
-                  .entries =
-                      {
-                          {
-                              .type = Input::Type_Slider,
-                              .slider = {"Empowerment"},
                           },
+                  },
+          },
+      [SectionType_Semantic] =
+          {
+              .section_header = {gui, "Semantic"},
+              .input_renderer = {gui,
+                                 &sections[SectionType_Semantic].input_list},
+              .input_list =
+                  {
+                      .count = 2,
+                      .entries =
                           {
-                              .type = Input::Type_Slider,
-                              .slider = {"Epic Meaning"},
+                              {
+                                  .type = Input::Type_Slider,
+                                  .slider = {"Empowerment"},
+                              },
+                              {
+                                  .type = Input::Type_Slider,
+                                  .slider = {"Epic Meaning"},
+                              },
                           },
-                      },
-              },
-      },
-      {
-          .section_header = {gui, "Social"},
-          .input_renderer = {gui, &sections[2].input_list},
-          .input_list =
-              {
-                  .count = 4,
-                  .entries =
-                      {
+                  },
+          },
+      [SectionType_Social] =
+          {
+              .section_header = {gui, "Social"},
+              .input_renderer = {gui, &sections[SectionType_Social].input_list},
+              .input_list =
+                  {
+                      .count = 4,
+                      .entries =
                           {
-                              .type = Input::Type_Toggle,
-                              .toggle = {"Collaborative"},
+                              {
+                                  .type = Input::Type_Toggle,
+                                  .toggle = {"Collaborative"},
+                              },
+                              {
+                                  .type = Input::Type_Toggle,
+                                  .toggle = {"Competitive"},
+                              },
+                              {
+                                  .type = Input::Type_Toggle,
+                                  .toggle = {"Published"},
+                              },
+                              {
+                                  .type = Input::Type_Toggle,
+                                  .toggle = {"Shareable"},
+                              },
                           },
-                          {
-                              .type = Input::Type_Toggle,
-                              .toggle = {"Competitive"},
-                          },
-                          {
-                              .type = Input::Type_Toggle,
-                              .toggle = {"Published"},
-                          },
-                          {
-                              .type = Input::Type_Toggle,
-                              .toggle = {"Shareable"},
-                          },
-                      },
-              },
-      },
-      {
-          .section_header = {gui, "Actions"},
-          .input_renderer = {gui, &sections[3].input_list},
-          .input_list =
-              {
-                  .count = 1,
-                  .entries =
-                      {
-                          {
-                              .type = Input::Type_Action,
-                              .action = {},
-                          },
-                      },
-              },
-      },
+                  },
+          },
+      [SectionType_Actions] =
+          {
+              .section_header = {gui, "Actions"},
+              .input_renderer = {gui,
+                                 &sections[SectionType_Actions].input_list},
+              // sine actions are different for each module we generate them
+              // dynamically
+              .input_list = {},
+          },
 
   };
 };

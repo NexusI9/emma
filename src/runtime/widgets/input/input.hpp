@@ -2,6 +2,8 @@
 #define _WIDGET_INPUT_H_
 
 #include "nkengine/include/list.h"
+#include "runtime/solutions/module/compounds/action.h"
+#include "runtime/solutions/module/compounds/reward.h"
 #include "runtime/widgets/core.hpp"
 #include <stdint.h>
 
@@ -68,6 +70,41 @@ typedef struct {
     } checkbox;
 
     struct {
+      const char *label;
+      CompoundModuleActionRole *role;
+      bool *active;
+
+      struct {
+
+        CompoundModuleRewardType *type;
+        float *probability;
+
+        struct {
+          CompoundModuleRewardAmountType *type;
+          uint32_t *value;
+          struct {
+            uint32_t *min;
+            uint32_t *max;
+          } range;
+
+        } amount;
+
+        struct {
+          uint32_t *quota;
+          uint32_t *interval;
+          uint32_t *repeat;
+          bool *forever;
+          CompoundModuleRewardTimeUnit *unit;
+        } frequency;
+
+        struct {
+          bool *active;
+          uint32_t *amount;
+          CompoundModuleRewardTimeUnit *unit;
+        } time_limit;
+
+      } reward;
+
     } action;
   };
 
