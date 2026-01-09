@@ -12,39 +12,38 @@ void Widget::Input::Renderer::Component::init() {
 
   for (uint8_t i = 0; i < list->count; i++) {
 
-    Input::Descriptor *input = &list->entries[i];
-    int *cursor = &cursors[input->type];
+    Input::Params *params = &list->entries[i];
+    int *cursor = &cursors[params->type];
 
-    switch (input->type) {
+    switch (params->type) {
 
     case Type_Slider:
-      sliders[*cursor].init(gui, input->slider.label, input->slider.value,
-                            input->slider.min, input->slider.max, 10,
+      sliders[*cursor].init(gui, &params->slider,
                             Slider::Component::Format_Integer);
       break;
 
     case Type_Toggle:
-      toggles[*cursor].init(gui, input->toggle.label, input->toggle.active);
+      toggles[*cursor].init(gui, &params->toggle);
       break;
 
     case Type_Segment:
-      segments[*cursor].init(gui, input->segment.label, input->segment.items,
-                             input->segment.count, input->segment.selected);
+      segments[*cursor].init(gui, &params->segment);
       break;
 
     case Type_Amount:
+      amounts[*cursor].init(gui, &params->amount);
       break;
 
     case Type_Combobox:
+      comboboxes[*cursor].init(gui, &params->combobox);
       break;
 
     case Type_Checkbox:
+      checkboxes[*cursor].init(gui, &params->checkbox);
       break;
 
     case Type_Action:
-      actions[*cursor].init(gui);
-      map_action(input, &actions[*cursor]);
-      actions[*cursor].validate();
+      actions[*cursor].init(gui, &params->action);
       break;
 
     default:
@@ -79,12 +78,15 @@ void Widget::Input::Renderer::Component::layout() {
       break;
 
     case Type_Amount:
+      amounts[*cursor].layout();
       break;
 
     case Type_Combobox:
+      comboboxes[*cursor].layout();
       break;
 
     case Type_Checkbox:
+      checkboxes[*cursor].layout();
       break;
 
     case Type_Action:
@@ -97,60 +99,6 @@ void Widget::Input::Renderer::Component::layout() {
 
     (*cursor)++;
   }
-}
-
-/**
-   Since the action is kinda like a Set of Inputs, it would be quite cumbersombe
-   to put all the parameters as argument. As a result we use a combination of
-   API calls as well a validation to make sure everything is set properly before
-   draw.
-
-   This function is called right after the initialisation and before the layout.
-   It acts as a more descriptive init().
-
-   TODO: Currently we use many steps ton translate Solutions attributes into
-   Inputs:
-
-   Solution => Action => InputDescriptor => [ MAP ] => Input Component
-
-   I feel like maybe the Action struct and Input Descriptor could be merged or
-   something caue it feel very repetitive to map all the value.
-   So streamline and simplify the whole thing.
-
-
- */
-void Widget::Input::Renderer::Component::map_action(
-    Input::Descriptor *descriptor, Action::Component *action) {
-
-  // clang-format off
-  action->set_label(descriptor->action.label);
-  action->set_role(descriptor->action.role);
-  action->set_active(descriptor->action.active);
-  
-  // reward
-  action->set_reward_probability(descriptor->action.reward.probability);
-  action->set_reward_type(descriptor->action.reward.type);
-  
-  // amount  
-  action->set_reward_amount_type(descriptor->action.reward.amount.type);
-  action->set_reward_amount_fixed(descriptor->action.reward.amount.value);
-  action->set_reward_amount_type(descriptor->action.reward.amount.type);
-  action->set_reward_amount_range(descriptor->action.reward.amount.range.min,
-                                  descriptor->action.reward.amount.range.max);
-
-  // frequency
-  action->set_reward_frequency_quota(descriptor->action.reward.frequency.quota);
-  action->set_reward_frequency_interval(descriptor->action.reward.frequency.interval);
-  action->set_reward_frequency_repeat(descriptor->action.reward.frequency.repeat);
-  action->set_reward_frequency_forever(descriptor->action.reward.frequency.forever);
-  action->set_reward_frequency_unit(descriptor->action.reward.frequency.unit);
-
-  // time limit
-  action->set_reward_time_limit_active(descriptor->action.reward.time_limit.active);
-  action->set_reward_time_limit_amount(descriptor->action.reward.time_limit.amount);
-  action->set_reward_time_limit_unit(descriptor->action.reward.time_limit.unit);
-
-  // clang-format on
 }
 
 void Widget::Input::Renderer::Component::draw() {
@@ -177,15 +125,19 @@ void Widget::Input::Renderer::Component::draw() {
       break;
 
     case Type_Amount:
+      amounts[*cursor].draw();
       break;
 
     case Type_Combobox:
+      comboboxes[*cursor].draw();
       break;
 
     case Type_Checkbox:
+      checkboxes[*cursor].draw();
       break;
 
     case Type_Action:
+      actions[*cursor].draw();
       break;
 
     default:

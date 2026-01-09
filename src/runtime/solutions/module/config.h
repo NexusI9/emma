@@ -33,13 +33,21 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                     .entries =
                         {
                             {
-                                .action = {"See Article",
-                                           CompoundModuleActionRole_Primary},
+                                .action =
+                                    {
+                                        "See Article",
+                                        CompoundModuleActionRole_Primary,
+                                        true,
+                                    },
                                 .reward = {CompoundModuleRewardType_Undefined},
                             },
                             {
-                                .action = {"See All",
-                                           CompoundModuleActionRole_Secondary},
+                                .action =
+                                    {
+                                        "See All",
+                                        CompoundModuleActionRole_Secondary,
+                                        true,
+                                    },
                                 .reward = {CompoundModuleRewardType_Undefined},
                             },
 
@@ -73,8 +81,12 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                     .entries =
                         {
                             {
-                                .action = {"See Profile",
-                                           CompoundModuleActionRole_Tertiary},
+                                .action =
+                                    {
+                                        "See Profile",
+                                        CompoundModuleActionRole_Tertiary,
+                                        true,
+                                    },
                                 .reward = {CompoundModuleRewardType_Undefined},
                             },
                         },
@@ -106,8 +118,12 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                     .entries =
                         {
                             {
-                                .action = {"Comment",
-                                           CompoundModuleActionRole_Primary},
+                                .action =
+                                    {
+                                        "Comment",
+                                        CompoundModuleActionRole_Primary,
+                                        true,
+                                    },
                                 .reward =
                                     {
                                         .type = CompoundModuleRewardType_Coin,
@@ -126,8 +142,12 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                                     },
                             },
                             {
-                                .action = {"Like",
-                                           CompoundModuleActionRole_Secondary},
+                                .action =
+                                    {
+                                        "Like",
+                                        CompoundModuleActionRole_Secondary,
+                                        true,
+                                    },
                                 .reward =
                                     {
                                         .type = CompoundModuleRewardType_Point,
@@ -146,8 +166,12 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                                     },
                             },
                             {
-                                .action = {"Rate",
-                                           CompoundModuleActionRole_Tertiary},
+                                .action =
+                                    {
+                                        "Rate",
+                                        CompoundModuleActionRole_Tertiary,
+                                        true,
+                                    },
                                 .reward =
                                     {
                                         .type = CompoundModuleRewardType_Point,
@@ -194,8 +218,12 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                     .entries =
                         {
                             {
-                                .action = {"Spin the wheel",
-                                           CompoundModuleActionRole_Primary},
+                                .action =
+                                    {
+                                        "Spin the wheel",
+                                        CompoundModuleActionRole_Primary,
+                                        true,
+                                    },
                                 .reward =
                                     {
                                         .type = CompoundModuleRewardType_Coin,
@@ -213,21 +241,27 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                                                 // 3 times every 2 day, forever
                                                 .quota = 3,
                                                 .interval = 1,
-                                                .unit = CompoundModuleRewardTimeUnit_Day,
+                                                .unit =
+                                                    CompoundModuleRewardTimeUnit_Day,
                                                 .repeat =
                                                     COMPOUND_MODULE_REPEAT_ALWAYS,
                                             },
                                     },
                             },
                             {
-                                .action = {"Invite",
-                                           CompoundModuleActionRole_Secondary},
+                                .action =
+                                    {
+                                        "Invite",
+                                        CompoundModuleActionRole_Secondary,
+                                        true,
+                                    },
                                 .reward =
                                     {
                                         .type = CompoundModuleRewardType_Coin,
                                         .amount =
                                             {
-                                                .type = CompoundModuleRewardAmountType_Fixed,
+                                                .type =
+                                                    CompoundModuleRewardAmountType_Fixed,
                                                 .value = 150,
                                             },
                                         .time_limit =
@@ -267,8 +301,12 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                     .entries =
                         {
                             {
-                                .action = {"Tick",
-                                           CompoundModuleActionRole_Primary},
+                                .action =
+                                    {
+                                        "Tick",
+                                        CompoundModuleActionRole_Primary,
+                                        true,
+                                    },
                                 .reward =
                                     {
                                         .type = CompoundModuleRewardType_Coin,
@@ -286,8 +324,12 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                                     },
                             },
                             {
-                                .action = {"Share",
-                                           CompoundModuleActionRole_Tertiary},
+                                .action =
+                                    {
+                                        "Share",
+                                        CompoundModuleActionRole_Tertiary,
+                                        true,
+                                    },
                                 .reward =
                                     {
                                         .type = CompoundModuleRewardType_Point,
@@ -333,8 +375,12 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                     .entries =
                         {
                             {
-                                .action = {"Tick",
-                                           CompoundModuleActionRole_Primary},
+                                .action =
+                                    {
+                                        "Tick",
+                                        CompoundModuleActionRole_Primary,
+                                        true,
+                                    },
                                 .reward =
                                     {
                                         .type = CompoundModuleRewardType_Coin,
@@ -352,8 +398,12 @@ static const SolutionModule SOLUTION_MODULES[ModuleType_COUNT] = {
                                     },
                             },
                             {
-                                .action = {"Share",
-                                           CompoundModuleActionRole_Tertiary},
+                                .action =
+                                    {
+                                        "Share",
+                                        CompoundModuleActionRole_Tertiary,
+                                        true,
+                                    },
                                 .reward =
                                     {
                                         .type = CompoundModuleRewardType_Point,

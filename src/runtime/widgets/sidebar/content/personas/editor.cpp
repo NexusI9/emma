@@ -32,7 +32,7 @@ void Widget::SideBar::Content::Personas::Editor::Component::
     static const uint8_t count = sizeof(values) / sizeof(values[0]);
 
     for (uint8_t i = 0; i < count; i++) {
-      Input::Descriptor *input = &sections[0].input_list.entries[i];
+      Input::Params *input = &sections[0].input_list.entries[i];
       input->slider.value = values[i];
       set_slider_static_attributes(input);
     }
@@ -48,7 +48,7 @@ void Widget::SideBar::Content::Personas::Editor::Component::
     static const uint8_t count = sizeof(values) / sizeof(values[0]);
 
     for (uint8_t i = 0; i < count; i++) {
-      Input::Descriptor *input = &sections[1].input_list.entries[i];
+      Input::Params *input = &sections[1].input_list.entries[i];
       input->slider.value = values[i];
       set_slider_static_attributes(input);
     }
@@ -66,7 +66,7 @@ void Widget::SideBar::Content::Personas::Editor::Component::
         sizeof(slider_values) / sizeof(slider_values[0]);
 
     for (uint8_t i = 0; i < slider_count; i++) {
-      Input::Descriptor *input = &sections[2].input_list.entries[i + 2];
+      Input::Params *input = &sections[2].input_list.entries[i + 2];
       input->slider.value = slider_values[i];
       set_slider_static_attributes(input);
     }
@@ -93,7 +93,7 @@ void Widget::SideBar::Content::Personas::Editor::Component::
     static const uint8_t count = sizeof(values) / sizeof(values[0]);
 
     for (uint8_t i = 0; i < count; i++) {
-      Input::Descriptor *input = &sections[3].input_list.entries[i];
+      Input::Params *input = &sections[3].input_list.entries[i];
       input->slider.value = values[i];
       set_slider_static_attributes(input);
     }

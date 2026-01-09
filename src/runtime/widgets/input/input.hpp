@@ -4,6 +4,7 @@
 #include "nkengine/include/list.h"
 #include "runtime/solutions/module/compounds/action.h"
 #include "runtime/solutions/module/compounds/reward.h"
+#include "runtime/solutions/module/core.h"
 #include "runtime/widgets/core.hpp"
 #include <stdint.h>
 
@@ -23,95 +24,70 @@ typedef enum {
 } Type;
 
 typedef struct {
+  const char *label;
+  float min;
+  float max;
+  float step;
+  float multiplier;
+  float *value;
+} SliderParams;
+
+typedef struct {
+  const char *label;
+  bool *active;
+} ToggleParams;
+
+typedef struct {
+  const char *label;
+  const char **items;
+  uint32_t count;
+  int *selected;
+} SegmentParams;
+
+typedef struct {
+  const char *label;
+  float min;
+  float max;
+  float step;
+  float multiplier;
+  float *value;
+} AmountParams;
+
+typedef struct {
+  const char *label;
+  const char **items;
+  uint32_t count;
+  int *selected;
+} ComboboxParams;
+
+typedef struct {
+  const char *label;
+  bool *active;
+} CheckboxParams;
+
+// Action Input Component will automatically map the input based on the
+// provided solution
+typedef struct {
+  SolutionModuleAction *handle;
+} ActionParams;
+
+typedef struct {
   Type type;
 
   union {
-
-    struct {
-      const char *label;
-      float min;
-      float max;
-      float step;
-      float multiplier;
-      float *value;
-    } slider;
-
-    struct {
-      const char *label;
-      bool *active;
-    } toggle;
-
-    struct {
-      const char *label;
-      const char **items;
-      uint32_t count;
-      int *selected;
-    } segment;
-
-    struct {
-      const char *label;
-      float min;
-      float max;
-      float step;
-      float multiplier;
-      float *value;
-    } amount;
-
-    struct {
-      const char *label;
-      const char **items;
-      uint32_t count;
-      int *selected;
-    } combobox;
-
-    struct {
-      const char *label;
-      bool *active;
-    } checkbox;
-
-    struct {
-      const char *label;
-      CompoundModuleActionRole *role;
-      bool *active;
-
-      struct {
-
-        CompoundModuleRewardType *type;
-        float *probability;
-
-        struct {
-          CompoundModuleRewardAmountType *type;
-          uint32_t *value;
-          struct {
-            uint32_t *min;
-            uint32_t *max;
-          } range;
-
-        } amount;
-
-        struct {
-          uint32_t *quota;
-          uint32_t *interval;
-          uint32_t *repeat;
-          bool *forever;
-          CompoundModuleRewardTimeUnit *unit;
-        } frequency;
-
-        struct {
-          bool *active;
-          uint32_t *amount;
-          CompoundModuleRewardTimeUnit *unit;
-        } time_limit;
-
-      } reward;
-
-    } action;
+    SliderParams slider;
+    ToggleParams toggle;
+    SegmentParams segment;
+    AmountParams amount;
+    ComboboxParams combobox;
+    CheckboxParams checkbox;
+    ActionParams action;
   };
 
-} Descriptor;
+} Params;
 
 static const uint8_t INPUT_LIST_CAPACITY = 32;
-typedef STATIC_LIST(Descriptor, INPUT_LIST_CAPACITY) List;
+typedef STATIC_LIST(Params, INPUT_LIST_CAPACITY) List;
 } // namespace Input
 
 } // namespace Widget

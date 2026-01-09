@@ -1,0 +1,11 @@
+elkhantour@IDN-Mac-3 emma % make serve
+make serve
+python -m http.server
+Serving HTTP on :: port 8000 (http://[::]:8000/) ...
+::1 - - [06/Jan/2026 13:59:12] "GET /public/scripts/Emma.js HTTP/1.1" 200 -
+::1 - - [06/Jan/2026 13:59:13] "GET /public/scripts/Emma.data HTTP/1.1" 200 -
+::1 - - [06/Jan/2026 13:59:13] "GET /public/scripts/Emma.wasm HTTP/1.1" 200 -
+::1 - - [06/Jan/2026 13:59:15] code 404, message File not found
+::1 - - [06/Jan/2026 13:59:15] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [06/Jan/2026 13:59:17] code 404, message File not found
+::1 - - [06/Jan/2026 13:59:17] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 -

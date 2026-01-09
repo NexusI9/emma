@@ -5,26 +5,26 @@
 
 void Widget::Segment::Component::layout() {
 
-  RADIUS = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
-  GAP = gui_scale(gui, emma_size(ThemeEmmaSize_Space_Medium));
+  sizes.radius = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
+  sizes.gap = gui_scale(gui, emma_size(ThemeEmmaSize_Space_Medium));
 
   // set label
-  ImVec2 label_size = ImGui::CalcTextSize(label);
-  label_p = ImVec2(0, 0);
+  ImVec2 label_size = ImGui::CalcTextSize(params->label);
+  positions.label = ImVec2(0, 0);
 
   // set buttons
   const ImVec2 BUTTON_SIZE =
-      ImVec2(size.x / count,
+      ImVec2(sizes.boundbox.x / params->count,
              gui_scale(gui, emma_size(ThemeEmmaSize_Height_Input_Small)));
 
-  const int BUTTON_BASE_Y = label_size.y + GAP;
+  const int BUTTON_BASE_Y = label_size.y + sizes.gap;
 
-  for (uint8_t i = 0; i < count; i++) {
+  for (uint8_t i = 0; i < params->count; i++) {
 
-    Button *b = &buttons[i];
+    Button *b = &components.buttons[i];
 
-    b->label = items[i];
-    b->radius = RADIUS;
+    b->label = params->items[i];
+    b->radius = sizes.radius;
 
     // center label
     ImVec2 label_size = ImGui::CalcTextSize(b->label);
@@ -38,7 +38,7 @@ void Widget::Segment::Component::layout() {
     if (i == 0)
       b->flags =
           ImDrawFlags_RoundCornersTopLeft | ImDrawFlags_RoundCornersBottomLeft;
-    else if (i == count - 1)
+    else if (i == params->count - 1)
       b->flags = ImDrawFlags_RoundCornersTopRight |
                  ImDrawFlags_RoundCornersBottomRight;
     else
@@ -50,30 +50,31 @@ void Widget::Segment::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 origin = ImGui::GetCursorScreenPos();
-  ImGui::ItemSize(size);
+  ImGui::ItemSize(sizes.boundbox);
 
-  dl->AddText(im_vec2_add(label_p, origin), LABEL_COLOR, label);
+  dl->AddText(im_vec2_add(positions.label, origin), colors.label,
+              params->label);
 
-  for (uint8_t i = 0; i < count; i++) {
+  for (uint8_t i = 0; i < params->count; i++) {
 
-    Button *b = &buttons[i];
+    Button *b = &components.buttons[i];
 
-    if (*selected == i) {
+    if (*params->selected == i) {
 
       dl->AddImageRounded((ImTextureRef)view, im_vec2_add(b->p0, origin),
                           im_vec2_add(b->p1, origin),
-                          ImVec2(button_gradient.region->uv0[0],
-                                 button_gradient.region->uv0[1]),
-                          ImVec2(button_gradient.region->uv1[0],
-                                 button_gradient.region->uv1[1]),
-                          ImColor(255, 255, 255, 255), RADIUS, b->flags);
+                          ImVec2(components.button_gradient.region->uv0[0],
+                                 components.button_gradient.region->uv0[1]),
+                          ImVec2(components.button_gradient.region->uv1[0],
+                                 components.button_gradient.region->uv1[1]),
+                          ImColor(255, 255, 255, 255), sizes.radius, b->flags);
 
     } else {
 
       dl->AddRect(im_vec2_add(b->p0, origin), im_vec2_add(b->p1, origin),
-                  STROKE_COLOR, RADIUS, b->flags);
+                  colors.stroke, sizes.radius, b->flags);
     }
 
-    dl->AddText(im_vec2_add(b->label_p, origin), LABEL_COLOR, b->label);
+    dl->AddText(im_vec2_add(b->label_p, origin), colors.label, b->label);
   }
 }

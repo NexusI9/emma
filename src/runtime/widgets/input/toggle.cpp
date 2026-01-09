@@ -4,34 +4,38 @@
 
 void Widget::Toggle::Component::layout() {
 
-  radius = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
-  p1 = size;
+  sizes.radius = gui_scale(gui, emma_size(ThemeEmmaSize_Radius_Base));
+  positions.end = sizes.boundbox;
 
   // center label
-  ImVec2 label_size = ImGui::CalcTextSize(label);
-  label_p =
-      ImVec2(size.x / 2 - label_size.x / 2, size.y / 2 - label_size.y / 2);
+  ImVec2 label_size = ImGui::CalcTextSize(params->label);
+  positions.label = ImVec2(sizes.boundbox.x / 2 - label_size.x / 2,
+                           sizes.boundbox.y / 2 - label_size.y / 2);
 }
 
 void Widget::Toggle::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 origin = ImGui::GetCursorScreenPos();
-  ImGui::ItemSize(size);
+  ImGui::ItemSize(sizes.boundbox);
 
-  if (*active) {
+  if (*params->active) {
 
-    dl->AddImageRounded(
-        (ImTextureRef)view, im_vec2_add(p0, origin), im_vec2_add(p1, origin),
-        ImVec2(button_gradient.region->uv0[0], button_gradient.region->uv0[1]),
-        ImVec2(button_gradient.region->uv1[0], button_gradient.region->uv1[1]),
-        ImColor(255, 255, 255, 255), radius);
+    dl->AddImageRounded((ImTextureRef)view,
+                        im_vec2_add(positions.start, origin),
+                        im_vec2_add(positions.end, origin),
+                        ImVec2(components.button_gradient.region->uv0[0],
+                               components.button_gradient.region->uv0[1]),
+                        ImVec2(components.button_gradient.region->uv1[0],
+                               components.button_gradient.region->uv1[1]),
+                        ImColor(255, 255, 255, 255), sizes.radius);
 
   } else {
 
-    dl->AddRect(im_vec2_add(p0, origin), im_vec2_add(p1, origin), STROKE_COLOR,
-                radius);
+    dl->AddRect(im_vec2_add(positions.start, origin),
+                im_vec2_add(positions.end, origin), colors.stroke,
+                sizes.radius);
   }
 
-  dl->AddText(im_vec2_add(label_p, origin), LABEL_COLOR, label);
+  dl->AddText(im_vec2_add(positions.label, origin), colors.label, params->label);
 }

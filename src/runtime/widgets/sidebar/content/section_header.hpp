@@ -22,7 +22,7 @@ public:
   Component(Gui *gui, const char *label)
       : Widget(gui), label(label),
         info_icon(texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
-                  ui_sprite(UISprite_Icon_Info)) {
+                  ui_sprite(UISprite_Icon_Info_Small_White)) {
     layout();
   }
 

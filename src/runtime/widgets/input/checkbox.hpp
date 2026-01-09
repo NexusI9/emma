@@ -1,5 +1,5 @@
-#ifndef _WIDGET_TOGGLE_H_
-#define _WIDGET_TOGGLE_H_
+#ifndef _WIDGET_CHECKBOX_H_
+#define _WIDGET_CHECKBOX_H_
 
 #include "nkengine/include/gui.hpp"
 #include "resources/theme.emma.h"
@@ -12,29 +12,22 @@
 
 namespace Widget {
 
-namespace Toggle {
+namespace Checkbox {
 
 class Component : public Widget {
 
 public:
-  Component()
-      : Widget(nullptr),
-        components{
-            .button_gradient = {texture_atlas_layer_view(&g_atlas,
-                                                         TextureAtlasLayer_UI),
-                                ui_sprite(UISprite_Button_Gradient)},
-        } {}
+  Component() : Widget(nullptr) {}
 
-  void init(Gui *gui, Input::ToggleParams *params) {
+  void init(Gui *gui, Input::CheckboxParams *params) {
 
     this->gui = gui;
     this->params = params;
 
-    sizes.boundbox =
-        ImVec2(gui_scale(gui, 368),
-               gui_scale(gui, emma_size(ThemeEmmaSize_Height_Input_Large)));
+    sizes.boundbox = ImVec2(gui_scale(gui, 328), gui_scale(gui, 48));
     layout();
   }
+
   void layout();
   void draw();
 
@@ -54,39 +47,38 @@ public:
   }
 
 private:
-  // core Attributes
-  Input::ToggleParams *params;
+  // Attributes
+  Input::CheckboxParams *params;
 
-  // positions
+  // Positions
   struct {
     ImVec2 label;
-    ImVec2 start;
-    ImVec2 end;
+    ImVec2 outer_box;
+    ImVec2 inner_box_start;
+    ImVec2 inner_box_end;
   } positions;
 
-  // sizes
+  // Sizes
   struct {
     ImVec2 boundbox;
-    int radius;
+    ImVec2 outer_box;
+    ImVec2 inner_box;
+    int outer_radius;
+    int inner_radius;
+    int gap;
   } sizes;
 
-  // colors
+  // Colors
   struct {
     const ImColor label = im_color(emma_color(ThemeEmmaColor_Text_On_Dark));
     const ImColor stroke =
-        im_color(emma_color(ThemeEmmaColor_Border_Brand_Subtle));
+        im_color(emma_color(ThemeEmmaColor_Border_Brand_Base));
+    const ImColor background =
+        im_color(emma_color(ThemeEmmaColor_Background_Brand_Base));
   } colors;
-
-  // components
-  struct {
-    ::Component::Sprite button_gradient;
-  } components;
-
-  // other
-  const WGPUTextureView view =
-      texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI);
 };
-} // namespace Toggle
+
+} // namespace Checkbox
 } // namespace Widget
 
 #endif

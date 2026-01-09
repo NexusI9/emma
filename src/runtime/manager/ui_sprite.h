@@ -35,8 +35,14 @@ typedef enum {
   UISprite_Statbar_Gradient_Socialbounding,
   UISprite_Statbar_Gradient_Friction,
   UISprite_Slider_Knob,
-  UISprite_Icon_Info,
+  UISprite_Icon_Info_Small_White,
   UISprite_Button_Gradient,
+  UISprite_Icon_Chevron_Down_Medium_Black,
+  UISprite_Icon_Chevron_Up_Medium_Black,
+  UISprite_Icon_Chevron_Up_Small_Black,
+  UISprite_Icon_Chevron_Down_Small_Black,
+  UISprite_Icon_Chevron_Down_Medium_White,
+  UISprite_Icon_Chevron_Up_Medium_White,
 } UISprite;
 
 static const TextureAtlasRegion sprites[] =
@@ -163,57 +169,57 @@ static const TextureAtlasRegion sprites[] =
         [UISprite_Statbar_Icon_Bored] =
             {
                 .label = "Statbar Icon Bored",
-                .uv0 = {0.756f, 0.124f},
-                .uv1 = {0.771f, 0.140f},
+                .uv0 = {0.850f, 0.124f},
+                .uv1 = {0.865f, 0.140f},
                 .size = {32, 32},
             },
         [UISprite_Statbar_Icon_Excited] =
             {
                 .label = "Statbar Icon Excited",
-                .uv0 = {0.771f, 0.124f},
-                .uv1 = {0.787f, 0.140f},
+                .uv0 = {0.865f, 0.124f},
+                .uv1 = {0.881f, 0.140f},
                 .size = {32, 32},
             },
         [UISprite_Statbar_Icon_Coin] =
             {
                 .label = "Statbar Icon Coin",
-                .uv0 = {0.787f, 0.124f},
-                .uv1 = {0.803f, 0.140f},
+                .uv0 = {0.881f, 0.124f},
+                .uv1 = {0.896f, 0.140f},
                 .size = {32, 32},
             },
         [UISprite_Statbar_Icon_Gift] =
             {
                 .label = "Statbar Icon Gift",
-                .uv0 = {0.803f, 0.124f},
-                .uv1 = {0.818f, 0.140f},
+                .uv0 = {0.896f, 0.124f},
+                .uv1 = {0.912f, 0.140f},
                 .size = {32, 32},
             },
         [UISprite_Statbar_Icon_Solo] =
             {
                 .label = "Statbar Icon Solo",
-                .uv0 = {0.756f, 0.140f},
-                .uv1 = {0.771f, 0.155f},
+                .uv0 = {0.850f, 0.140f},
+                .uv1 = {0.865f, 0.155f},
                 .size = {32, 32},
             },
         [UISprite_Statbar_Icon_Group] =
             {
                 .label = "Statbar Icon Group",
-                .uv0 = {0.771f, 0.140f},
-                .uv1 = {0.787f, 0.155f},
+                .uv0 = {0.865f, 0.140f},
+                .uv1 = {0.881f, 0.155f},
                 .size = {32, 32},
             },
         [UISprite_Statbar_Icon_Weight] =
             {
                 .label = "Statbar Icon Weight",
-                .uv0 = {0.787f, 0.140f},
-                .uv1 = {0.803f, 0.155f},
+                .uv0 = {0.881f, 0.140f},
+                .uv1 = {0.896f, 0.155f},
                 .size = {32, 32},
             },
         [UISprite_Statbar_Icon_Leaf] =
             {
                 .label = "Statbar Icon Leaf",
-                .uv0 = {0.803f, 0.140f},
-                .uv1 = {0.818f, 0.155f},
+                .uv0 = {0.896f, 0.140f},
+                .uv1 = {0.912f, 0.155f},
                 .size = {32, 32},
             },
         [UISprite_Statbar_Window] =
@@ -258,11 +264,11 @@ static const TextureAtlasRegion sprites[] =
                 .uv1 = {0.756f, 0.147f},
                 .size = {48, 48},
             },
-        [UISprite_Icon_Info] =
+        [UISprite_Icon_Info_Small_White] =
             {
-                .label = "Icon Info",
-                .uv0 = {0.818f, 0.124f},
-                .uv1 = {0.834f, 0.140f},
+                .label = "Icon Info Small White",
+                .uv0 = {0.912f, 0.124f},
+                .uv1 = {0.928f, 0.140f},
                 .size = {32, 32},
             },
         [UISprite_Button_Gradient] =
@@ -271,6 +277,48 @@ static const TextureAtlasRegion sprites[] =
                 .uv0 = {0.975f, 0.009f},
                 .uv1 = {0.987f, 0.054f},
                 .size = {26, 92},
+            },
+        [UISprite_Icon_Chevron_Down_Medium_Black] =
+            {
+                .label = "Icon Chevron Down Medium Black",
+                .uv0 = {0.803f, 0.124f},
+                .uv1 = {0.826f, 0.147f},
+                .size = {48, 48},
+            },
+        [UISprite_Icon_Chevron_Up_Medium_Black] =
+            {
+                .label = "Icon Chevron Up Medium Black",
+                .uv0 = {0.826f, 0.124f},
+                .uv1 = {0.850f, 0.147f},
+                .size = {48, 48},
+            },
+        [UISprite_Icon_Chevron_Up_Small_Black] =
+            {
+                .label = "Icon Chevron Up Small Black",
+                .uv0 = {0.928f, 0.124f},
+                .uv1 = {0.943f, 0.140f},
+                .size = {32, 32},
+            },
+        [UISprite_Icon_Chevron_Down_Small_Black] =
+            {
+                .label = "Icon Chevron Down Small Black",
+                .uv0 = {0.943f, 0.124f},
+                .uv1 = {0.959f, 0.140f},
+                .size = {32, 32},
+            },
+        [UISprite_Icon_Chevron_Down_Medium_White] =
+            {
+                .label = "Icon Chevron Down Medium White",
+                .uv0 = {0.756f, 0.124f},
+                .uv1 = {0.779f, 0.147f},
+                .size = {48, 48},
+            },
+        [UISprite_Icon_Chevron_Up_Medium_White] =
+            {
+                .label = "Icon Chevron Up Medium White",
+                .uv0 = {0.779f, 0.124f},
+                .uv1 = {0.803f, 0.147f},
+                .size = {48, 48},
             },
 };
 

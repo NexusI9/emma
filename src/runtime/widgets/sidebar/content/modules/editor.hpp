@@ -43,7 +43,7 @@ public:
   }
 
 private:
-  void create_actions_input_descriptor(const ModuleType);
+
   // Update inputs data according to selected persona
   void update_inputs_values(const ModuleType);
 

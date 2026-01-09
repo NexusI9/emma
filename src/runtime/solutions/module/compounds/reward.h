@@ -40,7 +40,6 @@
     _(  Skin,                    1,              0.850     )\
     _(  Gift,                    1,              1.000     )
 
-
 /*
   For the cycles max amount we use a clamp based value, as instance if the second is more that 60,
   it means that it should use a minute based time-limit.
@@ -64,12 +63,15 @@ typedef enum {
 #define _(Label, Amount, Weight) CompoundModuleRewardType_##Label,
   REWARD_TYPES(_)
 #undef _
+      CompoundModuleRewardType_COUNT,
 } CompoundModuleRewardType;
 
 typedef enum {
 #define _(Label, Amount, Weight) CompoundModuleRewardTimeUnit_##Label,
   REWARD_CYCLES(_)
 #undef _
+
+      CompoundModuleRewardTimeUnit_COUNT,
 } CompoundModuleRewardTimeUnit;
 
 typedef enum {
@@ -134,6 +136,7 @@ typedef struct {
 
 static const uint32_t COMPOUND_MODULE_QUOTA_UNLIMITED = INT32_MAX;
 static const uint32_t COMPOUND_MODULE_REPEAT_ALWAYS = INT32_MAX;
+static const uint32_t COMPOUND_MODULE_INTERVAL_LONGEST = INT32_MAX;
 static const float COMPOUND_MODULE_PROBABILITY_ALWAYS = 1.0f;
 
 // 1N reward for 1 action, most common use case
@@ -267,6 +270,9 @@ static inline float compound_module_reward_cycle_unit_to_sec(
 
   case CompoundModuleRewardTimeUnit_Year:
     return value * 365.0f * 24.0f * 60.0f * 60.0f;
+
+  default:
+    return 1.0f;
   }
 
   return 1.0f;

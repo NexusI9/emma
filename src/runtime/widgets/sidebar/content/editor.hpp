@@ -55,7 +55,7 @@ protected:
   void set_name(const char *name) { this->name = name; }
   void set_description(const char *desc) { this->description = desc; }
 
-  void set_slider_static_attributes(Input::Descriptor *);
+  void set_slider_static_attributes(Input::Params *);
   void update_inputs_layout();
   void update_motivation(const ::Solution *, const solution_formula *);
 

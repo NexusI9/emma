@@ -36,7 +36,7 @@ void Widget::SideBar::Content::Editor::Component::draw() {
 }
 
 void Widget::SideBar::Content::Editor::Component::set_slider_static_attributes(
-    Input::Descriptor *input) {
+    Input::Params *input) {
 
   static constexpr float SLIDER_MIN = 0.0f;
   static constexpr float SLIDER_MAX = 10.0f;
