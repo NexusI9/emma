@@ -36,10 +36,11 @@ void Widget::Amount::Component::layout() {
       positions.end.y);
 }
 
-void Widget::Amount::Component::draw() {
+bool Widget::Amount::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 origin = ImGui::GetCursorScreenPos();
+  bool updated = false;
 
   dl->AddText(im_vec2_add(positions.label, origin), colors.label,
               params->label);
@@ -58,11 +59,14 @@ void Widget::Amount::Component::draw() {
 
   ImGui::SetCursorScreenPos(im_vec2_add(positions.start, origin));
   ImGui::SetNextItemWidth(positions.value_end.x);
-  ImGui::DragFloat(id, params->value, params->step, params->min, params->max,
-                   format);
+  if (ImGui::DragFloat(id, params->value, params->step, params->min,
+                       params->max, format))
+    updated = true;
 
   ImGui::PopStyleColor(3);
 
   ImGui::SetCursorScreenPos(origin);
   ImGui::ItemSize(sizes.boundbox);
+
+  return updated;
 }

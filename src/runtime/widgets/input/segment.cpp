@@ -46,11 +46,12 @@ void Widget::Segment::Component::layout() {
   }
 }
 
-void Widget::Segment::Component::draw() {
+bool Widget::Segment::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 origin = ImGui::GetCursorScreenPos();
   ImGui::ItemSize(sizes.boundbox);
+  bool updated = false;
 
   dl->AddText(im_vec2_add(positions.label, origin), colors.label,
               params->label);
@@ -58,11 +59,18 @@ void Widget::Segment::Component::draw() {
   for (uint8_t i = 0; i < params->count; i++) {
 
     Button *b = &components.buttons[i];
+    const ImVec2 p0 = im_vec2_add(b->p0, origin);
+    const ImVec2 p1 = im_vec2_add(b->p1, origin);
+
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+        ImGui::IsMouseHoveringRect(p0, p1)) {
+      *params->selected = i;
+      updated = true;
+    }
 
     if (*params->selected == i) {
 
-      dl->AddImageRounded((ImTextureRef)view, im_vec2_add(b->p0, origin),
-                          im_vec2_add(b->p1, origin),
+      dl->AddImageRounded((ImTextureRef)view, p0, p1,
                           ImVec2(components.button_gradient.region->uv0[0],
                                  components.button_gradient.region->uv0[1]),
                           ImVec2(components.button_gradient.region->uv1[0],
@@ -77,4 +85,6 @@ void Widget::Segment::Component::draw() {
 
     dl->AddText(im_vec2_add(b->label_p, origin), colors.label, b->label);
   }
+
+  return updated;
 }

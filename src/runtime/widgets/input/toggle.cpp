@@ -13,10 +13,12 @@ void Widget::Toggle::Component::layout() {
                            sizes.boundbox.y / 2 - label_size.y / 2);
 }
 
-void Widget::Toggle::Component::draw() {
+bool Widget::Toggle::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 origin = ImGui::GetCursorScreenPos();
+  bool updated = false;
+
   ImGui::ItemSize(sizes.boundbox);
 
   if (*params->active) {
@@ -37,5 +39,8 @@ void Widget::Toggle::Component::draw() {
                 sizes.radius);
   }
 
-  dl->AddText(im_vec2_add(positions.label, origin), colors.label, params->label);
+  dl->AddText(im_vec2_add(positions.label, origin), colors.label,
+              params->label);
+
+  return updated;
 }

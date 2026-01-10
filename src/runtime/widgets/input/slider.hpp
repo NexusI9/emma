@@ -20,6 +20,7 @@ namespace Slider {
 class Component : public Widget {
 
 public:
+  // TODO: use union for Float/Int value
   typedef enum {
     Format_Float,
     Format_Integer,
@@ -42,20 +43,24 @@ public:
     this->gui = gui;
     this->format = format;
     this->params = params;
+
+    name_compose(id, "%s_slider", params->label);
   }
 
   void layout();
-  void draw();
+  bool draw();
 
 private:
   // core attribtues
   Input::SliderParams *params;
-  name_t str_value;
+  name_t str_value, id;
   Format format;
+  float t, value_t;
 
   // sizes
   struct {
     ImVec2 boundbox;
+    ImVec2 clickbox;
     ImVec2 slider;
     int dot;
     int row_gap;
@@ -87,6 +92,8 @@ private:
   } colors;
 
   void update_value(const float);
+  void mouse_pos_to_value(const ImVec2 &);
+  float update_knob_position_from_value();
 };
 
 } // namespace Slider

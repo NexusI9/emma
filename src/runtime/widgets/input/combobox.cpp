@@ -37,10 +37,11 @@ void Widget::Combobox::Component::layout() {
   sizes.boundbox = positions.end;
 }
 
-void Widget::Combobox::Component::draw() {
+bool Widget::Combobox::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 origin = ImGui::GetCursorScreenPos();
+  bool updated = false;
 
   dl->AddText(im_vec2_add(positions.label, origin), colors.label,
               params->label);
@@ -73,9 +74,10 @@ void Widget::Combobox::Component::draw() {
   if (ImGui::BeginPopup(id)) {
 
     for (size_t i = 0; i < params->count; i++)
-      if (ImGui::Selectable(params->items[i]))
+      if (ImGui::Selectable(params->items[i])) {
         *params->selected = i;
-
+        updated = true;
+      }
     ImGui::EndPopup();
   }
 
@@ -83,4 +85,6 @@ void Widget::Combobox::Component::draw() {
   ImGui::PopStyleColor(2);
 
   ImGui::ItemSize(sizes.boundbox);
+
+  return updated;
 }

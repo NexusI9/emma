@@ -172,10 +172,22 @@ Widget::Input::Action::Component::validate() {
 
 void Widget::Input::Action::Component::layout() {
 
-  sizes.boundbox = gui_scale_im_vec2(gui, ImVec2(368, 1046));
-  sizes.closed_boundbox =
-      ImVec2(sizes.boundbox.x,
-             gui_scale(gui, emma_size(ThemeEmmaSize_Height_Input_Medium)));
+  sizes.base_height = gui_scale(gui, 864);
+  sizes.boundbox = ImVec2(gui_scale(gui, 368), sizes.base_height);
+  sizes.closed_height =
+      gui_scale(gui, emma_size(ThemeEmmaSize_Height_Input_Medium));
+
+  {
+    // set dynamic heights
+    sizes.reward_amount_heights[CompoundModuleRewardAmountType_Undefined] =
+        gui_scale(gui, 102);
+    sizes.reward_amount_heights[CompoundModuleRewardAmountType_Fixed] =
+        gui_scale(gui, 166);
+    sizes.reward_amount_heights[CompoundModuleRewardAmountType_Range] =
+        gui_scale(gui, 230);
+  }
+
+  update_height();
 
   sizes.content_width = sizes.boundbox.x - 2 * sizes.padding;
 
@@ -225,14 +237,14 @@ void Widget::Input::Action::Component::layout_header() {
                  gui_scale(gui, emma_size(ThemeEmmaSize_Width_Border_Base)));
 }
 void Widget::Input::Action::Component::layout_action() {
-
   components.role.set_width(sizes.content_width);
 }
 void Widget::Input::Action::Component::layout_reward() {}
 
 void Widget::Input::Action::Component::layout_amount() {
   positions.amount_end.x = sizes.content_width;
-  positions.amount_end.y = gui_scale(gui, 166);
+  positions.amount_end.y =
+      sizes.reward_amount_heights[params->handle->reward.amount.type];
 
   components.reward_amount_type.set_width(sizes.reward_content_width);
   components.reward_amount_value.set_width(sizes.reward_content_width);
@@ -254,6 +266,19 @@ void Widget::Input::Action::Component::layout_time_limit() {
 
   components.reward_time_limit_amount.set_width(sizes.reward_content_width);
   components.reward_time_limit_unit.set_width(sizes.reward_content_width);
+}
+
+/**
+   Update the total height by adding the dynamic height of the reward amout type
+ */
+void Widget::Input::Action::Component::update_height() {
+  sizes.boundbox.y =
+      sizes.base_height +
+      sizes.reward_amount_heights[params->handle->reward.amount.type] +
+      sizes.padding;
+
+  positions.amount_end.y =
+      sizes.reward_amount_heights[params->handle->reward.amount.type];
 }
 
 /*
@@ -316,7 +341,7 @@ void Widget::Input::Action::Component::draw_header(ImDrawList *dl) {
 
   components.chevron.draw_at(origin);
 
-  if (State_Opened == state)
+  if (State_Open == state)
     dl->AddRectFilled(im_vec2_add(origin, positions.header.underline_start),
                       im_vec2_add(origin, positions.header.underline_end),
                       colors.border);
@@ -358,7 +383,8 @@ void Widget::Input::Action::Component::draw_amount(ImDrawList *dl) {
     draw_gap();
 
     reward_section_padding();
-    components.reward_amount_type.draw();
+    if (components.reward_amount_type.draw())
+      update_height();
 
     if (CompoundModuleRewardAmountType_Fixed ==
         params->handle->reward.amount.type) {

@@ -30,14 +30,23 @@ void Widget::Checkbox::Component::layout() {
   positions.label.x = sizes.outer_box.x + sizes.gap;
 }
 
-void Widget::Checkbox::Component::draw() {
+bool Widget::Checkbox::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 origin = ImGui::GetCursorScreenPos();
+  bool updated = false;
+
   ImGui::ItemSize(sizes.boundbox);
 
-  dl->AddRect(origin, im_vec2_add(sizes.outer_box, origin), colors.stroke,
-              sizes.outer_radius);
+  const ImVec2 p1 = im_vec2_add(sizes.outer_box, origin);
+
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+      ImGui::IsMouseHoveringRect(origin, p1)) {
+    *params->active = !(*params->active);
+    updated = true;
+  }
+
+  dl->AddRect(origin, p1, colors.stroke, sizes.outer_radius);
 
   if (*params->active)
     dl->AddRectFilled(im_vec2_add(origin, positions.inner_box_start),
@@ -46,4 +55,6 @@ void Widget::Checkbox::Component::draw() {
 
   dl->AddText(im_vec2_add(positions.label, origin), colors.label,
               params->label);
+
+  return updated;
 }

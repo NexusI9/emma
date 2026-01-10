@@ -60,7 +60,7 @@ public:
   }
 
   typedef enum {
-    State_Opened,
+    State_Open,
     State_Closed,
   } State;
 
@@ -191,6 +191,7 @@ private:
     ImGui::Dummy(ImVec2(sizes.reward_total_padding, 0));
     ImGui::SameLine();
   }
+  void update_height();
 
   // positions
   struct {
@@ -213,12 +214,14 @@ private:
   // sizes
   struct {
     ImVec2 boundbox;
-    ImVec2 closed_boundbox;
+    int base_height;
+    int closed_height;
     int content_width;
     int padding;
     int top_padding;
     int reward_box_padding;
     int reward_total_padding;
+    int reward_amount_heights[CompoundModuleRewardAmountType_COUNT];
     int gap;
     int radius;
     int reward_content_width;
@@ -335,6 +338,26 @@ private:
                       .amount =
                           {
                               "Value",
+                              .min = 0,
+                              .step = 1,
+                          },
+                  },
+              [ParamType_Reward_Amount_Min] =
+                  {
+                      Input::Type_Amount,
+                      .amount =
+                          {
+                              "Min",
+                              .min = 0,
+                              .step = 1,
+                          },
+                  },
+              [ParamType_Reward_Amount_Max] =
+                  {
+                      Input::Type_Amount,
+                      .amount =
+                          {
+                              "Max",
                               .min = 0,
                               .step = 1,
                           },

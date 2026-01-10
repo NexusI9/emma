@@ -29,7 +29,7 @@ public:
   }
 
   void layout();
-  void draw();
+  bool draw();
 
   void set_size(ImVec2 size) {
     this->sizes.boundbox = size;
