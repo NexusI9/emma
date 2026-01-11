@@ -21,11 +21,14 @@ bool Widget::Toggle::Component::draw() {
 
   ImGui::ItemSize(sizes.boundbox);
 
-  if (*params->active) {
+  const ImVec2 p1 = im_vec2_add(positions.end, origin);
 
-    dl->AddImageRounded((ImTextureRef)view,
-                        im_vec2_add(positions.start, origin),
-                        im_vec2_add(positions.end, origin),
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+      ImGui::IsMouseHoveringRect(origin, p1))
+    *params->active = !(*params->active);
+
+  if (*params->active) {
+    dl->AddImageRounded((ImTextureRef)view, origin, p1,
                         ImVec2(components.button_gradient.region->uv0[0],
                                components.button_gradient.region->uv0[1]),
                         ImVec2(components.button_gradient.region->uv1[0],
@@ -33,10 +36,7 @@ bool Widget::Toggle::Component::draw() {
                         ImColor(255, 255, 255, 255), sizes.radius);
 
   } else {
-
-    dl->AddRect(im_vec2_add(positions.start, origin),
-                im_vec2_add(positions.end, origin), colors.stroke,
-                sizes.radius);
+    dl->AddRect(origin, p1, colors.stroke, sizes.radius);
   }
 
   dl->AddText(im_vec2_add(positions.label, origin), colors.label,

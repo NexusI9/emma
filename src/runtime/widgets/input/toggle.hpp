@@ -60,7 +60,6 @@ private:
   // positions
   struct {
     ImVec2 label;
-    ImVec2 start;
     ImVec2 end;
   } positions;
 
