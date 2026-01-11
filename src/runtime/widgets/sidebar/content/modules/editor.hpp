@@ -19,6 +19,8 @@ namespace Modules {
 
 namespace Editor {
 
+void update_module_motivation(void *);
+
 class Component : public Content::Editor::Component {
 
 public:
@@ -28,12 +30,9 @@ public:
 
   void set_module(const ModuleType module) {
 
-    ::Solution *solution = g_module_solutions[module];
+    this->module = module;
+    update_motivation_from_active_module();
 
-    const solution_formula *formulas =
-        solution_get_formulas(SolutionType_Module);
-
-    update_motivation(solution, formulas);
     // TODO: find a way to streamline and unify the input update process
     update_inputs_values(module);
     update_inputs_layout();
@@ -42,10 +41,18 @@ public:
     set_description(MODULE_INTRO[module].description);
   }
 
-private:
+  void update_motivation_from_active_module() {
+    ::Solution *solution = g_module_solutions[module];
+    const solution_formula *formulas =
+        solution_get_formulas(SolutionType_Module);
 
+    update_motivation(solution, formulas);
+  }
+
+private:
   // Update inputs data according to selected persona
   void update_inputs_values(const ModuleType);
+  ModuleType module;
 
   typedef enum {
     SectionType_Experience,
@@ -60,8 +67,13 @@ private:
       [SectionType_Experience] =
           {
               .section_header = {gui, "Experience"},
-              .input_renderer = {gui,
-                                 &sections[SectionType_Experience].input_list},
+              .input_renderer =
+                  {
+                      gui,
+                      &sections[SectionType_Experience].input_list,
+                      update_module_motivation,
+                      this,
+                  },
               .input_list =
                   {
                       .count = 2,
@@ -92,8 +104,13 @@ private:
       [SectionType_Semantic] =
           {
               .section_header = {gui, "Semantic"},
-              .input_renderer = {gui,
-                                 &sections[SectionType_Semantic].input_list},
+              .input_renderer =
+                  {
+                      gui,
+                      &sections[SectionType_Semantic].input_list,
+                      update_module_motivation,
+                      this,
+                  },
               .input_list =
                   {
                       .count = 2,
@@ -113,7 +130,13 @@ private:
       [SectionType_Social] =
           {
               .section_header = {gui, "Social"},
-              .input_renderer = {gui, &sections[SectionType_Social].input_list},
+              .input_renderer =
+                  {
+                      gui,
+                      &sections[SectionType_Social].input_list,
+                      update_module_motivation,
+                      this,
+                  },
               .input_list =
                   {
                       .count = 4,
@@ -141,8 +164,13 @@ private:
       [SectionType_Actions] =
           {
               .section_header = {gui, "Actions"},
-              .input_renderer = {gui,
-                                 &sections[SectionType_Actions].input_list},
+              .input_renderer =
+                  {
+                      gui,
+                      &sections[SectionType_Actions].input_list,
+                      update_module_motivation,
+                      this,
+                  },
               // sine actions are different for each module we generate them
               // dynamically
               .input_list = {},

@@ -78,17 +78,21 @@ void Widget::Slider::Component::mouse_pos_to_value(const ImVec2 &origin) {
   if (format == Format_Integer) {
     v = roundf(v);
     v = ImClamp((int)v, (int)params->min, (int)params->max);
+    v /= params->multiplier;
   } else if (params->step > 0.0f) {
     v = roundf(v / params->step) * params->step;
   }
 
+  
+  
   if (v != *params->value)
     *params->value = v;
 }
 
 float Widget::Slider::Component::update_knob_position_from_value() {
   float value = (*params->value - params->min) / (params->max - params->min);
-  return ImClamp(value, 0.0f, 1.0f);
+  value *= params->multiplier;
+  return ImClamp(value, params->min, params->max);
 }
 
 bool Widget::Slider::Component::draw() {

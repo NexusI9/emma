@@ -224,9 +224,22 @@ void Widget::Input::Action::Component::layout_header() {
   positions.header.checkbox.x = sizes.padding;
   positions.header.checkbox.y = sizes.top_padding + gui_scale(gui, 6);
 
-  components.chevron.set_position(
-      ImVec2(sizes.boundbox.x - sizes.padding, sizes.top_padding),
-      GuiSpriteAnchor_TopRight);
+  positions.header.chevron_start =
+      ImVec2(sizes.boundbox.x - sizes.padding -
+                 components.chevron_down.region->size[0],
+             sizes.top_padding);
+
+  positions.header.chevron_end =
+      ImVec2(components.chevron_down.region->size[0],
+             components.chevron_down.region->size[1]);
+
+  positions.header.chevron_end =
+      im_vec2_add(positions.header.chevron_start, positions.header.chevron_end);
+
+  components.chevron_down.set_position(positions.header.chevron_start,
+                                       GuiSpriteAnchor_TopLeft);
+  components.chevron_up.set_position(positions.header.chevron_start,
+                                     GuiSpriteAnchor_TopLeft);
 
   positions.header.underline_start =
       ImVec2(sizes.padding, sizes.top_padding + gui_scale(gui, 32));
@@ -272,6 +285,12 @@ void Widget::Input::Action::Component::layout_time_limit() {
    Update the total height by adding the dynamic height of the reward amout type
  */
 void Widget::Input::Action::Component::update_height() {
+
+  if (!open) {
+    sizes.boundbox.y = sizes.closed_height;
+    return;
+  }
+
   sizes.boundbox.y =
       sizes.base_height +
       sizes.reward_amount_heights[params->handle->reward.amount.type] +
@@ -291,10 +310,11 @@ void Widget::Input::Action::Component::update_height() {
 
  */
 
-void Widget::Input::Action::Component::draw() {
+bool Widget::Input::Action::Component::draw() {
 
   ImDrawList *dl = ImGui::GetWindowDrawList();
   ImVec2 origin = ImGui::GetCursorScreenPos();
+  bool updated = false;
 
   // bg
   dl->AddRectFilled(origin, im_vec2_add(sizes.boundbox, origin),
@@ -302,22 +322,27 @@ void Widget::Input::Action::Component::draw() {
 
   ImGui::PushID(params->handle->action.label);
 
-  draw_header(dl);
-  draw_gap();
-  draw_action(dl);
-  draw_gap();
-  draw_reward(dl);
-  draw_gap();
-  draw_amount(dl);
-  draw_gap();
-  draw_frequency(dl);
-  draw_gap();
-  draw_time_limit(dl);
+  draw_header(dl, &updated);
+
+  if (open) {
+    draw_gap();
+    draw_action(dl, &updated);
+    draw_gap();
+    draw_reward(dl, &updated);
+    draw_gap();
+    draw_amount(dl, &updated);
+    draw_gap();
+    draw_frequency(dl, &updated);
+    draw_gap();
+    draw_time_limit(dl, &updated);
+  }
 
   ImGui::PopID();
 
   ImGui::SetCursorScreenPos(origin);
   ImGui::ItemSize(sizes.boundbox);
+
+  return updated;
 }
 
 void Widget::Input::Action::Component::draw_label(const char *label) {
@@ -332,33 +357,48 @@ void Widget::Input::Action::Component::draw_frame(ImDrawList *dl,
   dl->AddRect(start, end, colors.border, sizes.radius);
 }
 
-void Widget::Input::Action::Component::draw_header(ImDrawList *dl) {
+void Widget::Input::Action::Component::draw_header(ImDrawList *dl,
+                                                   bool *updated) {
 
   ImVec2 origin = ImGui::GetCursorScreenPos();
 
   ImGui::SetCursorScreenPos(im_vec2_add(origin, positions.header.checkbox));
-  components.active.draw();
+  if (components.active.draw())
+    *updated = true;
 
-  components.chevron.draw_at(origin);
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+      ImGui::IsMouseHoveringRect(
+          im_vec2_add(positions.header.chevron_start, origin),
+          im_vec2_add(positions.header.chevron_end, origin))) {
+    open = !open;
+    update_height();
+  }
 
-  if (State_Open == state)
+  if (open) {
+    components.chevron_up.draw_at(origin);
     dl->AddRectFilled(im_vec2_add(origin, positions.header.underline_start),
                       im_vec2_add(origin, positions.header.underline_end),
                       colors.border);
+  } else {
+    components.chevron_down.draw_at(origin);
+  }
 
   ImGui::SetCursorScreenPos(
       im_vec2_add(origin, ImVec2(0, sizes.header.height)));
 }
 
-void Widget::Input::Action::Component::draw_action(ImDrawList *dl) {
+void Widget::Input::Action::Component::draw_action(ImDrawList *dl,
+                                                   bool *updated) {
 
   ImVec2 origin = ImGui::GetCursorScreenPos();
   ImGui::SetCursorPosX(sizes.padding);
 
-  components.role.draw();
+  if (components.role.draw())
+    *updated = true;
 }
 
-void Widget::Input::Action::Component::draw_reward(ImDrawList *dl) {
+void Widget::Input::Action::Component::draw_reward(ImDrawList *dl,
+                                                   bool *updated) {
 
   ImVec2 origin = ImGui::GetCursorScreenPos();
 
@@ -367,15 +407,18 @@ void Widget::Input::Action::Component::draw_reward(ImDrawList *dl) {
   draw_gap();
 
   ImGui::SetCursorPosX(sizes.padding);
-  components.reward_type.draw();
+  if (components.reward_type.draw())
+    *updated = true;
 
   draw_gap();
 
   ImGui::SetCursorPosX(sizes.padding);
-  components.reward_probability.draw();
+  if (components.reward_probability.draw())
+    *updated = true;
 }
 
-void Widget::Input::Action::Component::draw_amount(ImDrawList *dl) {
+void Widget::Input::Action::Component::draw_amount(ImDrawList *dl,
+                                                   bool *updated) {
 
   ImVec2 origin;
   reward_section_begin(dl, "Amount", positions.amount_end, &origin);
@@ -383,31 +426,37 @@ void Widget::Input::Action::Component::draw_amount(ImDrawList *dl) {
     draw_gap();
 
     reward_section_padding();
-    if (components.reward_amount_type.draw())
+    if (components.reward_amount_type.draw()) {
       update_height();
+      *updated = true;
+    }
 
     if (CompoundModuleRewardAmountType_Fixed ==
         params->handle->reward.amount.type) {
 
       reward_section_padding();
-      components.reward_amount_value.draw();
+      if (components.reward_amount_value.draw())
+        *updated = true;
 
     } else if (CompoundModuleRewardAmountType_Range ==
                params->handle->reward.amount.type) {
 
       reward_section_padding();
-      components.reward_amount_min.draw();
+      if (components.reward_amount_min.draw())
+        *updated = true;
 
       draw_gap();
 
       reward_section_padding();
-      components.reward_amount_max.draw();
+      if (components.reward_amount_max.draw())
+        *updated = true;
     }
   }
   reward_section_end(origin, positions.amount_end);
 }
 
-void Widget::Input::Action::Component::draw_frequency(ImDrawList *dl) {
+void Widget::Input::Action::Component::draw_frequency(ImDrawList *dl,
+                                                      bool *updated) {
 
   ImVec2 origin;
   reward_section_begin(dl, "Frequency", positions.frequency_end, &origin);
@@ -415,38 +464,46 @@ void Widget::Input::Action::Component::draw_frequency(ImDrawList *dl) {
 
     draw_gap();
     reward_section_padding();
-    components.reward_frequency_quota.draw();
+    if (components.reward_frequency_quota.draw())
+      *updated = true;
 
     draw_gap();
     reward_section_padding();
-    components.reward_frequency_interval.draw();
+    if (components.reward_frequency_interval.draw())
+      *updated = true;
 
     draw_gap();
     reward_section_padding();
-    components.reward_frequency_repeat.draw();
+    if (components.reward_frequency_repeat.draw())
+      *updated = true;
 
     reward_section_padding();
-    components.reward_frequency_forever.draw();
+    if (components.reward_frequency_forever.draw())
+      *updated = true;
 
     draw_gap();
     reward_section_padding();
-    components.reward_frequency_unit.draw();
+    if (components.reward_frequency_unit.draw())
+      *updated = true;
   }
   reward_section_end(origin, positions.frequency_end);
 }
 
-void Widget::Input::Action::Component::draw_time_limit(ImDrawList *dl) {
+void Widget::Input::Action::Component::draw_time_limit(ImDrawList *dl,
+                                                       bool *updated) {
 
   ImVec2 origin;
   reward_section_begin(dl, "Time Limit", positions.time_limit_end, &origin);
   {
     draw_gap();
     reward_section_padding();
-    components.reward_time_limit_amount.draw();
+    if (components.reward_time_limit_amount.draw())
+      *updated = true;
 
     draw_gap();
     reward_section_padding();
-    components.reward_time_limit_unit.draw();
+    if (components.reward_time_limit_unit.draw())
+      *updated = true;
   }
   reward_section_end(origin, positions.time_limit_end);
 }

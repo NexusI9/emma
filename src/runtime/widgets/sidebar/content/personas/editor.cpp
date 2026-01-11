@@ -4,6 +4,17 @@
 #include "runtime/widgets/input/input.hpp"
 
 /**
+   On Editor input change we re-read the linked/ active persona attribute from
+   the global buffer and sync it with the local motivation to display change
+   dynamically
+ */
+void Widget::SideBar::Content::Personas::Editor::update_persona_motivation(
+    void *user_data) {
+  Component *component = (Component *)user_data;
+  component->update_motivation_from_active_persona();
+}
+
+/**
  Link each sections input descriptor values pointer with the right motivation
  value
  */

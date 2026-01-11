@@ -22,10 +22,16 @@ namespace Input {
 
 namespace Renderer {
 
+typedef void (*on_input_update)(void *);
+
 class Component : public Widget {
 
 public:
-  Component(Gui *gui, Input::List *list) : Widget(gui), list(list){};
+  Component(Gui *gui, Input::List *list,
+            on_input_update update_callback = nullptr,
+            void *update_data = nullptr)
+      : Widget(gui), list(list), update_callback(update_callback),
+        update_data(update_data){};
 
   Input::List *list;
 
@@ -35,6 +41,8 @@ public:
 
 private:
   const int INPUT_GAP = gui_scale(gui, emma_size(ThemeEmmaSize_Space_Medium));
+  on_input_update update_callback;
+  void *update_data;
 
   int cursors[Input::Type_COUNT];
   void reset_cursors() { memset(cursors, 0, sizeof(cursors)); }

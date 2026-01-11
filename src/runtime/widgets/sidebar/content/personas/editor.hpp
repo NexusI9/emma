@@ -1,6 +1,7 @@
 #ifndef _WIDGET_SIDEBAR_CONTENT_PERSONA_EDITOR_H_
 #define _WIDGET_SIDEBAR_CONTENT_PERSONA_EDITOR_H_
 
+#include "runtime/node/persona.h"
 #include "runtime/solutions/formula.h"
 #include "runtime/solutions/globals.h"
 #include "runtime/widgets/input/input.hpp"
@@ -16,6 +17,8 @@ namespace Personas {
 
 namespace Editor {
 
+void update_persona_motivation(void *);
+
 class Component : public Content::Editor::Component {
 
 public:
@@ -25,12 +28,8 @@ public:
 
   void set_persona(const PersonaType persona) {
 
-    ::Solution *solution = g_persona_solutions[persona];
-
-    const solution_formula *formulas =
-        solution_get_formulas(SolutionType_Persona);
-
-    update_motivation(solution, formulas);
+    this->persona = persona;
+    update_motivation_from_active_persona();
 
     // TODO: find a way to streamline and unify the input update process
     update_inputs_values(persona);
@@ -40,9 +39,18 @@ public:
     set_description(PERSONA_INTRO[persona].description);
   }
 
+  void update_motivation_from_active_persona() {
+    ::Solution *solution = g_persona_solutions[persona];
+    const solution_formula *formulas =
+        solution_get_formulas(SolutionType_Persona);
+
+    update_motivation(solution, formulas);
+  }
+
 private:
   // Update inputs data according to selected persona
   void update_inputs_values(const PersonaType);
+  PersonaType persona;
 
   typedef enum {
     SectionType_Motivation,
@@ -60,7 +68,12 @@ private:
                   {
                       .section_header = {gui, "Motivations"},
                       .input_renderer =
-                          {gui, &sections[SectionType_Motivation].input_list},
+                          {
+                              gui,
+                              &sections[SectionType_Motivation].input_list,
+                              update_persona_motivation,
+                              this,
+                          },
                       .input_list =
                           {
                               .count = 12,
@@ -120,9 +133,13 @@ private:
               [SectionType_SocialBehavior] =
                   {
                       .section_header = {gui, "Social Behavior"},
-                      .input_renderer = {gui,
-                                         &sections[SectionType_SocialBehavior]
-                                              .input_list},
+                      .input_renderer =
+                          {
+                              gui,
+                              &sections[SectionType_SocialBehavior].input_list,
+                              update_persona_motivation,
+                              this,
+                          },
                       .input_list =
                           {
                               .count = 2,
@@ -143,7 +160,12 @@ private:
                   {
                       .section_header = {gui, "Agency"},
                       .input_renderer =
-                          {gui, &sections[SectionType_Agency].input_list},
+                          {
+                              gui,
+                              &sections[SectionType_Agency].input_list,
+                              update_persona_motivation,
+                              this,
+                          },
                       .input_list =
                           {
                               .count = 3,
@@ -174,7 +196,12 @@ private:
                   {
                       .section_header = {gui, "Density"},
                       .input_renderer =
-                          {gui, &sections[SectionType_Density].input_list},
+                          {
+                              gui,
+                              &sections[SectionType_Density].input_list,
+                              update_persona_motivation,
+                              this,
+                          },
                       .input_list =
                           {
                               .count = 1,

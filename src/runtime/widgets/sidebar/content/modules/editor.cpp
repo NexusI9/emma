@@ -5,6 +5,17 @@
 #include "runtime/widgets/sidebar/content/editor.hpp"
 
 /**
+   On Editor input change we re-read the linked/ active module attribute from
+   the global buffer and sync it with the local motivation to display change
+   dynamically
+ */
+void Widget::SideBar::Content::Modules::Editor::update_module_motivation(
+    void *user_data) {
+  Component *component = (Component *)user_data;
+  component->update_motivation_from_active_module();
+}
+
+/**
  Link each sections input descriptor values pointer with the right motivation
  value
  */
@@ -70,8 +81,8 @@ void Widget::SideBar::Content::Modules::Editor::Component::update_inputs_values(
   {
     for (uint8_t i = 0; i < solution->module.actions.count; i++) {
       Input::Params *input =
-        &sections[SectionType_Actions].input_list.entries[i];
-      
+          &sections[SectionType_Actions].input_list.entries[i];
+
       input->type = Input::Type_Action;
       input->action.handle = &solution->module.actions.entries[i];
     }

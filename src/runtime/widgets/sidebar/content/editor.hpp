@@ -7,6 +7,7 @@
 #include "runtime/manager/atlas.h"
 #include "runtime/manager/theme.h"
 #include "runtime/manager/ui_sprite.h"
+#include "runtime/node/motivation.h"
 #include "runtime/solutions/solution.h"
 #include "runtime/widgets/core.hpp"
 #include "runtime/widgets/input/input.hpp"
@@ -29,6 +30,7 @@ typedef struct {
   Input::Renderer::Component input_renderer;
 } Section;
 
+
 /**
    Core component being used to initialize render and manage the Persona and
    Module profile allowing to Edit each properties through sliders, combobox and
@@ -49,9 +51,10 @@ public:
   void layout() override;
   void draw() override;
 
-protected:
-  // set min, max etc. of sliders
+  ::Motivation *get_motivation() { return motivation; }
+  MotivationOverview::Component overview;
 
+protected:
   void set_name(const char *name) { this->name = name; }
   void set_description(const char *desc) { this->description = desc; }
 
@@ -63,7 +66,6 @@ private:
   const int ROW_GAP =
       gui_scale(gui, emma_size(ThemeEmmaSize_Space_Extra_Large));
 
-  MotivationOverview::Component overview;
   ::Motivation *motivation;
 
   Section *sections;

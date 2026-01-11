@@ -104,6 +104,7 @@ void Widget::Input::Renderer::Component::layout() {
 void Widget::Input::Renderer::Component::draw() {
 
   reset_cursors();
+  bool updated = false;
 
   for (uint8_t i = 0; i < list->count; i++) {
 
@@ -113,31 +114,38 @@ void Widget::Input::Renderer::Component::draw() {
     switch (type) {
 
     case Type_Slider:
-      sliders[*cursor].draw();
+      if (sliders[*cursor].draw())
+        updated = true;
       break;
 
     case Type_Toggle:
-      toggles[*cursor].draw();
+      if (toggles[*cursor].draw())
+        updated = true;
       break;
 
     case Type_Segment:
-      segments[*cursor].draw();
+      if (segments[*cursor].draw())
+        updated = true;
       break;
 
     case Type_Amount:
-      amounts[*cursor].draw();
+      if (amounts[*cursor].draw())
+        updated = true;
       break;
 
     case Type_Combobox:
-      comboboxes[*cursor].draw();
+      if (comboboxes[*cursor].draw())
+        updated = true;
       break;
 
     case Type_Checkbox:
-      checkboxes[*cursor].draw();
+      if (checkboxes[*cursor].draw())
+        updated = true;
       break;
 
     case Type_Action:
-      actions[*cursor].draw();
+      if (actions[*cursor].draw())
+        updated = true;
       break;
 
     default:
@@ -147,4 +155,7 @@ void Widget::Input::Renderer::Component::draw() {
     (*cursor)++;
     ImGui::Dummy(ImVec2(0, INPUT_GAP));
   }
+
+  if (updated && update_callback)
+    update_callback(update_data);
 }

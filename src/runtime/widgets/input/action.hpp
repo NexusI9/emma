@@ -52,17 +52,23 @@ class Component : public Widget {
 public:
   Component()
       : Widget(nullptr),
-        components{.chevron = {
-                       texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
-                       ui_sprite(UISprite_Icon_Chevron_Down_Medium_White)}} {
+        components{
+            .chevron_down =
+                {
+                    texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
+                    ui_sprite(UISprite_Icon_Chevron_Down_Medium_White),
+                },
+            .chevron_up =
+                {
+                    texture_atlas_layer_view(&g_atlas, TextureAtlasLayer_UI),
+                    ui_sprite(UISprite_Icon_Chevron_Up_Medium_White),
+                },
+        } // namespace Action
+  {
 
     // set initial attributes
   }
 
-  typedef enum {
-    State_Open,
-    State_Closed,
-  } State;
 
   typedef enum {
     Status_Success,
@@ -74,7 +80,7 @@ public:
   void init_inputs_from_params();
   Status validate();
   void layout();
-  void draw();
+  bool draw();
 
   void set_label(const char *label) { this->label = label; }
   void set_role(CompoundModuleActionRole *role) {
@@ -149,7 +155,7 @@ public:
   }
 
 private:
-  State state;
+  bool open = false;
   const char *label;
   Input::ActionParams *params;
 
@@ -169,12 +175,12 @@ private:
   void layout_frequency();
   void layout_time_limit();
 
-  void draw_header(ImDrawList *);
-  void draw_action(ImDrawList *);
-  void draw_reward(ImDrawList *);
-  void draw_amount(ImDrawList *);
-  void draw_frequency(ImDrawList *);
-  void draw_time_limit(ImDrawList *);
+  void draw_header(ImDrawList *, bool *);
+  void draw_action(ImDrawList *, bool *);
+  void draw_reward(ImDrawList *, bool *);
+  void draw_amount(ImDrawList *, bool *);
+  void draw_frequency(ImDrawList *, bool *);
+  void draw_time_limit(ImDrawList *, bool *);
 
   // utils
   void draw_gap() { ImGui::Dummy(ImVec2(sizes.boundbox.x, sizes.gap)); }
@@ -199,7 +205,8 @@ private:
 
     struct {
       ImVec2 checkbox;
-      ImVec2 chevron;
+      ImVec2 chevron_start;
+      ImVec2 chevron_end;
       ImVec2 underline_start;
       ImVec2 underline_end;
     } header;
@@ -243,7 +250,8 @@ private:
 
   // components (sprite, inputs, buttons...)
   struct {
-    ::Component::Sprite chevron;
+    ::Component::Sprite chevron_down;
+    ::Component::Sprite chevron_up;
 
 #define _(Type, VarName, CmpType, InputType) CmpType VarName;
     ACTION_INPUT_ROUTE(_)
@@ -440,7 +448,7 @@ private:
                   },
           },
   };
-};
+}; // namespace Input
 
 } // namespace Action
 } // namespace Input

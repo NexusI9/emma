@@ -1,6 +1,7 @@
 #include "editor.hpp"
 #include "runtime/node/motivation.h"
 
+
 void Widget::SideBar::Content::Editor::Component::layout() {}
 
 void Widget::SideBar::Content::Editor::Component::draw() {
